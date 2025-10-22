@@ -1,0 +1,16 @@
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/medsync
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/data/icudtl.dat
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/lib/libflutter_linux_gtk.so
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/data/flutter_assets/kernel_blob.bin
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/data/flutter_assets/NOTICES.Z
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/data/flutter_assets/NOTICES
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/data/flutter_assets/AssetManifest.json
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/data/flutter_assets/FontManifest.json
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/data/flutter_assets/AssetManifest.bin
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/data/flutter_assets/fonts/MaterialIcons-Regular.otf
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/data/flutter_assets/version.json
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/data/flutter_assets/NativeAssetsManifest.json
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/data/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/data/flutter_assets/assets/icd10_chronic.json
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/data/flutter_assets/shaders/ink_sparkle.frag
+/home/mark/workspace/github.com/pndaRN/medsync/frontend/build/linux/x64/debug/bundle/data/flutter_assets/AssetManifest.bin.json
