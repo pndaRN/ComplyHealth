@@ -1,50 +1,86 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# ==============================
+# 🐦 Flutter / Dart
+# ==============================
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
-/build/
-/coverage/
+build/
+coverage/
+generated_plugin_registrant.dart
 
-# Symbolication related
-app.*.symbols
+# ─── Android ───
+android/.gradle/
+android/app/build/
+android/local.properties
 
-# Obfuscation related
-app.*.map.json
+# ─── iOS / macOS ───
+ios/Flutter/
+ios/.symlinks/
+ios/Pods/
+ios/build/
+macos/Flutter/ephemeral/
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# ─── Linux ───
+linux/build/
+linux/CMakeFiles/
+linux/flutter/
+linux/Makefile
+linux/cmake_install.cmake
+linux/.vs/
+linux/.idea/
+linux/.vscode/
+*.so
+*.o
+*.a
 
-#Backend
-/backend/bin
+# ─── Windows (optional) ───
+windows/build/
+windows/flutter/
 
-.env
+# ─── Editor / IDE ───
+.idea/
+.vscode/
+*.iml
+
+# ─── Logs / Misc ───
+*.log
+*.tmp
+*.lock
+*.swp
+.DS_Store
+Thumbs.db
+
+# ─── System clutter ───
+*.kate-swp
+*~
+# ==============================
+# 🦫 Go
+# ==============================
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.log
+vendor/
+go.work
+go.work.sum
+
+# ─── Go IDE / Editor ───
+.idea/
+.vscode/
+*.iml
+
+# ==============================
+# ⚙️ OS + Global
+# ==============================
+.DS_Store
+Thumbs.db
+*.kate-swp
+*~
