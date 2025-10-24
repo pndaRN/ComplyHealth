@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/models/medication.dart';
 import '../../core/state/medication_provider.dart';
+import '../../core/state/conditions_provider.dart';
 
 class MedicationsScreen extends ConsumerWidget {
   const MedicationsScreen({super.key});
@@ -31,17 +32,24 @@ class MedicationsScreen extends ConsumerWidget {
               },
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddDialog(context, notifier),
+        onPressed: () => _showAddDialog(context, ref, notifier),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _showAddDialog(BuildContext context, MedicationNotifier notifier) {
+  void _showAddDialog(
+    BuildContext context,
+    WidgetRef ref,
+    MedicationNotifier notifier,
+  ) {
     final nameCtrl = TextEditingController();
     final doseCtrl = TextEditingController();
     final freqCtrl = TextEditingController();
-    final condCtrl = TextEditingController();
+
+    final selectedConditions = ref.read(conditionsProvider);
+    final icdCodes = selectedConditions.map((c) => c.code).join(', ');
+    final condCtrl = TextEditingController(text: icdCodes);
 
     showDialog(
       context: context,
