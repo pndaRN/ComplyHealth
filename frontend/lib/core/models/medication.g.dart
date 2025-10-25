@@ -21,7 +21,7 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       name: fields[1] as String,
       dosage: fields[2] as String,
       frequency: fields[3] as String,
-      conditionCode: fields[4] as String,
+      conditionName: fields[4] as String,
     );
   }
 
@@ -38,7 +38,7 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..writeByte(3)
       ..write(obj.frequency)
       ..writeByte(4)
-      ..write(obj.conditionCode);
+      ..write(obj.conditionName);
   }
 
   @override

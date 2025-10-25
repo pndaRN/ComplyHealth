@@ -13,13 +13,29 @@ class Medication {
   @HiveField(3)
   final String frequency;
   @HiveField(4)
-  final String conditionCode;
+  final String conditionName;
 
   Medication({
     required this.id,
     required this.name,
     required this.dosage,
     required this.frequency,
-    required this.conditionCode,
+    required this.conditionName,
   });
+
+  factory Medication.fromJson(Map<String, dynamic> json) => Medication(
+    id: json['id'] ?? '',
+    name: json['name'] ?? '',
+    dosage: json['doseage'] ?? '',
+    frequency: json['frequency'] ?? '',
+    conditionName: json['conditionName'] ?? '',
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'dosage': dosage,
+    'frequency': frequency,
+    'conditionName': conditionName,
+  };
 }

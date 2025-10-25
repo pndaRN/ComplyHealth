@@ -39,14 +39,21 @@ class DashboardScreen extends ConsumerWidget {
                 itemBuilder: (context, i) {
                   final c = conditions[i];
                   final related = meds
-                      .where((m) => m.conditionCode == c.code)
+                      .where((m) => m.conditionName == c.name)
                       .toList();
                   return Card(
                     child: ListTile(
                       title: Text(c.name),
                       subtitle: related.isEmpty
                           ? const Text('No medications yet')
-                          : Text(related.map((m) => m.name).join(', ')),
+                          : Text(
+                              related
+                                  .map(
+                                    (m) =>
+                                        '${m.name} - ${m.dosage} - ${m.frequency}',
+                                  )
+                                  .join('\n'),
+                            ),
                     ),
                   );
                 },

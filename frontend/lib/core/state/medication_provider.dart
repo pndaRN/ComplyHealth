@@ -31,6 +31,6 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     state = state.where((m) => m.id != med.id).toList();
   }
 
-  List<Medication> forCondition(String code) =>
-      state.where((m) => m.conditionCode == code).toList();
+  List<Medication> forCondition(String name) =>
+      state.where((m) => m.conditionName == name).toList();
 }
