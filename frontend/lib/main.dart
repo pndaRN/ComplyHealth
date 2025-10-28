@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:medsync/core/models/profile.dart';
+import 'package:medsync/features/education/eductation_screen.dart';
 import 'core/models/disease.dart';
 import 'core/models/medication.dart';
 import 'features/conditions/conditions_screen.dart';
 import 'features/medications/medications_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
+import 'features/profile/profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter(DiseaseAdapter());
   Hive.registerAdapter(MedicationAdapter());
+  Hive.registerAdapter(ProfileAdapter());
   runApp(const ProviderScope(child: MedSyncApp()));
 }
 
@@ -29,6 +33,8 @@ class _MedSyncAppState extends State<MedSyncApp> {
     DashboardScreen(),
     ConditionsScreen(),
     MedicationsScreen(),
+    EducationScreen(),
+    ProfileScreen(),
   ];
 
   @override
@@ -41,6 +47,9 @@ class _MedSyncAppState extends State<MedSyncApp> {
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _index,
           onTap: (i) => setState(() => _index = i),
+          backgroundColor: Colors.white, // Explicit background
+          selectedItemColor: Colors.blue, // Selected icon color
+          unselectedItemColor: Colors.grey,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.dashboard),
@@ -54,6 +63,11 @@ class _MedSyncAppState extends State<MedSyncApp> {
               icon: Icon(Icons.medication),
               label: 'Medications',
             ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.school),
+              label: 'Education',
+            ),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
         ),
       ),
