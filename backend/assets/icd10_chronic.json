@@ -2,27 +2,37 @@
   {
     "code": "I10",
     "name": "Essential (primary) hypertension",
-    "category": "Cardiovascular"
+    "category": "Cardiovascular",
+    "commonName": "Hypertension",
+    "description": "Essential (primary) hypertension is when your blood pressure stays high without a single clear cause—it usually builds up over years from genetics, aging, and lifestyle. It’s like your home’s water pipes slowly getting more pressure because the pump keeps working a little too hard and the pipes get a bit tighter over time. Nothing’s broken, but if it keeps up too long, those pipes can start to wear down.",
   },
   {
     "code": "E11.9",
     "name": "Type 2 diabetes mellitus without complications",
-    "category": "Endocrine"
+    "category": "Endocrine",
+    "commonName": "Type 2 Diabetes",
+    "description": "Type 2 diabetes mellitus without complications means your body isn’t using insulin properly, so sugar builds up in your blood, but it hasn’t yet caused damage to organs or tissues. It’s like your house’s thermostat not responding well—the heater (insulin) still works, but the rooms (your cells) aren’t “listening,” so the heat (sugar) keeps rising. Things still function, but if it continues unchecked, the system can start wearing out.",
   },
   {
     "code": "J44.9",
     "name": "Chronic obstructive pulmonary disease, unspecified",
-    "category": "Pulmonary"
+    "category": "Pulmonary",
+    "commonName": "COPD",
+    "description": "Chronic obstructive pulmonary disease (COPD) means the airways in your lungs are damaged and narrowed, making it hard to breathe over time. It’s like trying to breathe through a straw that’s partly clogged—air still moves, but it takes more effort and never feels like quite enough. The damage builds up slowly, usually from smoking or long-term irritation, and can’t be fully undone once it’s there.",
   },
   {
     "code": "E78.5",
     "name": "Hyperlipidemia, unspecified",
-    "category": "Metabolic"
+    "category": "Metabolic",
+    "commonName": "Hyperlipidemia",
+    "description": "Hyperlipidemia means there’s too much fat—like cholesterol or triglycerides—floating around in your blood. It’s like having too much grease in your plumbing; things still flow, but over time that buildup can start to clog the pipes. You might not feel it day-to-day, but it quietly raises the risk of heart disease and stroke if left unchecked.",
   },
   {
     "code": "F32.9",
     "name": "Major depressive disorder, single episode, unspecified",
-    "category": "Psychiatric"
+    "category": "Psychiatric",
+    "commonName": "Depression",
+    "description": "Major depressive disorder is when sadness and loss of interest stick around so long and so deeply that they start affecting how you think, sleep, and live day-to-day. It’s like your brain’s “brightness dial” gets turned way down—everything feels dimmer, heavier, and harder to move through. The lights still work, but it takes real effort (and often help) to turn them back up again.",
   }
 ]
 
