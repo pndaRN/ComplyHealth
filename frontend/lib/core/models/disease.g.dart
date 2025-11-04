@@ -20,19 +20,25 @@ class DiseaseAdapter extends TypeAdapter<Disease> {
       code: fields[0] as String,
       name: fields[1] as String,
       category: fields[2] as String,
+      commonName: fields[3] as String,
+      description: fields[4] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Disease obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.code)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.category);
+      ..write(obj.category)
+      ..writeByte(3)
+      ..write(obj.commonName)
+      ..writeByte(4)
+      ..write(obj.description);
   }
 
   @override

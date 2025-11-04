@@ -10,25 +10,37 @@ class Disease {
 
     @HiveField(1)
     final String name;
-    
+
     @HiveField(2)
     final String category;
+
+    @HiveField(3)
+    final String commonName;
+
+    @HiveField(4)
+    final String description;
 
     Disease({
         required this.code,
         required this.name,
         required this.category,
+        required this.commonName,
+        required this.description,
       });
 
     factory Disease.fromJson(Map<String, dynamic> json) => Disease (
       code: json['code'] ?? '',
       name: json['name'] ?? '',
       category: json['category'] ?? '',
+      commonName: json['commonName'] ?? '',
+      description: json['description'] ?? '',
     );
-    
+
     Map<String, dynamic> toJson() => {
         'code': code,
         'name': name,
         'category': category,
+        'commonName': commonName,
+        'description': description,
       };
   }

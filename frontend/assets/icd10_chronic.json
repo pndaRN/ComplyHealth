@@ -33,5 +33,40 @@
     "category": "Pulmonary",
     "commonName": "COPD",
     "description": "Chronic obstructive pulmonary disease (COPD) means the airways in your lungs are damaged and narrowed, making it hard to breathe over time. It’s like trying to breathe through a straw that’s partly clogged—air still moves, but it takes more effort and never feels like quite enough. The damage builds up slowly, usually from smoking or long-term irritation, and can’t be fully undone once it’s there."
+  },
+  {
+    "code": "K21.9",
+    "name": "Gastroesophageal Reflux Disease, Without esophhagitis",
+    "category": "Gastrointestinal",
+    "commonName": "GERD",
+    "description": "GERD is a chronic condition in which stomach acid or contents flow backward from the stomach into the esophagus, causing symptoms such as heartburn, regurgitation, and possible injury to the esophageal lining. Your stomach makes acid to help break down food, but sometimes that acid sneaks up into the tube (your esophagus) that connects your mouth to your stomach.When that happens, it can burn or taste sour in your throat.\nIt’s like when you shake a soda can too much and the bubbles shoot out the top — your stomach acid is the bubbles, and your esophagus gets messy from the splash."
+  },
+  {
+    "code": "F41.9",
+    "name": "Anxiety",
+    "category": "Psychiatric",
+    "commonName": "Anxiety",
+    "description": "Anxiety is a mental and physical response characterized by excessive worry, nervousness, or fear that is out of proportion to a situation. Our brain has a tiny helper that rings a bell when it thinks something scary might happen.When you have anxiety, that helper rings the bell too much, even when you’re safe.\nIt’s like having a fire alarm that keeps going off just because you made toast — it’s trying to protect you, but it’s too sensitive."
+  },
+  {
+    "code": "M19.90",
+    "name": "Osteoarthritis",
+    "category": "Musculoskeletal",
+    "commonName": "Arthritis",
+    "description": "Osteoarthritis is a degenerative joint disease characterized by the breakdown of articular cartilage and changes in the underlying bone, leading to pain, stiffness, decreased mobility, and sometimes swelling. It is the most common form of arthritis and is typically caused by aging, joint injury, or repetitive stress. Your joints are like door hinges that help your body move smoothly.\nInside those hinges is a soft, slippery padding called cartilage that keeps the bones from rubbing together.\nWhen you get osteoarthritis, that padding wears down — like a rusty door hinge that squeaks and grinds when you open it."
+  },
+  {
+    "code": "E66.9",
+    "name": "Obesity, Unspecified",
+    "category": "Multiple",
+    "commonName": "Obesity",
+    "description": "Obesity is defined as an excessive accumulation of body fat that poses a health risk, typically identified by a body mass index of 30.0 or higher. Obesity means your body is carrying more fat than it needs to stay healthy.\nIt can make your heart, joints, and other organs work harder than they should.\nIt’s like a car built to carry four people that’s always loaded with eight — it still runs, but the engine and tires wear out faster."
+  },
+  {
+    "code": "J45.909",
+    "name": "Unspecified asthma, uncomplicated",
+    "category": "Respiratory",
+    "commonName": "Asthma",
+    "description": "Asthma is a chronic inflammatory disease of the airways characterized by episodes of wheezing, shortness of breath, chest tightness, and coughing. Asthma means your breathing tubes inside your lungs sometimes get tight and irritated, making it hard to breathe.You might cough, wheeze, or feel like you can’t get enough air, especially when you’re sick, exercising, or around things like smoke or dust.\nIt’s like trying to breathe through a straw that keeps shrinking whenever the air gets dusty or cold — medicine helps open it back up so air can flow easily again."
   }
 ]
