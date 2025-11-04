@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/models/medication.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/state/conditions_provider.dart';
+import '../conditions/add_condition_dialog.dart';
 
 class MedicationsScreen extends ConsumerWidget {
   const MedicationsScreen({super.key});
@@ -42,21 +43,73 @@ class MedicationsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     MedicationNotifier notifier,
-  ) {
+  ) async {
     final nameCtrl = TextEditingController();
     final doseCtrl = TextEditingController();
     final freqCtrl = TextEditingController();
-    final conditions = ref.watch(conditionsProvider);
+    final conditions = ref.read(conditionsProvider);
     String? selectCondition;
 
+    if (conditions.isEmpty) {
+      // Show simplified dialog to add condition first
+      final shouldOpenConditionDialog = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            title: const Text('Add Medication'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Please add at least one condition first.'),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(dialogContext, true);
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Condition'),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Cancel'),
+              ),
+            ],
+          );
+        },
+      );
+
+      // If user clicked "Add Condition", open the condition dialog
+      if (shouldOpenConditionDialog == true && context.mounted) {
+        await showDialog(
+          context: context,
+          builder: (context) => const AddConditionDialog(),
+        );
+
+        // After condition dialog closes, check if conditions were added
+        if (context.mounted) {
+          final updatedConditions = ref.read(conditionsProvider);
+          if (updatedConditions.isNotEmpty) {
+            // Small delay to ensure dialog is fully closed
+            await Future.delayed(const Duration(milliseconds: 100));
+            if (context.mounted) {
+              _showAddDialog(context, ref, notifier);
+            }
+          }
+        }
+      }
+      return;
+    }
+
+    // Normal flow when conditions exist
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text('Add Medication'),
-          content: conditions.isEmpty
-              ? const Text('Please add at least one condition first.')
-              : SingleChildScrollView(
+          content: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -80,7 +133,7 @@ class MedicationsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
-                        value: selectCondition,
+                        initialValue: selectCondition,
                         hint: const Text('Select Condition'),
                         items: conditions.map((condition) {
                           return DropdownMenuItem<String>(
@@ -117,7 +170,7 @@ class MedicationsScreen extends ConsumerWidget {
                 notifier.addMeds(newMedication);
                 Navigator.pop(context);
               },
-              child: const Text('Add'),
+              child: const Text('Add Medication'),
             ),
           ],
         );
