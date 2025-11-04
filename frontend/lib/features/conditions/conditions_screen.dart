@@ -21,7 +21,7 @@ class ConditionsScreen extends ConsumerWidget {
                 final condition = myConditions[i];
                 return ListTile(
                   title: Text(condition.name),
-                  subtitle: Text('${condition.code} • ${condition.category}'),
+                  subtitle: Text('${condition.code} (${condition.commonName}) • ${condition.category}'),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete_outline),
                     onPressed: () => notifier.removeCondition(condition),

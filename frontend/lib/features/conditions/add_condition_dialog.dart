@@ -107,7 +107,7 @@ class _ConditionListItem extends ConsumerWidget {
     return ListTile(
       title: Text(disease.name),
       subtitle: Text(
-        '${disease.code} • ${disease.category}',
+        '${disease.code} (${disease.commonName}) • ${disease.category}',
       ),
       trailing: IconButton(
         icon: Icon(
