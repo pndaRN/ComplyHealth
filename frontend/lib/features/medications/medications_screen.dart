@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
 import '../../core/models/medication.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/state/conditions_provider.dart';
 import '../conditions/add_condition_dialog.dart';
+import 'dialogs/medication_add_dialog.dart';
+import 'dialogs/medication_edit_dialog.dart';
 
 class MedicationsScreen extends ConsumerWidget {
   const MedicationsScreen({super.key});
@@ -29,26 +30,19 @@ class MedicationsScreen extends ConsumerWidget {
                     icon: const Icon(Icons.delete_outline),
                     onPressed: () => notifier.deleteMeds(m),
                   ),
+                  onTap: () => _showEditDialog(context, m),
                 );
               },
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddDialog(context, ref, notifier),
+        onPressed: () => _showAddDialog(context, ref),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _showAddDialog(
-    BuildContext context,
-    WidgetRef ref,
-    MedicationNotifier notifier,
-  ) async {
-    final nameCtrl = TextEditingController();
-    final doseCtrl = TextEditingController();
-    final freqCtrl = TextEditingController();
+  void _showAddDialog(BuildContext context, WidgetRef ref) async {
     final conditions = ref.read(conditionsProvider);
-    String? selectCondition;
 
     if (conditions.isEmpty) {
       // Show simplified dialog to add condition first
@@ -88,15 +82,16 @@ class MedicationsScreen extends ConsumerWidget {
           builder: (context) => const AddConditionDialog(),
         );
 
-        // After condition dialog closes, check if conditions were added
+        // After condition dialog closes, check if conditions were added and reopen
         if (context.mounted) {
           final updatedConditions = ref.read(conditionsProvider);
           if (updatedConditions.isNotEmpty) {
-            // Small delay to ensure dialog is fully closed
-            await Future.delayed(const Duration(milliseconds: 100));
-            if (context.mounted) {
-              _showAddDialog(context, ref, notifier);
-            }
+            // Use addPostFrameCallback to ensure clean dialog transition
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) {
+                _showAddDialog(context, ref);
+              }
+            });
           }
         }
       }
@@ -106,75 +101,14 @@ class MedicationsScreen extends ConsumerWidget {
     // Normal flow when conditions exist
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Add Medication'),
-          content: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextField(
-                        controller: nameCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Medication Name',
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: doseCtrl,
-                        decoration: const InputDecoration(labelText: 'Dosage'),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: freqCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Frequency',
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                        initialValue: selectCondition,
-                        hint: const Text('Select Condition'),
-                        items: conditions.map((condition) {
-                          return DropdownMenuItem<String>(
-                            value: condition.name,
-                            child: Text(condition.name),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          selectCondition = value;
-                        },
-                        decoration: const InputDecoration(
-                          labelText: 'Condition',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (selectCondition == null) return;
-                final newMedication = Medication(
-                  id: const Uuid().v4(),
-                  name: nameCtrl.text,
-                  dosage: doseCtrl.text,
-                  frequency: freqCtrl.text,
-                  conditionName: selectCondition!,
-                );
-                notifier.addMeds(newMedication);
-                Navigator.pop(context);
-              },
-              child: const Text('Add Medication'),
-            ),
-          ],
-        );
-      },
+      builder: (context) => const MedicationAddDialog(),
+    );
+  }
+
+  void _showEditDialog(BuildContext context, Medication medication) {
+    showDialog(
+      context: context,
+      builder: (context) => MedicationEditDialog(medication: medication),
     );
   }
 }
