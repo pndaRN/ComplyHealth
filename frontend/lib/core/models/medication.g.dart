@@ -6,7 +6,7 @@ part of 'medication.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-class MedicationAdapter extends TypeAdapter<Medication> {
+class MedicationAdapterGenerated extends TypeAdapter<Medication> {
   @override
   final int typeId = 1;
 
@@ -21,7 +21,8 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       name: fields[1] as String,
       dosage: fields[2] as String,
       frequency: fields[3] as String,
-      conditionName: fields[4] as String,
+      conditionNames:
+          fields[4] == null ? [] : (fields[4] as List).cast<String>(),
     );
   }
 
@@ -38,7 +39,7 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..writeByte(3)
       ..write(obj.frequency)
       ..writeByte(4)
-      ..write(obj.conditionName);
+      ..write(obj.conditionNames);
   }
 
   @override
@@ -47,7 +48,7 @@ class MedicationAdapter extends TypeAdapter<Medication> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MedicationAdapter &&
+      other is MedicationAdapterGenerated &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

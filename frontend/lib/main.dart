@@ -14,7 +14,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter(DiseaseAdapter());
-  Hive.registerAdapter(MedicationAdapter());
+  Hive.registerAdapter(MedicationAdapterCustom());
   Hive.registerAdapter(ProfileAdapter());
   runApp(const ProviderScope(child: MedSyncApp()));
 }

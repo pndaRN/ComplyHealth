@@ -20,8 +20,8 @@ class DiseaseAdapter extends TypeAdapter<Disease> {
       code: fields[0] as String,
       name: fields[1] as String,
       category: fields[2] as String,
-      commonName: fields[3] as String,
-      description: fields[4] as String,
+      commonName: fields[3] == null ? '' : fields[3] as String,
+      description: fields[4] == null ? '' : fields[4] as String,
     );
   }
 

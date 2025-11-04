@@ -8,7 +8,7 @@ class MedicationValidator {
     required String name,
     required String dosage,
     required String frequency,
-    required String? condition,
+    required List<String> conditions,
   }) {
     if (name.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -28,9 +28,9 @@ class MedicationValidator {
       );
       return false;
     }
-    if (condition == null) {
+    if (conditions.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a condition')),
+        const SnackBar(content: Text('Please select at least one condition')),
       );
       return false;
     }

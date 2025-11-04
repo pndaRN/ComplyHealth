@@ -57,20 +57,47 @@ class ProfileScreen extends ConsumerWidget {
             const Divider(height: 30),
 
             Text(
-              '🏆 XP: ${profile.xp}',
+              '⭐ Level ${notifier.getCurrentLevel(profile.xp)}',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '🏆 Total XP: ${profile.xp}',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             Text(
-              '🔥 Streak: ${profile.streak} days',
+              '🔥 Level Streak: ${profile.streak}',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
 
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Progress to Level ${notifier.getCurrentLevel(profile.xp) + 1}',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                Text(
+                  '${(profile.levelProgress * 100).toInt()}%',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
             LinearProgressIndicator(
               value: profile.levelProgress,
               minHeight: 10,
               backgroundColor: Colors.grey.shade300,
               color: Colors.blueAccent,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Next level: ${notifier.getXpForNextLevel(notifier.getCurrentLevel(profile.xp))} XP',
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
             ),
             const SizedBox(height: 20),
 

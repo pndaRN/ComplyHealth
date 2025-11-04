@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/state/conditions_provider.dart';
+import '../../core/state/medication_provider.dart';
 import 'add_condition_dialog.dart';
 
 class ConditionsScreen extends ConsumerWidget {
@@ -10,6 +11,7 @@ class ConditionsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final myConditions = ref.watch(conditionsProvider);
     final notifier = ref.read(conditionsProvider.notifier);
+    final medicationNotifier = ref.read(medicationProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Conditions')),
@@ -19,12 +21,89 @@ class ConditionsScreen extends ConsumerWidget {
               itemCount: myConditions.length,
               itemBuilder: (context, i) {
                 final condition = myConditions[i];
-                return ListTile(
-                  title: Text(condition.name),
-                  subtitle: Text('${condition.code} (${condition.commonName}) • ${condition.category}'),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: () => notifier.removeCondition(condition),
+                final medications = medicationNotifier.forCondition(condition.name);
+
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: ExpansionTile(
+                    title: Text(
+                      condition.commonName.isNotEmpty ? condition.commonName : condition.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text('${condition.code} • ${condition.category}'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () => notifier.removeCondition(condition),
+                    ),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (condition.description.isNotEmpty) ...[
+                              const Text(
+                                'Description',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                condition.description,
+                                style: TextStyle(color: Colors.grey[700]),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Medications (${medications.length})',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            if (medications.isEmpty)
+                              Text(
+                                'No medications assigned to this condition.',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              )
+                            else
+                              ...medications.map((med) => Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.medication, size: 16, color: Colors.blue),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        '${med.name} - ${med.dosage}',
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                    ),
+                                    Text(
+                                      med.frequency,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },

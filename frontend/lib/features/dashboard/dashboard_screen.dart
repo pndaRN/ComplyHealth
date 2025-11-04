@@ -39,7 +39,7 @@ class DashboardScreen extends ConsumerWidget {
                 itemBuilder: (context, i) {
                   final c = conditions[i];
                   final related = meds
-                      .where((m) => m.conditionName == c.name)
+                      .where((m) => m.conditionNames.contains(c.name))
                       .toList();
                   return Card(
                     child: ListTile(

@@ -7,8 +7,8 @@ class MedicationFormContent extends StatelessWidget {
   final TextEditingController dosageController;
   final TextEditingController frequencyController;
   final List<Disease> conditions;
-  final String? selectedCondition;
-  final ValueChanged<String?> onConditionChanged;
+  final List<String> selectedConditions;
+  final ValueChanged<List<String>> onConditionsChanged;
 
   const MedicationFormContent({
     super.key,
@@ -16,8 +16,8 @@ class MedicationFormContent extends StatelessWidget {
     required this.dosageController,
     required this.frequencyController,
     required this.conditions,
-    required this.selectedCondition,
-    required this.onConditionChanged,
+    required this.selectedConditions,
+    required this.onConditionsChanged,
   });
 
   @override
@@ -45,23 +45,123 @@ class MedicationFormContent extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            value: selectedCondition,
-            hint: const Text('Select Condition'),
-            items: conditions.map((condition) {
-              return DropdownMenuItem<String>(
-                value: condition.name,
-                child: Text(condition.name),
-              );
-            }).toList(),
-            onChanged: onConditionChanged,
-            decoration: const InputDecoration(
-              labelText: 'Condition',
-              border: OutlineInputBorder(),
+          InkWell(
+            onTap: () => _showConditionSelector(context),
+            child: InputDecorator(
+              decoration: const InputDecoration(
+                labelText: 'Conditions',
+                border: OutlineInputBorder(),
+              ),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: selectedConditions.isEmpty
+                    ? [const Text('Tap to select conditions', style: TextStyle(color: Colors.grey))]
+                    : selectedConditions.map((conditionName) {
+                        final condition = conditions.firstWhere(
+                          (c) => c.name == conditionName,
+                          orElse: () => Disease(code: '', name: conditionName, category: '', commonName: '', description: ''),
+                        );
+                        final displayName = condition.commonName.isNotEmpty ? condition.commonName : condition.name;
+                        return Chip(
+                          label: Text(displayName, style: const TextStyle(fontSize: 12)),
+                          deleteIcon: const Icon(Icons.close, size: 16),
+                          onDeleted: () {
+                            final updated = List<String>.from(selectedConditions)..remove(conditionName);
+                            onConditionsChanged(updated);
+                          },
+                        );
+                      }).toList(),
+              ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  void _showConditionSelector(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => _ConditionSelectorDialog(
+        conditions: conditions,
+        selectedConditions: selectedConditions,
+        onConditionsChanged: onConditionsChanged,
+      ),
+    );
+  }
+}
+
+class _ConditionSelectorDialog extends StatefulWidget {
+  final List<Disease> conditions;
+  final List<String> selectedConditions;
+  final ValueChanged<List<String>> onConditionsChanged;
+
+  const _ConditionSelectorDialog({
+    required this.conditions,
+    required this.selectedConditions,
+    required this.onConditionsChanged,
+  });
+
+  @override
+  State<_ConditionSelectorDialog> createState() => _ConditionSelectorDialogState();
+}
+
+class _ConditionSelectorDialogState extends State<_ConditionSelectorDialog> {
+  late List<String> _tempSelected;
+
+  @override
+  void initState() {
+    super.initState();
+    _tempSelected = List<String>.from(widget.selectedConditions);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Select Conditions'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: widget.conditions.isEmpty
+            ? const Text('No conditions available. Add conditions first.')
+            : ListView.builder(
+                shrinkWrap: true,
+                itemCount: widget.conditions.length,
+                itemBuilder: (context, index) {
+                  final condition = widget.conditions[index];
+                  final displayName = condition.commonName.isNotEmpty ? condition.commonName : condition.name;
+                  final isSelected = _tempSelected.contains(condition.name);
+
+                  return CheckboxListTile(
+                    title: Text(displayName),
+                    subtitle: Text('${condition.code} • ${condition.category}', style: const TextStyle(fontSize: 12)),
+                    value: isSelected,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        if (value == true) {
+                          _tempSelected.add(condition.name);
+                        } else {
+                          _tempSelected.remove(condition.name);
+                        }
+                      });
+                    },
+                  );
+                },
+              ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            widget.onConditionsChanged(_tempSelected);
+            Navigator.pop(context);
+          },
+          child: const Text('Done'),
+        ),
+      ],
     );
   }
 }

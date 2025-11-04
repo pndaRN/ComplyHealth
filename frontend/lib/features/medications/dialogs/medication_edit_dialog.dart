@@ -20,7 +20,7 @@ class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
   late TextEditingController nameCtrl;
   late TextEditingController doseCtrl;
   late TextEditingController freqCtrl;
-  late String? selectCondition;
+  late List<String> selectedConditions;
 
   @override
   void initState() {
@@ -28,7 +28,7 @@ class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
     nameCtrl = TextEditingController(text: widget.medication.name);
     doseCtrl = TextEditingController(text: widget.medication.dosage);
     freqCtrl = TextEditingController(text: widget.medication.frequency);
-    selectCondition = widget.medication.conditionName;
+    selectedConditions = List<String>.from(widget.medication.conditionNames);
   }
 
   @override
@@ -51,10 +51,10 @@ class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
         dosageController: doseCtrl,
         frequencyController: freqCtrl,
         conditions: conditions,
-        selectedCondition: selectCondition,
-        onConditionChanged: (value) {
+        selectedConditions: selectedConditions,
+        onConditionsChanged: (value) {
           setState(() {
-            selectCondition = value;
+            selectedConditions = value;
           });
         },
       ),
@@ -70,7 +70,7 @@ class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
               name: nameCtrl.text,
               dosage: doseCtrl.text,
               frequency: freqCtrl.text,
-              condition: selectCondition,
+              conditions: selectedConditions,
             )) {
               return;
             }
@@ -80,7 +80,7 @@ class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
               name: nameCtrl.text.trim(),
               dosage: doseCtrl.text.trim(),
               frequency: freqCtrl.text.trim(),
-              conditionName: selectCondition!,
+              conditionNames: selectedConditions,
             );
             notifier.updateMeds(updatedMedication);
             Navigator.pop(context);

@@ -23,9 +23,23 @@ class MedicationsScreen extends ConsumerWidget {
               itemCount: meds.length,
               itemBuilder: (context, i) {
                 final m = meds[i];
+                final conditions = ref.watch(conditionsProvider);
+
+                // Get display names for conditions
+                final conditionDisplayNames = m.conditionNames.map((name) {
+                  final matchingConditions = conditions.where((c) => c.name == name);
+                  if (matchingConditions.isEmpty) return name;
+                  final condition = matchingConditions.first;
+                  return condition.commonName.isNotEmpty ? condition.commonName : name;
+                }).toList();
+
                 return ListTile(
                   title: Text('${m.name} — ${m.dosage}'),
-                  subtitle: Text('For condition: ${m.conditionName}'),
+                  subtitle: Text(
+                    m.conditionNames.isEmpty
+                        ? 'No conditions'
+                        : 'For: ${conditionDisplayNames.join(", ")}',
+                  ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete_outline),
                     onPressed: () => notifier.deleteMeds(m),

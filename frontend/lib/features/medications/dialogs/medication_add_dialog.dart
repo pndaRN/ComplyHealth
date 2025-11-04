@@ -19,7 +19,7 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
   late TextEditingController nameCtrl;
   late TextEditingController doseCtrl;
   late TextEditingController freqCtrl;
-  String? selectCondition;
+  List<String> selectedConditions = [];
 
   @override
   void initState() {
@@ -49,10 +49,10 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
         dosageController: doseCtrl,
         frequencyController: freqCtrl,
         conditions: conditions,
-        selectedCondition: selectCondition,
-        onConditionChanged: (value) {
+        selectedConditions: selectedConditions,
+        onConditionsChanged: (value) {
           setState(() {
-            selectCondition = value;
+            selectedConditions = value;
           });
         },
       ),
@@ -68,7 +68,7 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
               name: nameCtrl.text,
               dosage: doseCtrl.text,
               frequency: freqCtrl.text,
-              condition: selectCondition,
+              conditions: selectedConditions,
             )) {
               return;
             }
@@ -78,7 +78,7 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
               name: nameCtrl.text.trim(),
               dosage: doseCtrl.text.trim(),
               frequency: freqCtrl.text.trim(),
-              conditionName: selectCondition!,
+              conditionNames: selectedConditions,
             );
             notifier.addMeds(newMedication);
             Navigator.pop(context);

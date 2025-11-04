@@ -14,18 +14,18 @@ class Disease {
     @HiveField(2)
     final String category;
 
-    @HiveField(3)
+    @HiveField(3, defaultValue: '')
     final String commonName;
 
-    @HiveField(4)
+    @HiveField(4, defaultValue: '')
     final String description;
 
     Disease({
         required this.code,
         required this.name,
         required this.category,
-        required this.commonName,
-        required this.description,
+        this.commonName = '',
+        this.description = '',
       });
 
     factory Disease.fromJson(Map<String, dynamic> json) => Disease (

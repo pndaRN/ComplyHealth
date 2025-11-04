@@ -49,5 +49,5 @@ class MedicationNotifier extends Notifier<List<Medication>> {
   }
 
   List<Medication> forCondition(String name) =>
-      state.where((m) => m.conditionName == name).toList();
+      state.where((m) => m.conditionNames.contains(name)).toList();
 }
