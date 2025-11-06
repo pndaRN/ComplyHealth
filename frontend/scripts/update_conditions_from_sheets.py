@@ -1,16 +1,32 @@
 import json
 import pandas as pd
 from pathlib import Path
+import logging
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # ====CONFIG====
-SHEET_ID = "1O1Bn2D-ksH5CETZhQ0IL54alOCdB-eOCK-rlOu56uyU"
+SHEET_ID = os.getenv("GOOGLE_SHEET_ID")
+if not SHEET_ID:
+    raise ValueError("GOOGLE_SHEET_ID environment variable is missing")
 
 SHEET_NAME = "Sheet1"
 
 JSON_PATH = Path("../assets/icd10_chronic.json")
 
 sheet_csv_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={SHEET_NAME}"
-df = pd.read_csv(sheet_csv_url)
+
+try:
+    df = pd.read_csv(sheet_csv_url)
+except Exception as e:
+    logging.error(f"Failed to load Google Sheet data: {e}")
+    raise
 
 if not {"code", "name", "category", "commonName", "description"}.issubset(df.columns):
     raise ValueError(
@@ -50,6 +66,6 @@ if new_entries:
     combined = existing_data + new_entries
     with open(JSON_PATH, "w") as f:
         json.dump(combined, f, indent=2, ensure_ascii=False)
-    print(f"✅ Added {len(new_entries)} new conditions to {JSON_PATH}")
+    logging.info(f"✅ Added {len(new_entries)} new conditions to {JSON_PATH}")
 else:
-    print("No new conditions to add.")
+    logging.info("No new conditions to add.")
