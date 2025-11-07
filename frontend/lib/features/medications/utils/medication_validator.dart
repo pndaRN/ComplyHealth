@@ -10,30 +10,33 @@ class MedicationValidator {
     required String frequency,
     required List<String> conditions,
   }) {
+    final List<Widget> errors = [];
+
     if (name.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a medication name')),
-      );
-      return false;
+      errors.add(Text('Please enter a medication name'));
     }
     if (dosage.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a dosage')),
-      );
-      return false;
+      errors.add(Text('Please enter a dosage'));
     }
     if (frequency.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a frequency')),
-      );
-      return false;
+      errors.add(Text('Please enter a frequency'));
     }
     if (conditions.isEmpty) {
+      errors.add(Text('Please select at least one condition'));
+    }
+
+    if (errors.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one condition')),
+        SnackBar(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: errors.map((error) => Padding(padding: const EdgeInsets.all(8.0), child: error)).toList(),
+          ),
+        ),
       );
       return false;
     }
+
     return true;
   }
 }
