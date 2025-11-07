@@ -4,6 +4,7 @@ import '../../../core/models/medication.dart';
 enum MedicationSortOption {
   alphabetical,
   groupedByCondition,
+  frequency,
 }
 
 /// Utility class for sorting medications
@@ -18,6 +19,8 @@ class MedicationSorter {
         return _sortAlphabetically(medications);
       case MedicationSortOption.groupedByCondition:
         return _sortByConditionGroups(medications);
+      case MedicationSortOption.frequency:
+        return _sortByFrequency(medications);
     }
   }
 
@@ -61,6 +64,23 @@ class MedicationSorter {
     return result;
   }
 
+  /// Sort medications by frequency (e.g., daily, weekly)
+  static List<Medication> _sortByFrequency(List<Medication> medications) {
+    final frequencyOrder = <String, int>{
+      'daily': 1,
+      'weekly': 2,
+      'bi-weekly': 3,
+      'monthly': 4,
+      // Add more frequencies as needed
+    };
+
+    return List.from(medications)..sort((a, b) {
+      final freqA = frequencyOrder[a.frequency.toLowerCase()] ?? 5;
+      final freqB = frequencyOrder[b.frequency.toLowerCase()] ?? 5;
+      return freqA.compareTo(freqB);
+    });
+  }
+
   /// Get display name for sort option
   static String getDisplayName(MedicationSortOption option) {
     switch (option) {
@@ -68,6 +88,8 @@ class MedicationSorter {
         return 'Alphabetical';
       case MedicationSortOption.groupedByCondition:
         return 'Grouped by Condition';
+      case MedicationSortOption.frequency:
+        return 'Frequency';
     }
   }
 }
