@@ -1,11 +1,7 @@
 import '../../../core/models/medication.dart';
 
 /// Sorting options for medications list
-enum MedicationSortOption {
-  alphabetical,
-  groupedByCondition,
-  frequency,
-}
+enum MedicationSortOption { alphabetical, groupedByCondition, frequency }
 
 /// Utility class for sorting medications
 class MedicationSorter {
@@ -57,7 +53,9 @@ class MedicationSorter {
     for (final conditionName in sortedConditionNames) {
       final medsInGroup = conditionGroups[conditionName]!;
       // Sort medications within each group alphabetically
-      medsInGroup.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      medsInGroup.sort(
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+      );
       result.addAll(medsInGroup);
     }
 
