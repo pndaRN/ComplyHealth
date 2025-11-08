@@ -38,11 +38,9 @@ class TimingPresetButtons extends StatelessWidget {
               ]),
             ),
             _PresetButton(
-              label: 'Three Times Daily',
+              label: 'Daily',
               onPressed: () => onTimesSelected([
-                const TimeOfDay(hour: 8, minute: 0),
-                const TimeOfDay(hour: 14, minute: 0),
-                const TimeOfDay(hour: 20, minute: 0),
+                const TimeOfDay(hour: 12, minute: 0), // Example time for daily
               ]),
             ),
           ],
