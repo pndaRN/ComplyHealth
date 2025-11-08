@@ -42,10 +42,6 @@ class ConditionsScreen extends ConsumerWidget {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text('${condition.code} • ${condition.category}'),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () => notifier.removeCondition(condition),
-                    ),
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -111,6 +107,17 @@ class ConditionsScreen extends ConsumerWidget {
                                   ],
                                 ),
                               )),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                TextButton.icon(
+                                  icon: const Icon(Icons.delete_outline),
+                                  label: const Text('Delete'),
+                                  onPressed: () => notifier.removeCondition(condition),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),

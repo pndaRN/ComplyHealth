@@ -6,7 +6,6 @@ import '../../core/state/conditions_provider.dart';
 import '../conditions/add_condition_dialog.dart';
 import 'dialogs/medication_add_dialog.dart';
 import 'dialogs/medication_edit_dialog.dart';
-import 'widgets/medication_detail_dialog.dart';
 import 'utils/medication_sorter.dart';
 
 class MedicationsScreen extends ConsumerWidget {
@@ -25,6 +24,23 @@ class MedicationsScreen extends ConsumerWidget {
     } else {
       return '$count times daily';
     }
+  }
+
+  String _formatTime(String timeString) {
+    try {
+      final parts = timeString.split(':');
+      if (parts.length == 2) {
+        final hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+        final period = hour >= 12 ? 'PM' : 'AM';
+        final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+        final displayMinute = minute.toString().padLeft(2, '0');
+        return '$displayHour:$displayMinute $period';
+      }
+    } catch (e) {
+      // Return original if parsing fails
+    }
+    return timeString;
   }
 
   @override
@@ -101,25 +117,148 @@ class MedicationsScreen extends ConsumerWidget {
 
         final timingSummary = _getTimingSummary(m);
 
-        return ListTile(
-          title: Text('${m.name} — ${m.dosage}'),
-          subtitle: Text('$timingSummary • For: ${conditionDisplayNames.join(", ")}'),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: ExpansionTile(
+            title: Text('${m.name} — ${m.dosage}'),
+            subtitle: Text('$timingSummary • For: ${conditionDisplayNames.join(", ")}'),
             children: [
-              IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                onPressed: () => _showEditDialog(context, m),
-                tooltip: 'Edit',
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () => notifier.deleteMeds(m),
-                tooltip: 'Delete',
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Dosage section
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.medical_services, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Dosage',
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                              Text(
+                                m.dosage,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Conditions section
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.healing, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                m.conditionNames.length > 1 ? 'Conditions' : 'Condition',
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                              Text(
+                                conditionDisplayNames.join(', '),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
+                    // Timing section
+                    if (m.isPRN) ...[
+                      Row(
+                        children: [
+                          const Icon(Icons.warning_amber, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Take as needed (PRN)',
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 28.0),
+                        child: Text(
+                          'Maximum: ${m.maxDailyDoses ?? 'Not specified'} doses per day',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                    ] else ...[
+                      Row(
+                        children: [
+                          const Icon(Icons.schedule, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Scheduled Times',
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      if (m.scheduledTimes.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.only(left: 28.0),
+                          child: Text('No times scheduled', style: TextStyle(fontStyle: FontStyle.italic)),
+                        )
+                      else
+                        ...m.scheduledTimes.map((time) {
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 28.0, bottom: 8.0),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.access_time, size: 16),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _formatTime(time),
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                    ],
+                    const SizedBox(height: 16),
+                    // Action buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton.icon(
+                          icon: const Icon(Icons.edit_outlined),
+                          label: const Text('Edit'),
+                          onPressed: () => _showEditDialog(context, m),
+                        ),
+                        const SizedBox(width: 8),
+                        TextButton.icon(
+                          icon: const Icon(Icons.delete_outline),
+                          label: const Text('Delete'),
+                          onPressed: () => notifier.deleteMeds(m),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          onTap: () => _showDetailDialog(context, ref, m),
         );
       },
     );
@@ -162,28 +301,159 @@ class MedicationsScreen extends ConsumerWidget {
         );
       }
 
+      // Get display names for all conditions
+      final conditionDisplayNames = m.conditionNames.map((name) {
+        final matchingConditions = conditions.where((c) => c.name == name);
+        if (matchingConditions.isEmpty) return name;
+        final condition = matchingConditions.first;
+        return condition.commonName.isNotEmpty ? condition.commonName : name;
+      }).toList();
+
       // Add medication tile
       final timingSummary = _getTimingSummary(m);
       items.add(
-        ListTile(
-          title: Text('${m.name} — ${m.dosage}'),
-          subtitle: Text(timingSummary),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
+        Card(
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: ExpansionTile(
+            title: Text('${m.name} — ${m.dosage}'),
+            subtitle: Text(timingSummary),
             children: [
-              IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                onPressed: () => _showEditDialog(context, m),
-                tooltip: 'Edit',
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () => notifier.deleteMeds(m),
-                tooltip: 'Delete',
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Dosage section
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.medical_services, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Dosage',
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                              Text(
+                                m.dosage,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Conditions section
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.healing, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                m.conditionNames.length > 1 ? 'Conditions' : 'Condition',
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                              Text(
+                                conditionDisplayNames.join(', '),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
+                    // Timing section
+                    if (m.isPRN) ...[
+                      Row(
+                        children: [
+                          const Icon(Icons.warning_amber, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Take as needed (PRN)',
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 28.0),
+                        child: Text(
+                          'Maximum: ${m.maxDailyDoses ?? 'Not specified'} doses per day',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                    ] else ...[
+                      Row(
+                        children: [
+                          const Icon(Icons.schedule, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Scheduled Times',
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      if (m.scheduledTimes.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.only(left: 28.0),
+                          child: Text('No times scheduled', style: TextStyle(fontStyle: FontStyle.italic)),
+                        )
+                      else
+                        ...m.scheduledTimes.map((time) {
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 28.0, bottom: 8.0),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.access_time, size: 16),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _formatTime(time),
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                    ],
+                    const SizedBox(height: 16),
+                    // Action buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton.icon(
+                          icon: const Icon(Icons.edit_outlined),
+                          label: const Text('Edit'),
+                          onPressed: () => _showEditDialog(context, m),
+                        ),
+                        const SizedBox(width: 8),
+                        TextButton.icon(
+                          icon: const Icon(Icons.delete_outline),
+                          label: const Text('Delete'),
+                          onPressed: () => notifier.deleteMeds(m),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          onTap: () => _showDetailDialog(context, ref, m),
         ),
       );
     }
@@ -259,17 +529,6 @@ class MedicationsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => MedicationEditDialog(medication: medication),
-    );
-  }
-
-  void _showDetailDialog(BuildContext context, WidgetRef ref, Medication medication) {
-    final conditions = ref.read(conditionsProvider);
-    showDialog(
-      context: context,
-      builder: (context) => MedicationDetailDialog(
-        medication: medication,
-        conditions: conditions,
-      ),
     );
   }
 }

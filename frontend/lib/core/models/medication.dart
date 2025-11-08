@@ -18,6 +18,10 @@ class Medication {
   final List<String> scheduledTimes; // Stored as "HH:mm" format
   @HiveField(7)
   final int? maxDailyDoses;
+  @HiveField(8, defaultValue: 0)
+  final int currentDoseCount; // Doses taken today
+  @HiveField(9)
+  final DateTime? lastDoseCountReset; // When counter was last reset
 
   Medication({
     required this.id,
@@ -27,6 +31,8 @@ class Medication {
     this.isPRN = false,
     this.scheduledTimes = const [],
     this.maxDailyDoses,
+    this.currentDoseCount = 0,
+    this.lastDoseCountReset,
   });
 
   factory Medication.fromJson(Map<String, dynamic> json) => Medication(
@@ -41,6 +47,10 @@ class Medication {
         ? List<String>.from(json['scheduledTimes'])
         : [],
     maxDailyDoses: json['maxDailyDoses'],
+    currentDoseCount: json['currentDoseCount'] ?? 0,
+    lastDoseCountReset: json['lastDoseCountReset'] != null
+        ? DateTime.parse(json['lastDoseCountReset'])
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -51,6 +61,8 @@ class Medication {
     'isPRN': isPRN,
     'scheduledTimes': scheduledTimes,
     'maxDailyDoses': maxDailyDoses,
+    'currentDoseCount': currentDoseCount,
+    'lastDoseCountReset': lastDoseCountReset?.toIso8601String(),
   };
 }
 
@@ -93,6 +105,8 @@ class MedicationAdapterCustom extends TypeAdapter<Medication> {
     }
 
     final maxDailyDoses = fields[7] as int?;
+    final currentDoseCount = fields[8] as int? ?? 0;
+    final lastDoseCountReset = fields[9] as DateTime?;
 
     return Medication(
       id: fields[0] as String,
@@ -102,13 +116,15 @@ class MedicationAdapterCustom extends TypeAdapter<Medication> {
       isPRN: isPRN,
       scheduledTimes: scheduledTimes,
       maxDailyDoses: maxDailyDoses,
+      currentDoseCount: currentDoseCount,
+      lastDoseCountReset: lastDoseCountReset,
     );
   }
 
   @override
   void write(BinaryWriter writer, Medication obj) {
     writer
-      ..writeByte(7) // Number of fields
+      ..writeByte(9) // Number of fields
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -122,7 +138,11 @@ class MedicationAdapterCustom extends TypeAdapter<Medication> {
       ..writeByte(6)
       ..write(obj.scheduledTimes)
       ..writeByte(7)
-      ..write(obj.maxDailyDoses);
+      ..write(obj.maxDailyDoses)
+      ..writeByte(8)
+      ..write(obj.currentDoseCount)
+      ..writeByte(9)
+      ..write(obj.lastDoseCountReset);
   }
 
   @override

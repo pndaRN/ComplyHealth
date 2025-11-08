@@ -16,6 +16,7 @@ class MedicationFormContent extends StatelessWidget {
   final List<TimeOfDay> scheduledTimes;
   final ValueChanged<List<TimeOfDay>> onTimesChanged;
   final TextEditingController maxDosesController;
+  final ValueChanged<int>? onPRNSelected;
 
   const MedicationFormContent({
     super.key,
@@ -29,6 +30,7 @@ class MedicationFormContent extends StatelessWidget {
     required this.scheduledTimes,
     required this.onTimesChanged,
     required this.maxDosesController,
+    this.onPRNSelected,
   });
 
   @override
@@ -71,6 +73,7 @@ class MedicationFormContent extends StatelessWidget {
                 }
                 onTimesChanged(combined);
               },
+              onPRNSelected: onPRNSelected,
             ),
             const SizedBox(height: 16),
             TimePickerSection(
