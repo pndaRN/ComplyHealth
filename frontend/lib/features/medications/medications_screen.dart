@@ -13,7 +13,9 @@ class MedicationsScreen extends ConsumerWidget {
 
   String _getTimingSummary(Medication medication) {
     if (medication.isPRN) {
-      return 'As needed (PRN)';
+      final current = medication.currentDoseCount;
+      final max = medication.maxDailyDoses ?? 0;
+      return '$current/$max doses taken today';
     }
 
     final count = medication.scheduledTimes.length;
@@ -24,6 +26,14 @@ class MedicationsScreen extends ConsumerWidget {
     } else {
       return '$count times daily';
     }
+  }
+
+  Color _getDoseCountColor(int current, int max) {
+    if (max == 0) return Colors.grey;
+    final ratio = current / max;
+    if (ratio >= 1.0) return Colors.red;
+    if (ratio >= 0.75) return Colors.orange;
+    return Colors.green;
   }
 
   String _formatTime(String timeString) {
@@ -116,12 +126,33 @@ class MedicationsScreen extends ConsumerWidget {
         }).toList();
 
         final timingSummary = _getTimingSummary(m);
+        final doseColor = m.isPRN
+            ? _getDoseCountColor(m.currentDoseCount, m.maxDailyDoses ?? 0)
+            : null;
 
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: ExpansionTile(
             title: Text('${m.name} — ${m.dosage}'),
-            subtitle: Text('$timingSummary • For: ${conditionDisplayNames.join(", ")}'),
+            subtitle: RichText(
+              text: TextSpan(
+                style: Theme.of(context).textTheme.bodySmall,
+                children: [
+                  TextSpan(
+                    text: timingSummary,
+                    style: m.isPRN ? TextStyle(color: doseColor, fontWeight: FontWeight.bold) : null,
+                  ),
+                  TextSpan(text: ' • For: ${conditionDisplayNames.join(", ")}'),
+                ],
+              ),
+            ),
+            trailing: m.isPRN
+                ? IconButton(
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: () => notifier.incrementDoseCount(m),
+                    tooltip: 'Add dose',
+                  )
+                : null,
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -195,9 +226,40 @@ class MedicationsScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
                       Padding(
                         padding: const EdgeInsets.only(left: 28.0),
-                        child: Text(
-                          'Maximum: ${m.maxDailyDoses ?? 'Not specified'} doses per day',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Maximum: ${m.maxDailyDoses ?? 'Not specified'} doses per day',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                OutlinedButton.icon(
+                                  onPressed: m.currentDoseCount > 0
+                                      ? () => notifier.decrementDoseCount(m)
+                                      : null,
+                                  icon: const Icon(Icons.remove, size: 18),
+                                  label: const Text('Decrease'),
+                                ),
+                                const SizedBox(width: 8),
+                                FilledButton.icon(
+                                  onPressed: () => notifier.incrementDoseCount(m),
+                                  icon: const Icon(Icons.add, size: 18),
+                                  label: const Text('Increase'),
+                                ),
+                                const SizedBox(width: 8),
+                                TextButton.icon(
+                                  onPressed: m.currentDoseCount > 0
+                                      ? () => notifier.resetDoseCount(m)
+                                      : null,
+                                  icon: const Icon(Icons.refresh, size: 18),
+                                  label: const Text('Reset'),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ] else ...[
@@ -311,12 +373,28 @@ class MedicationsScreen extends ConsumerWidget {
 
       // Add medication tile
       final timingSummary = _getTimingSummary(m);
+      final doseColor = m.isPRN
+          ? _getDoseCountColor(m.currentDoseCount, m.maxDailyDoses ?? 0)
+          : null;
+
       items.add(
         Card(
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: ExpansionTile(
             title: Text('${m.name} — ${m.dosage}'),
-            subtitle: Text(timingSummary),
+            subtitle: m.isPRN
+                ? Text(
+                    timingSummary,
+                    style: TextStyle(color: doseColor, fontWeight: FontWeight.bold),
+                  )
+                : Text(timingSummary),
+            trailing: m.isPRN
+                ? IconButton(
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: () => notifier.incrementDoseCount(m),
+                    tooltip: 'Add dose',
+                  )
+                : null,
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -390,9 +468,40 @@ class MedicationsScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
                       Padding(
                         padding: const EdgeInsets.only(left: 28.0),
-                        child: Text(
-                          'Maximum: ${m.maxDailyDoses ?? 'Not specified'} doses per day',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Maximum: ${m.maxDailyDoses ?? 'Not specified'} doses per day',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                OutlinedButton.icon(
+                                  onPressed: m.currentDoseCount > 0
+                                      ? () => notifier.decrementDoseCount(m)
+                                      : null,
+                                  icon: const Icon(Icons.remove, size: 18),
+                                  label: const Text('Decrease'),
+                                ),
+                                const SizedBox(width: 8),
+                                FilledButton.icon(
+                                  onPressed: () => notifier.incrementDoseCount(m),
+                                  icon: const Icon(Icons.add, size: 18),
+                                  label: const Text('Increase'),
+                                ),
+                                const SizedBox(width: 8),
+                                TextButton.icon(
+                                  onPressed: m.currentDoseCount > 0
+                                      ? () => notifier.resetDoseCount(m)
+                                      : null,
+                                  icon: const Icon(Icons.refresh, size: 18),
+                                  label: const Text('Reset'),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ] else ...[

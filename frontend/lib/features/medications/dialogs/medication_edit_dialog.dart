@@ -99,6 +99,13 @@ class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
           });
         },
         maxDosesController: maxDosesCtrl,
+        onPRNSelected: (maxDoses) {
+          setState(() {
+            isPRN = true;
+            maxDosesCtrl.text = maxDoses.toString();
+            scheduledTimes = [];
+          });
+        },
       ),
       actions: [
         TextButton(
@@ -127,6 +134,8 @@ class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
               isPRN: isPRN,
               scheduledTimes: scheduledTimes.map(_timeToString).toList(),
               maxDailyDoses: maxDosesCtrl.text.isEmpty ? null : int.tryParse(maxDosesCtrl.text),
+              currentDoseCount: widget.medication.currentDoseCount,
+              lastDoseCountReset: widget.medication.lastDoseCountReset,
             );
             notifier.updateMeds(updatedMedication);
             Navigator.pop(context);

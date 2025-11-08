@@ -16,7 +16,13 @@ class MedicationNotifier extends Notifier<List<Medication>> {
   @override
   List<Medication> build() {
     _loadMeds();
+    checkAndResetDailyCounts();
     return [];
+  }
+
+  /// Check if two DateTime objects are on the same day
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   /// Get or open the Hive box (cached)
@@ -87,4 +93,110 @@ class MedicationNotifier extends Notifier<List<Medication>> {
 
   List<Medication> forCondition(String name) =>
       state.where((m) => m.conditionNames.contains(name)).toList();
+
+  /// Increment dose count for a PRN medication
+  Future<void> incrementDoseCount(Medication med) async {
+    if (!med.isPRN) return;
+
+    final today = DateTime.now();
+    int newCount = med.currentDoseCount;
+    DateTime? resetDate = med.lastDoseCountReset;
+
+    // Reset if it's a new day
+    if (resetDate == null || !_isSameDay(resetDate, today)) {
+      newCount = 1;
+      resetDate = today;
+    } else {
+      newCount = med.currentDoseCount + 1;
+    }
+
+    final updatedMed = Medication(
+      id: med.id,
+      name: med.name,
+      dosage: med.dosage,
+      conditionNames: med.conditionNames,
+      isPRN: med.isPRN,
+      scheduledTimes: med.scheduledTimes,
+      maxDailyDoses: med.maxDailyDoses,
+      currentDoseCount: newCount,
+      lastDoseCountReset: resetDate,
+    );
+
+    await updateMeds(updatedMed);
+  }
+
+  /// Decrement dose count for a PRN medication (minimum 0)
+  Future<void> decrementDoseCount(Medication med) async {
+    if (!med.isPRN || med.currentDoseCount <= 0) return;
+
+    final updatedMed = Medication(
+      id: med.id,
+      name: med.name,
+      dosage: med.dosage,
+      conditionNames: med.conditionNames,
+      isPRN: med.isPRN,
+      scheduledTimes: med.scheduledTimes,
+      maxDailyDoses: med.maxDailyDoses,
+      currentDoseCount: med.currentDoseCount - 1,
+      lastDoseCountReset: med.lastDoseCountReset,
+    );
+
+    await updateMeds(updatedMed);
+  }
+
+  /// Reset dose count for a PRN medication
+  Future<void> resetDoseCount(Medication med) async {
+    if (!med.isPRN) return;
+
+    final updatedMed = Medication(
+      id: med.id,
+      name: med.name,
+      dosage: med.dosage,
+      conditionNames: med.conditionNames,
+      isPRN: med.isPRN,
+      scheduledTimes: med.scheduledTimes,
+      maxDailyDoses: med.maxDailyDoses,
+      currentDoseCount: 0,
+      lastDoseCountReset: DateTime.now(),
+    );
+
+    await updateMeds(updatedMed);
+  }
+
+  /// Check and reset dose counts for PRN medications if it's a new day
+  Future<void> checkAndResetDailyCounts() async {
+    final today = DateTime.now();
+    bool hasUpdates = false;
+
+    final updatedMeds = state.map((med) {
+      if (!med.isPRN) return med;
+
+      if (med.lastDoseCountReset == null ||
+          !_isSameDay(med.lastDoseCountReset!, today)) {
+        hasUpdates = true;
+        return Medication(
+          id: med.id,
+          name: med.name,
+          dosage: med.dosage,
+          conditionNames: med.conditionNames,
+          isPRN: med.isPRN,
+          scheduledTimes: med.scheduledTimes,
+          maxDailyDoses: med.maxDailyDoses,
+          currentDoseCount: 0,
+          lastDoseCountReset: today,
+        );
+      }
+      return med;
+    }).toList();
+
+    if (hasUpdates) {
+      final box = await _getBox();
+      for (final med in updatedMeds) {
+        if (med.isPRN) {
+          await box.put(med.id, med);
+        }
+      }
+      state = MedicationSorter.sort(updatedMeds, _sortOption);
+    }
+  }
 }

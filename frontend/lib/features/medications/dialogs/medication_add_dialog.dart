@@ -78,6 +78,13 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
           });
         },
         maxDosesController: maxDosesCtrl,
+        onPRNSelected: (maxDoses) {
+          setState(() {
+            isPRN = true;
+            maxDosesCtrl.text = maxDoses.toString();
+            scheduledTimes = [];
+          });
+        },
       ),
       actions: [
         TextButton(
