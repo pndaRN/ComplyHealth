@@ -29,12 +29,32 @@ class MedSyncApp extends StatefulWidget {
 class _MedSyncAppState extends State<MedSyncApp> {
   int _index = 0;
 
-  final _screens = const [
+  final List<Widget> _screens = [
     DashboardScreen(),
     ConditionsScreen(),
     MedicationsScreen(),
     EducationScreen(),
     ProfileScreen(),
+  ];
+
+  final List<BottomNavigationBarItem> _bottomNavigationBarItems = [
+    BottomNavigationBarItem(
+      icon: Icon(Icons.dashboard),
+      label: 'Dashboard',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.healing),
+      label: 'Conditions',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.medication),
+      label: 'Medications',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.school),
+      label: 'Education',
+    ),
+    BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
   ];
 
   @override
@@ -50,25 +70,7 @@ class _MedSyncAppState extends State<MedSyncApp> {
           backgroundColor: Colors.white, // Explicit background
           selectedItemColor: Colors.blue, // Selected icon color
           unselectedItemColor: Colors.grey,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard),
-              label: 'Dashboard',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.healing),
-              label: 'Conditions',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.medication),
-              label: 'Medications',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.school),
-              label: 'Education',
-            ),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          ],
+          items: _bottomNavigationBarItems,
         ),
       ),
     );
