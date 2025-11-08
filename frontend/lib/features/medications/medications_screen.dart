@@ -6,10 +6,26 @@ import '../../core/state/conditions_provider.dart';
 import '../conditions/add_condition_dialog.dart';
 import 'dialogs/medication_add_dialog.dart';
 import 'dialogs/medication_edit_dialog.dart';
+import 'widgets/medication_detail_dialog.dart';
 import 'utils/medication_sorter.dart';
 
 class MedicationsScreen extends ConsumerWidget {
   const MedicationsScreen({super.key});
+
+  String _getTimingSummary(Medication medication) {
+    if (medication.isPRN) {
+      return 'As needed (PRN)';
+    }
+
+    final count = medication.scheduledTimes.length;
+    if (count == 0) {
+      return 'No schedule';
+    } else if (count == 1) {
+      return 'Once daily';
+    } else {
+      return '$count times daily';
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -83,18 +99,27 @@ class MedicationsScreen extends ConsumerWidget {
           return condition.commonName.isNotEmpty ? condition.commonName : name;
         }).toList();
 
+        final timingSummary = _getTimingSummary(m);
+
         return ListTile(
           title: Text('${m.name} — ${m.dosage}'),
-          subtitle: Text(
-            m.conditionNames.isEmpty
-                ? 'No conditions'
-                : 'For: ${conditionDisplayNames.join(", ")}',
+          subtitle: Text('$timingSummary • For: ${conditionDisplayNames.join(", ")}'),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () => _showEditDialog(context, m),
+                tooltip: 'Edit',
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline),
+                onPressed: () => notifier.deleteMeds(m),
+                tooltip: 'Delete',
+              ),
+            ],
           ),
-          trailing: IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: () => notifier.deleteMeds(m),
-          ),
-          onTap: () => _showEditDialog(context, m),
+          onTap: () => _showDetailDialog(context, ref, m),
         );
       },
     );
@@ -137,16 +162,28 @@ class MedicationsScreen extends ConsumerWidget {
         );
       }
 
-      // Add medication tile (no subtitle needed since condition is shown in header)
+      // Add medication tile
+      final timingSummary = _getTimingSummary(m);
       items.add(
         ListTile(
           title: Text('${m.name} — ${m.dosage}'),
-          subtitle: Text('Frequency: ${m.frequency}'),
-          trailing: IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: () => notifier.deleteMeds(m),
+          subtitle: Text(timingSummary),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () => _showEditDialog(context, m),
+                tooltip: 'Edit',
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline),
+                onPressed: () => notifier.deleteMeds(m),
+                tooltip: 'Delete',
+              ),
+            ],
           ),
-          onTap: () => _showEditDialog(context, m),
+          onTap: () => _showDetailDialog(context, ref, m),
         ),
       );
     }
@@ -222,6 +259,17 @@ class MedicationsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => MedicationEditDialog(medication: medication),
+    );
+  }
+
+  void _showDetailDialog(BuildContext context, WidgetRef ref, Medication medication) {
+    final conditions = ref.read(conditionsProvider);
+    showDialog(
+      context: context,
+      builder: (context) => MedicationDetailDialog(
+        medication: medication,
+        conditions: conditions,
+      ),
     );
   }
 }

@@ -2,9 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
+import '../../core/models/medication.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
+
+  String _getTimingSummary(Medication medication) {
+    if (medication.isPRN) {
+      return 'PRN';
+    }
+    final count = medication.scheduledTimes.length;
+    if (count == 0) return 'No schedule';
+    if (count == 1) return 'Once daily';
+    return '${count}x daily';
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -18,21 +29,6 @@ class DashboardScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Conditions: ${conditions.length}',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Medications: ${meds.length}',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Summary',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
             Expanded(
               child: ListView.builder(
                 itemCount: conditions.length,
@@ -50,7 +46,7 @@ class DashboardScreen extends ConsumerWidget {
                               related
                                   .map(
                                     (m) =>
-                                        '${m.name} - ${m.dosage} - ${m.frequency}',
+                                        '${m.name} - ${m.dosage} - ${_getTimingSummary(m)}',
                                   )
                                   .join('\n'),
                             ),

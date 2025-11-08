@@ -20,26 +20,33 @@ class MedicationAdapterGenerated extends TypeAdapter<Medication> {
       id: fields[0] as String,
       name: fields[1] as String,
       dosage: fields[2] as String,
-      frequency: fields[3] as String,
       conditionNames:
           fields[4] == null ? [] : (fields[4] as List).cast<String>(),
+      isPRN: fields[5] == null ? false : fields[5] as bool,
+      scheduledTimes:
+          fields[6] == null ? [] : (fields[6] as List).cast<String>(),
+      maxDailyDoses: fields[7] as int?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Medication obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
       ..write(obj.dosage)
-      ..writeByte(3)
-      ..write(obj.frequency)
       ..writeByte(4)
-      ..write(obj.conditionNames);
+      ..write(obj.conditionNames)
+      ..writeByte(5)
+      ..write(obj.isPRN)
+      ..writeByte(6)
+      ..write(obj.scheduledTimes)
+      ..writeByte(7)
+      ..write(obj.maxDailyDoses);
   }
 
   @override

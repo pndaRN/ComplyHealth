@@ -62,20 +62,17 @@ class MedicationSorter {
     return result;
   }
 
-  /// Sort medications by frequency (e.g., daily, weekly)
+  /// Sort medications by frequency (number of times per day)
+  /// PRN medications are sorted last, scheduled medications by times per day (ascending)
   static List<Medication> _sortByFrequency(List<Medication> medications) {
-    final frequencyOrder = <String, int>{
-      'daily': 1,
-      'weekly': 2,
-      'bi-weekly': 3,
-      'monthly': 4,
-      // Add more frequencies as needed
-    };
-
     return List.from(medications)..sort((a, b) {
-      final freqA = frequencyOrder[a.frequency.toLowerCase()] ?? 5;
-      final freqB = frequencyOrder[b.frequency.toLowerCase()] ?? 5;
-      return freqA.compareTo(freqB);
+      // PRN medications go last
+      if (a.isPRN && !b.isPRN) return 1;
+      if (!a.isPRN && b.isPRN) return -1;
+      if (a.isPRN && b.isPRN) return 0;
+
+      // Sort by number of scheduled times (ascending)
+      return a.scheduledTimes.length.compareTo(b.scheduledTimes.length);
     });
   }
 

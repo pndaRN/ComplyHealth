@@ -2,10 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
+import '../../core/models/medication.dart';
 import 'add_condition_dialog.dart';
 
 class ConditionsScreen extends ConsumerWidget {
   const ConditionsScreen({super.key});
+
+  String _getTimingSummary(Medication medication) {
+    if (medication.isPRN) {
+      return 'PRN';
+    }
+    final count = medication.scheduledTimes.length;
+    if (count == 0) return 'No schedule';
+    if (count == 1) return 'Once daily';
+    return '${count}x daily';
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -91,7 +102,7 @@ class ConditionsScreen extends ConsumerWidget {
                                       ),
                                     ),
                                     Text(
-                                      med.frequency,
+                                      _getTimingSummary(med),
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.grey[600],

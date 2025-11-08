@@ -5,8 +5,11 @@ import logging
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+# Get the script's directory
+SCRIPT_DIR = Path(__file__).parent.resolve()
+
+# Load environment variables from .env file in the scripts directory
+load_dotenv(SCRIPT_DIR / ".env")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -18,7 +21,8 @@ if not SHEET_ID:
 
 SHEET_NAME = "Sheet1"
 
-JSON_PATH = Path("../assets/icd10_chronic.json")
+# Resolve the path to the JSON file relative to the script's location
+JSON_PATH = (SCRIPT_DIR.parent / "assets" / "icd10_chronic.json").resolve()
 
 sheet_csv_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={SHEET_NAME}"
 

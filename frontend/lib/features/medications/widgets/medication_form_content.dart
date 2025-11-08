@@ -1,23 +1,34 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/disease.dart';
+import 'timing_preset_buttons.dart';
+import 'time_picker_section.dart';
+import 'prn_section.dart';
 
 /// Reusable form content for medication dialogs (add/edit)
 class MedicationFormContent extends StatelessWidget {
   final TextEditingController nameController;
   final TextEditingController dosageController;
-  final TextEditingController frequencyController;
   final List<Disease> conditions;
   final List<String> selectedConditions;
   final ValueChanged<List<String>> onConditionsChanged;
+  final bool isPRN;
+  final ValueChanged<bool> onPRNChanged;
+  final List<TimeOfDay> scheduledTimes;
+  final ValueChanged<List<TimeOfDay>> onTimesChanged;
+  final TextEditingController maxDosesController;
 
   const MedicationFormContent({
     super.key,
     required this.nameController,
     required this.dosageController,
-    required this.frequencyController,
     required this.conditions,
     required this.selectedConditions,
     required this.onConditionsChanged,
+    required this.isPRN,
+    required this.onPRNChanged,
+    required this.scheduledTimes,
+    required this.onTimesChanged,
+    required this.maxDosesController,
   });
 
   @override
@@ -37,13 +48,49 @@ class MedicationFormContent extends StatelessWidget {
             controller: dosageController,
             decoration: const InputDecoration(labelText: 'Dosage'),
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: frequencyController,
-            decoration: const InputDecoration(
-              labelText: 'Frequency',
-            ),
+          const SizedBox(height: 16),
+          PRNSection(
+            isPRN: isPRN,
+            onPRNChanged: onPRNChanged,
+            maxDosesController: maxDosesController,
           ),
+          if (!isPRN) ...[
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 16),
+            TimingPresetButtons(
+              onTimesSelected: (newTimes) {
+                // Add new times to existing ones, avoiding duplicates
+                final combined = List<TimeOfDay>.from(scheduledTimes);
+                for (final time in newTimes) {
+                  final exists = combined.any((t) =>
+                      t.hour == time.hour && t.minute == time.minute);
+                  if (!exists) {
+                    combined.add(time);
+                  }
+                }
+                onTimesChanged(combined);
+              },
+            ),
+            const SizedBox(height: 16),
+            TimePickerSection(
+              selectedTimes: scheduledTimes,
+              onAddTime: (time) {
+                final exists = scheduledTimes.any((t) =>
+                    t.hour == time.hour && t.minute == time.minute);
+                if (!exists) {
+                  onTimesChanged([...scheduledTimes, time]);
+                }
+              },
+              onRemoveTime: (time) {
+                final updated = scheduledTimes.where((t) =>
+                    !(t.hour == time.hour && t.minute == time.minute)).toList();
+                onTimesChanged(updated);
+              },
+            ),
+            const SizedBox(height: 16),
+            const Divider(),
+          ],
           const SizedBox(height: 12),
           InkWell(
             onTap: () => _showConditionSelector(context),

@@ -18,23 +18,29 @@ class MedicationAddDialog extends ConsumerStatefulWidget {
 class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
   late TextEditingController nameCtrl;
   late TextEditingController doseCtrl;
-  late TextEditingController freqCtrl;
+  late TextEditingController maxDosesCtrl;
   List<String> selectedConditions = [];
+  bool isPRN = false;
+  List<TimeOfDay> scheduledTimes = [];
 
   @override
   void initState() {
     super.initState();
     nameCtrl = TextEditingController();
     doseCtrl = TextEditingController();
-    freqCtrl = TextEditingController();
+    maxDosesCtrl = TextEditingController();
   }
 
   @override
   void dispose() {
     nameCtrl.dispose();
     doseCtrl.dispose();
-    freqCtrl.dispose();
+    maxDosesCtrl.dispose();
     super.dispose();
+  }
+
+  String _timeToString(TimeOfDay time) {
+    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -47,7 +53,6 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
       content: MedicationFormContent(
         nameController: nameCtrl,
         dosageController: doseCtrl,
-        frequencyController: freqCtrl,
         conditions: conditions,
         selectedConditions: selectedConditions,
         onConditionsChanged: (value) {
@@ -55,6 +60,24 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
             selectedConditions = value;
           });
         },
+        isPRN: isPRN,
+        onPRNChanged: (value) {
+          setState(() {
+            isPRN = value;
+            if (value) {
+              scheduledTimes = [];
+            } else {
+              maxDosesCtrl.clear();
+            }
+          });
+        },
+        scheduledTimes: scheduledTimes,
+        onTimesChanged: (value) {
+          setState(() {
+            scheduledTimes = value;
+          });
+        },
+        maxDosesController: maxDosesCtrl,
       ),
       actions: [
         TextButton(
@@ -67,8 +90,10 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
               context: context,
               name: nameCtrl.text,
               dosage: doseCtrl.text,
-              frequency: freqCtrl.text,
               conditions: selectedConditions,
+              isPRN: isPRN,
+              scheduledTimes: scheduledTimes,
+              maxDailyDoses: maxDosesCtrl.text.isEmpty ? null : int.tryParse(maxDosesCtrl.text),
             )) {
               return;
             }
@@ -77,8 +102,10 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
               id: const Uuid().v4(),
               name: nameCtrl.text.trim(),
               dosage: doseCtrl.text.trim(),
-              frequency: freqCtrl.text.trim(),
               conditionNames: selectedConditions,
+              isPRN: isPRN,
+              scheduledTimes: scheduledTimes.map(_timeToString).toList(),
+              maxDailyDoses: maxDosesCtrl.text.isEmpty ? null : int.tryParse(maxDosesCtrl.text),
             );
             notifier.addMeds(newMedication);
             Navigator.pop(context);
