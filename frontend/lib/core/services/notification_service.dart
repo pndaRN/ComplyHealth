@@ -1,7 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:medsync/core/models/medication.dart';
+import 'package:smartpatient/core/models/medication.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();

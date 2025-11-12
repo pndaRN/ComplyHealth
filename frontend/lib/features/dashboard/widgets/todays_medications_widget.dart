@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:medsync/core/state/adherence_provider.dart';
-import 'package:medsync/features/dashboard/dialogs/dose_logging_dialog.dart';
+import 'package:smartpatient/core/state/adherence_provider.dart';
+import 'package:smartpatient/features/dashboard/dialogs/dose_logging_dialog.dart';
 
 class TodaysMedicationsWidget extends ConsumerStatefulWidget {
   const TodaysMedicationsWidget({super.key});

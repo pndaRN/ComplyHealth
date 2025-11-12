@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:medsync/core/state/adherence_provider.dart';
-import 'package:medsync/core/models/medication_log.dart';
+import 'package:smartpatient/core/state/adherence_provider.dart';
+import 'package:smartpatient/core/models/medication_log.dart';
 
 class AdherenceHistoryWidget extends ConsumerStatefulWidget {
   const AdherenceHistoryWidget({super.key});

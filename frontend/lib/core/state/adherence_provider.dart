@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:medsync/core/models/medication.dart';
-import 'package:medsync/core/models/medication_log.dart';
-import 'package:medsync/core/state/medication_provider.dart';
+import 'package:smartpatient/core/models/medication.dart';
+import 'package:smartpatient/core/models/medication_log.dart';
+import 'package:smartpatient/core/state/medication_provider.dart';
 
 /// Provider for medication adherence tracking
 final adherenceProvider =

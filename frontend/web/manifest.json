@@ -1,11 +1,11 @@
 {
-    "name": "medsync",
-    "short_name": "medsync",
+    "name": "SmartPatient",
+    "short_name": "SmartPatient",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "A comprehensive medical condition and medication tracker",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

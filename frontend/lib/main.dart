@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:medsync/core/models/profile.dart';
-import 'package:medsync/features/education/eductation_screen.dart';
+import 'package:smartpatient/core/models/profile.dart';
+import 'package:smartpatient/features/education/eductation_screen.dart';
 import 'core/models/disease.dart';
 import 'core/models/medication.dart';
 import 'core/models/medication_log.dart';
@@ -24,17 +24,17 @@ void main() async {
   // Initialize notification service
   await NotificationService().initialize();
 
-  runApp(const ProviderScope(child: MedSyncApp()));
+  runApp(const ProviderScope(child: SmartPatientApp()));
 }
 
-class MedSyncApp extends StatefulWidget {
-  const MedSyncApp({super.key});
+class SmartPatientApp extends StatefulWidget {
+  const SmartPatientApp({super.key});
 
   @override
-  State<MedSyncApp> createState() => _MedSyncAppState();
+  State<SmartPatientApp> createState() => _SmartPatientAppState();
 }
 
-class _MedSyncAppState extends State<MedSyncApp> {
+class _SmartPatientAppState extends State<SmartPatientApp> {
   int _index = 0;
 
   final List<Widget> _screens = [
@@ -68,7 +68,7 @@ class _MedSyncAppState extends State<MedSyncApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MedSync',
+      title: 'SmartPatient',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: Scaffold(
         body: _screens[_index],

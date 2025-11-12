@@ -10,9 +10,9 @@ class RotatingWelcomeMessage extends StatefulWidget {
 
 class _RotatingWelcomeMessageState extends State<RotatingWelcomeMessage> {
   final List<String> messages = [
-    "Hello! Welcome to MedSync.",
+    "Hello! Welcome to SmartPatient.",
     "Let's keep your health on track!",
-    "Stay healthy with MedSync!",
+    "Stay healthy with SmartPatient!",
     "Your medication, your peace of mind.",
     "Managing your health, one day at a time.",
     "Welcome back! Ready to track your wellness?",

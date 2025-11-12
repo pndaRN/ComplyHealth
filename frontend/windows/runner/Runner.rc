@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "medsync" "\0"
+            VALUE "FileDescription", "SmartPatient" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "medsync" "\0"
+            VALUE "InternalName", "smartpatient" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "medsync.exe" "\0"
-            VALUE "ProductName", "medsync" "\0"
+            VALUE "OriginalFilename", "smartpatient.exe" "\0"
+            VALUE "ProductName", "SmartPatient" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
