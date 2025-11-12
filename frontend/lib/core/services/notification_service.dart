@@ -21,7 +21,9 @@ class NotificationService {
     tz.initializeTimeZones();
 
     // Android initialization settings
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
 
     // iOS initialization settings
     const iosSettings = DarwinInitializationSettings(
@@ -50,23 +52,22 @@ class NotificationService {
 
   /// Request notification permissions
   Future<void> _requestPermissions() async {
-    final androidPlugin =
-        _notifications.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+    final androidPlugin = _notifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
 
     if (androidPlugin != null) {
       await androidPlugin.requestNotificationsPermission();
     }
 
-    final iosPlugin = _notifications.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
+    final iosPlugin = _notifications
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
 
     if (iosPlugin != null) {
-      await iosPlugin.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+      await iosPlugin.requestPermissions(alert: true, badge: true, sound: true);
     }
   }
 
@@ -103,7 +104,8 @@ class NotificationService {
       await _scheduleDailyNotification(
         id: notificationId,
         title: 'Time to take ${medication.name}',
-        body: '${medication.dosage} - Scheduled for ${_formatTime(hour, minute)}',
+        body:
+            '${medication.dosage} - Scheduled for ${_formatTime(hour, minute)}',
         hour: hour,
         minute: minute,
         payload: '${medication.id}|$timeStr',
