@@ -11,6 +11,6 @@ func main() {
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
-	fmt.Println("🚀 MedSync API running on http://localhost:8080")
+	fmt.Println("🚀 SmartPatient API running on http://localhost:8080")
 	r.Run(":8080")
 }

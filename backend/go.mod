@@ -1,4 +1,4 @@
-module github.com/pndaRN/medsync
+module github.com/pndaRN/smartpatient
 
 go 1.25.3
 

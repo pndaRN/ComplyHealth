@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MedSync is a cross-platform medical condition and medication tracker with a Flutter mobile frontend and Go backend API. The app allows users to track chronic conditions (using ICD-10 codes), manage medications, and access educational resources.
+SmartPatient is a cross-platform medical condition and medication tracker with a Flutter mobile frontend and Go backend API. The app allows users to track chronic conditions (using ICD-10 codes), manage medications, and access educational resources.
 
 ## Architecture
 
