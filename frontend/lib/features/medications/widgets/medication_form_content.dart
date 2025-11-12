@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../core/models/disease.dart';
 import 'timing_preset_buttons.dart';
 import 'time_picker_section.dart';
-import 'prn_section.dart';
 
 /// Reusable form content for medication dialogs (add/edit)
 class MedicationFormContent extends StatelessWidget {
@@ -41,9 +40,7 @@ class MedicationFormContent extends StatelessWidget {
         children: [
           TextField(
             controller: nameController,
-            decoration: const InputDecoration(
-              labelText: 'Medication Name',
-            ),
+            decoration: const InputDecoration(labelText: 'Medication Name'),
           ),
           const SizedBox(height: 12),
           TextField(
@@ -51,49 +48,48 @@ class MedicationFormContent extends StatelessWidget {
             decoration: const InputDecoration(labelText: 'Dosage'),
           ),
           const SizedBox(height: 16),
-          PRNSection(
-            isPRN: isPRN,
-            onPRNChanged: onPRNChanged,
-            maxDosesController: maxDosesController,
+          const Divider(),
+          const SizedBox(height: 16),
+          TimingPresetButtons(
+            onTimesSelected: (newTimes) {
+              // Add new times to existing ones, avoiding duplicates
+              final combined = List<TimeOfDay>.from(scheduledTimes);
+              for (final time in newTimes) {
+                final exists = combined.any(
+                  (t) => t.hour == time.hour && t.minute == time.minute,
+                );
+                if (!exists) {
+                  combined.add(time);
+                }
+              }
+              onTimesChanged(combined);
+            },
+            onPRNSelected: onPRNSelected,
           ),
           if (!isPRN) ...[
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 16),
-            TimingPresetButtons(
-              onTimesSelected: (newTimes) {
-                // Add new times to existing ones, avoiding duplicates
-                final combined = List<TimeOfDay>.from(scheduledTimes);
-                for (final time in newTimes) {
-                  final exists = combined.any((t) =>
-                      t.hour == time.hour && t.minute == time.minute);
-                  if (!exists) {
-                    combined.add(time);
-                  }
-                }
-                onTimesChanged(combined);
-              },
-              onPRNSelected: onPRNSelected,
-            ),
             const SizedBox(height: 16),
             TimePickerSection(
               selectedTimes: scheduledTimes,
               onAddTime: (time) {
-                final exists = scheduledTimes.any((t) =>
-                    t.hour == time.hour && t.minute == time.minute);
+                final exists = scheduledTimes.any(
+                  (t) => t.hour == time.hour && t.minute == time.minute,
+                );
                 if (!exists) {
                   onTimesChanged([...scheduledTimes, time]);
                 }
               },
               onRemoveTime: (time) {
-                final updated = scheduledTimes.where((t) =>
-                    !(t.hour == time.hour && t.minute == time.minute)).toList();
+                final updated = scheduledTimes
+                    .where(
+                      (t) => !(t.hour == time.hour && t.minute == time.minute),
+                    )
+                    .toList();
                 onTimesChanged(updated);
               },
             ),
-            const SizedBox(height: 16),
-            const Divider(),
           ],
+          const SizedBox(height: 16),
+          const Divider(),
           const SizedBox(height: 12),
           InkWell(
             onTap: () => _showConditionSelector(context),
@@ -106,18 +102,36 @@ class MedicationFormContent extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 4,
                 children: selectedConditions.isEmpty
-                    ? [const Text('Tap to select conditions', style: TextStyle(color: Colors.grey))]
+                    ? [
+                        const Text(
+                          'Tap to select conditions',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ]
                     : selectedConditions.map((conditionName) {
                         final condition = conditions.firstWhere(
                           (c) => c.name == conditionName,
-                          orElse: () => Disease(code: '', name: conditionName, category: '', commonName: '', description: ''),
+                          orElse: () => Disease(
+                            code: '',
+                            name: conditionName,
+                            category: '',
+                            commonName: '',
+                            description: '',
+                          ),
                         );
-                        final displayName = condition.commonName.isNotEmpty ? condition.commonName : condition.name;
+                        final displayName = condition.commonName.isNotEmpty
+                            ? condition.commonName
+                            : condition.name;
                         return Chip(
-                          label: Text(displayName, style: const TextStyle(fontSize: 12)),
+                          label: Text(
+                            displayName,
+                            style: const TextStyle(fontSize: 12),
+                          ),
                           deleteIcon: const Icon(Icons.close, size: 16),
                           onDeleted: () {
-                            final updated = List<String>.from(selectedConditions)..remove(conditionName);
+                            final updated = List<String>.from(
+                              selectedConditions,
+                            )..remove(conditionName);
                             onConditionsChanged(updated);
                           },
                         );
@@ -154,7 +168,8 @@ class _ConditionSelectorDialog extends StatefulWidget {
   });
 
   @override
-  State<_ConditionSelectorDialog> createState() => _ConditionSelectorDialogState();
+  State<_ConditionSelectorDialog> createState() =>
+      _ConditionSelectorDialogState();
 }
 
 class _ConditionSelectorDialogState extends State<_ConditionSelectorDialog> {
@@ -179,12 +194,17 @@ class _ConditionSelectorDialogState extends State<_ConditionSelectorDialog> {
                 itemCount: widget.conditions.length,
                 itemBuilder: (context, index) {
                   final condition = widget.conditions[index];
-                  final displayName = condition.commonName.isNotEmpty ? condition.commonName : condition.name;
+                  final displayName = condition.commonName.isNotEmpty
+                      ? condition.commonName
+                      : condition.name;
                   final isSelected = _tempSelected.contains(condition.name);
 
                   return CheckboxListTile(
                     title: Text(displayName),
-                    subtitle: Text('${condition.code} • ${condition.category}', style: const TextStyle(fontSize: 12)),
+                    subtitle: Text(
+                      '${condition.code} • ${condition.category}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
                     value: isSelected,
                     onChanged: (bool? value) {
                       setState(() {
