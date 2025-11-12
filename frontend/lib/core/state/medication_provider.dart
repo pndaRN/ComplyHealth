@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../models/medication.dart';
+import '../services/notification_service.dart';
 import '../../features/medications/utils/medication_sorter.dart';
 
 final medicationProvider =
@@ -57,6 +58,9 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     final box = await _getBox();
     final meds = box.values.cast<Medication>().toList();
     state = MedicationSorter.sort(meds, _sortOption);
+
+    // Schedule notifications for all medications
+    await NotificationService().scheduleAllMedications(meds);
   }
 
   Future<void> addMeds(Medication med) async {
@@ -64,6 +68,9 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     await box.put(med.id, med);
     final updatedMeds = [...state, med];
     state = MedicationSorter.sort(updatedMeds, _sortOption);
+
+    // Schedule notifications for the new medication
+    await NotificationService().scheduleMedicationNotifications(med);
   }
 
   Future<void> deleteMeds(Medication med) async {
@@ -71,6 +78,9 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     await box.delete(med.id);
     final updatedMeds = state.where((m) => m.id != med.id).toList();
     state = MedicationSorter.sort(updatedMeds, _sortOption);
+
+    // Cancel notifications for the deleted medication
+    await NotificationService().cancelMedicationNotifications(med.id);
   }
 
   Future<void> updateMeds(Medication med) async {
@@ -78,6 +88,9 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     await box.put(med.id, med);
     final updatedMeds = state.map((m) => m.id == med.id ? med : m).toList();
     state = MedicationSorter.sort(updatedMeds, _sortOption);
+
+    // Re-schedule notifications for the updated medication
+    await NotificationService().scheduleMedicationNotifications(med);
   }
 
   /// Change the sort option and re-sort medications

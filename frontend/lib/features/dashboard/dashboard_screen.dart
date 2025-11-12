@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/models/medication.dart';
+import 'widgets/rotating_welcome_message.dart';
+import 'widgets/todays_medications_widget.dart';
+import 'widgets/adherence_metrics_widget.dart';
+import 'widgets/adherence_history_widget.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -24,37 +28,57 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
+      body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: conditions.length,
-                itemBuilder: (context, i) {
-                  final c = conditions[i];
-                  final related = meds
-                      .where((m) => m.conditionNames.contains(c.name))
-                      .toList();
-                  return Card(
-                    child: ListTile(
-                      title: Text(c.name),
-                      subtitle: related.isEmpty
-                          ? const Text('No medications yet')
-                          : Text(
-                              related
-                                  .map(
-                                    (m) =>
-                                        '${m.name} - ${m.dosage} - ${_getTimingSummary(m)}',
-                                  )
-                                  .join('\n'),
-                            ),
-                    ),
-                  );
-                },
+            const RotatingWelcomeMessage(),
+            const Divider(height: 1),
+            const TodaysMedicationsWidget(),
+            const AdherenceMetricsWidget(),
+            const AdherenceHistoryWidget(),
+            const Divider(height: 1),
+            if (conditions.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  'No conditions tracked yet.\nAdd a condition to get started!',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                ),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: conditions.length,
+                  itemBuilder: (context, i) {
+                    final c = conditions[i];
+                    final related = meds
+                        .where((m) => m.conditionNames.contains(c.name))
+                        .toList();
+                    return Card(
+                      child: ListTile(
+                        title: Text(c.name),
+                        subtitle: related.isEmpty
+                            ? const Text('No medications yet')
+                            : Text(
+                                related
+                                    .map(
+                                      (m) =>
+                                          '${m.name} - ${m.dosage} - ${_getTimingSummary(m)}',
+                                    )
+                                    .join('\n'),
+                              ),
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
           ],
         ),
       ),

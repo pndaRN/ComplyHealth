@@ -32,16 +32,23 @@ class ConditionsScreen extends ConsumerWidget {
               itemCount: myConditions.length,
               itemBuilder: (context, i) {
                 final condition = myConditions[i];
-                final medications = medicationNotifier.forCondition(condition.name);
+                final medications = medicationNotifier.forCondition(
+                  condition.name,
+                );
 
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   child: ExpansionTile(
                     title: Text(
-                      condition.commonName.isNotEmpty ? condition.commonName : condition.name,
+                      condition.commonName.isNotEmpty
+                          ? condition.commonName
+                          : condition.name,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text('${condition.code} • ${condition.category}'),
+                    subtitle: Text('${condition.name} • ${condition.category}'),
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -85,28 +92,36 @@ class ConditionsScreen extends ConsumerWidget {
                                 ),
                               )
                             else
-                              ...medications.map((med) => Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.medication, size: 16, color: Colors.blue),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        '${med.name} - ${med.dosage}',
-                                        style: const TextStyle(fontSize: 14),
+                              ...medications.map(
+                                (med) => Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.medication,
+                                        size: 16,
+                                        color: Colors.blue,
                                       ),
-                                    ),
-                                    Text(
-                                      _getTimingSummary(med),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey[600],
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          '${med.name} - ${med.dosage}',
+                                          style: const TextStyle(fontSize: 14),
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                      Text(
+                                        _getTimingSummary(med),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              )),
+                              ),
                             const SizedBox(height: 16),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
@@ -114,7 +129,8 @@ class ConditionsScreen extends ConsumerWidget {
                                 TextButton.icon(
                                   icon: const Icon(Icons.delete_outline),
                                   label: const Text('Delete'),
-                                  onPressed: () => notifier.removeCondition(condition),
+                                  onPressed: () =>
+                                      notifier.removeCondition(condition),
                                 ),
                               ],
                             ),

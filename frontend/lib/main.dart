@@ -5,6 +5,8 @@ import 'package:medsync/core/models/profile.dart';
 import 'package:medsync/features/education/eductation_screen.dart';
 import 'core/models/disease.dart';
 import 'core/models/medication.dart';
+import 'core/models/medication_log.dart';
+import 'core/services/notification_service.dart';
 import 'features/conditions/conditions_screen.dart';
 import 'features/medications/medications_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
@@ -16,6 +18,12 @@ void main() async {
   Hive.registerAdapter(DiseaseAdapter());
   Hive.registerAdapter(MedicationAdapterCustom());
   Hive.registerAdapter(ProfileAdapter());
+  Hive.registerAdapter(DoseStatusAdapter());
+  Hive.registerAdapter(MedicationLogAdapter());
+
+  // Initialize notification service
+  await NotificationService().initialize();
+
   runApp(const ProviderScope(child: MedSyncApp()));
 }
 
