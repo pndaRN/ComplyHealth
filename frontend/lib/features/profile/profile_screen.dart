@@ -3,18 +3,75 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/profile.dart';
 import '../../core/state/profile_provider.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _isEditing = false;
+  late TextEditingController _nameCtrl;
+  late TextEditingController _dobCtrl;
+  late TextEditingController _allergyCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    final profile = ref.read(profileProvider);
+    _nameCtrl = TextEditingController(text: profile.name);
+    _dobCtrl = TextEditingController(text: profile.dob);
+    _allergyCtrl = TextEditingController(text: profile.allergies);
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _dobCtrl.dispose();
+    _allergyCtrl.dispose();
+    super.dispose();
+  }
+
+  void _enterEditMode() {
+    final profile = ref.read(profileProvider);
+    _nameCtrl.text = profile.name;
+    _dobCtrl.text = profile.dob;
+    _allergyCtrl.text = profile.allergies;
+    setState(() => _isEditing = true);
+  }
+
+  void _cancelEdit() {
+    final profile = ref.read(profileProvider);
+    _nameCtrl.text = profile.name;
+    _dobCtrl.text = profile.dob;
+    _allergyCtrl.text = profile.allergies;
+    setState(() => _isEditing = false);
+  }
+
+  void _saveProfile() {
+    final profile = ref.read(profileProvider);
+    final notifier = ref.read(profileProvider.notifier);
+    final p = Profile(
+      name: _nameCtrl.text,
+      dob: _dobCtrl.text,
+      allergies: _allergyCtrl.text,
+      xp: profile.xp,
+      streak: profile.streak,
+      levelProgress: profile.levelProgress,
+    );
+    notifier.save(p);
+    setState(() => _isEditing = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Profile saved!')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final profile = ref.watch(profileProvider);
     final notifier = ref.read(profileProvider.notifier);
-
-    final nameCtrl = TextEditingController(text: profile.name);
-    final dobCtrl = TextEditingController(text: profile.dob);
-    final allergyCtrl = TextEditingController(text: profile.allergies);
 
     return Scaffold(
       appBar: AppBar(
@@ -39,70 +96,104 @@ class ProfileScreen extends ConsumerWidget {
                         color: theme.colorScheme.primary,
                       ),
                       const SizedBox(width: 12),
-                      Text(
-                        'Personal Information',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Text(
+                          'Personal Information',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
+                      if (!_isEditing)
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined),
+                          onPressed: _enterEditMode,
+                          tooltip: 'Edit profile',
+                        ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  TextField(
-                    controller: nameCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Full Name',
-                      prefixIcon: const Icon(Icons.badge),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  if (_isEditing) ...[
+                    // Edit Mode - Show text fields
+                    TextField(
+                      controller: _nameCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Full Name',
+                        prefixIcon: const Icon(Icons.badge),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: dobCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Date of Birth',
-                      prefixIcon: const Icon(Icons.cake),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _dobCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Date of Birth',
+                        prefixIcon: const Icon(Icons.cake),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: allergyCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Allergies',
-                      prefixIcon: const Icon(Icons.warning_amber),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _allergyCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Allergies',
+                        prefixIcon: const Icon(Icons.warning_amber),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
+                      maxLines: 2,
                     ),
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: () {
-                        final p = Profile(
-                          name: nameCtrl.text,
-                          dob: dobCtrl.text,
-                          allergies: allergyCtrl.text,
-                          xp: profile.xp,
-                          streak: profile.streak,
-                          levelProgress: profile.levelProgress,
-                        );
-                        notifier.save(p);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Profile saved!')),
-                        );
-                      },
-                      icon: const Icon(Icons.save),
-                      label: const Text('Save Changes'),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _cancelEdit,
+                            icon: const Icon(Icons.close),
+                            label: const Text('Cancel'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: _saveProfile,
+                            icon: const Icon(Icons.save),
+                            label: const Text('Save'),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                  ] else ...[
+                    // View Mode - Show information boxes
+                    _buildInfoRow(
+                      context,
+                      icon: Icons.badge,
+                      label: 'Full Name',
+                      value: profile.name.isEmpty ? 'Not set' : profile.name,
+                      isEmpty: profile.name.isEmpty,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildInfoRow(
+                      context,
+                      icon: Icons.cake,
+                      label: 'Date of Birth',
+                      value: profile.dob.isEmpty ? 'Not set' : profile.dob,
+                      isEmpty: profile.dob.isEmpty,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildInfoRow(
+                      context,
+                      icon: Icons.warning_amber,
+                      label: 'Allergies',
+                      value: profile.allergies.isEmpty ? 'None listed' : profile.allergies,
+                      isEmpty: profile.allergies.isEmpty,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -342,6 +433,57 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildInfoRow(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    bool isEmpty = false,
+  }) {
+    final theme = Theme.of(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.labelSmall,
+              ),
+              const SizedBox(height: 4),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isEmpty
+                      ? theme.colorScheme.surfaceContainerHighest.withOpacity(0.5)
+                      : theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: theme.colorScheme.outline.withOpacity(0.2),
+                  ),
+                ),
+                child: Text(
+                  value,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: isEmpty
+                        ? theme.colorScheme.onSurfaceVariant.withOpacity(0.6)
+                        : theme.colorScheme.onSurface,
+                    fontStyle: isEmpty ? FontStyle.italic : null,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
