@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/medication.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/state/conditions_provider.dart';
-import '../conditions/add_condition_dialog.dart';
 import 'dialogs/medication_add_dialog.dart';
 import 'dialogs/medication_edit_dialog.dart';
 import 'utils/medication_sorter.dart';
@@ -574,56 +573,32 @@ class MedicationsScreen extends ConsumerWidget {
     final conditions = ref.read(conditionsProvider);
 
     if (conditions.isEmpty) {
-      // Show simplified dialog to add condition first
-      final shouldOpenConditionDialog = await showDialog<bool>(
+      // Show dialog to prompt user to add condition from Health tab
+      await showDialog<void>(
         context: context,
         builder: (dialogContext) {
           return AlertDialog(
             title: const Text('Add Medication'),
-            content: Column(
+            content: const Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Please add at least one condition first.'),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(dialogContext, true);
-                  },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Condition'),
+                Text('Please add at least one condition first from the Health tab.'),
+                SizedBox(height: 8),
+                Text(
+                  'Tap the Health icon in the bottom navigation to get started.',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(dialogContext, false),
-                child: const Text('Cancel'),
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('OK'),
               ),
             ],
           );
         },
       );
-
-      // If user clicked "Add Condition", open the condition dialog
-      if (shouldOpenConditionDialog == true && context.mounted) {
-        await showDialog(
-          context: context,
-          builder: (context) => const AddConditionDialog(),
-        );
-
-        // After condition dialog closes, check if conditions were added and reopen
-        if (context.mounted) {
-          final updatedConditions = ref.read(conditionsProvider);
-          if (updatedConditions.isNotEmpty) {
-            // Use addPostFrameCallback to ensure clean dialog transition
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (context.mounted) {
-                _showAddDialog(context, ref);
-              }
-            });
-          }
-        }
-      }
       return;
     }
 

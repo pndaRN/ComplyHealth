@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smartpatient/core/models/profile.dart';
-import 'package:smartpatient/features/education/eductation_screen.dart';
 import 'core/models/disease.dart';
 import 'core/models/medication.dart';
 import 'core/models/medication_log.dart';
+import 'core/models/education_content.dart';
 import 'core/services/notification_service.dart';
-import 'features/conditions/conditions_screen.dart';
+import 'features/health/health_screen.dart';
 import 'features/medications/medications_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/profile/profile_screen.dart';
@@ -20,6 +20,9 @@ void main() async {
   Hive.registerAdapter(ProfileAdapter());
   Hive.registerAdapter(DoseStatusAdapter());
   Hive.registerAdapter(MedicationLogAdapter());
+  Hive.registerAdapter(EducationContentAdapter());
+  Hive.registerAdapter(ArticleAdapter());
+  Hive.registerAdapter(VideoAdapter());
 
   // Initialize notification service
   await NotificationService().initialize();
@@ -39,9 +42,8 @@ class _SmartPatientAppState extends State<SmartPatientApp> {
 
   final List<Widget> _screens = [
     DashboardScreen(),
-    ConditionsScreen(),
+    HealthScreen(),
     MedicationsScreen(),
-    EducationScreen(),
     ProfileScreen(),
   ];
 
@@ -51,16 +53,12 @@ class _SmartPatientAppState extends State<SmartPatientApp> {
       label: 'Dashboard',
     ),
     BottomNavigationBarItem(
-      icon: Icon(Icons.healing),
-      label: 'Conditions',
+      icon: Icon(Icons.health_and_safety),
+      label: 'Health',
     ),
     BottomNavigationBarItem(
       icon: Icon(Icons.medication),
       label: 'Medications',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.school),
-      label: 'Education',
     ),
     BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
   ];

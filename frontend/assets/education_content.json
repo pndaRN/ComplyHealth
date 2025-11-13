@@ -1,0 +1,166 @@
+[
+  {
+    "conditionCode": "E11",
+    "articles": [
+      {
+        "title": "Understanding Type 2 Diabetes",
+        "url": "https://www.cdc.gov/diabetes/basics/type2.html",
+        "source": "CDC",
+        "description": "Comprehensive guide to understanding type 2 diabetes, its causes, and management strategies."
+      },
+      {
+        "title": "Diabetes Management and Care",
+        "url": "https://www.diabetes.org/diabetes",
+        "source": "American Diabetes Association",
+        "description": "Evidence-based information about managing diabetes effectively."
+      }
+    ],
+    "lifestyleTips": [
+      "Monitor your blood sugar levels regularly as recommended by your healthcare provider.",
+      "Follow a balanced diet with controlled portions of carbohydrates throughout the day.",
+      "Engage in at least 150 minutes of moderate aerobic activity per week.",
+      "Maintain a healthy weight through diet and exercise.",
+      "Take medications as prescribed and attend regular check-ups.",
+      "Stay hydrated and limit sugary beverages.",
+      "Check your feet daily for any cuts, blisters, or signs of infection."
+    ],
+    "videos": [
+      {
+        "title": "Living Well with Type 2 Diabetes",
+        "url": "https://www.youtube.com/watch?v=example1",
+        "thumbnail": null,
+        "duration": "10:30"
+      }
+    ]
+  },
+  {
+    "conditionCode": "I10",
+    "articles": [
+      {
+        "title": "High Blood Pressure Facts",
+        "url": "https://www.cdc.gov/bloodpressure/facts.htm",
+        "source": "CDC",
+        "description": "Essential facts about hypertension and its management."
+      },
+      {
+        "title": "Managing High Blood Pressure",
+        "url": "https://www.heart.org/en/health-topics/high-blood-pressure",
+        "source": "American Heart Association",
+        "description": "Guide to understanding and managing high blood pressure."
+      }
+    ],
+    "lifestyleTips": [
+      "Monitor your blood pressure regularly at home and keep a log.",
+      "Reduce sodium intake to less than 2,300 mg per day.",
+      "Exercise regularly - aim for 30 minutes of moderate activity most days.",
+      "Maintain a healthy weight through diet and exercise.",
+      "Limit alcohol consumption and avoid smoking.",
+      "Manage stress through relaxation techniques like meditation or yoga.",
+      "Take blood pressure medications as prescribed."
+    ],
+    "videos": [
+      {
+        "title": "Understanding Blood Pressure",
+        "url": "https://www.youtube.com/watch?v=example2",
+        "thumbnail": null,
+        "duration": "8:45"
+      }
+    ]
+  },
+  {
+    "conditionCode": "J45",
+    "articles": [
+      {
+        "title": "Asthma Overview",
+        "url": "https://www.cdc.gov/asthma/default.htm",
+        "source": "CDC",
+        "description": "Comprehensive information about asthma causes, symptoms, and treatment."
+      },
+      {
+        "title": "Living with Asthma",
+        "url": "https://www.lung.org/lung-health-diseases/lung-disease-lookup/asthma",
+        "source": "American Lung Association",
+        "description": "Resources for managing asthma and improving quality of life."
+      }
+    ],
+    "lifestyleTips": [
+      "Identify and avoid your asthma triggers (dust, pollen, smoke, etc.).",
+      "Always carry your rescue inhaler with you.",
+      "Use your controller medication daily as prescribed, even when feeling well.",
+      "Monitor your peak flow readings regularly.",
+      "Get annual flu vaccines and stay up to date with pneumonia vaccines.",
+      "Exercise regularly but warm up properly and follow your asthma action plan.",
+      "Keep your home clean and free from dust mites and allergens."
+    ],
+    "videos": [
+      {
+        "title": "Asthma Management Basics",
+        "url": "https://www.youtube.com/watch?v=example3",
+        "thumbnail": null,
+        "duration": "12:15"
+      }
+    ]
+  },
+  {
+    "conditionCode": "E78",
+    "articles": [
+      {
+        "title": "Understanding Cholesterol",
+        "url": "https://www.cdc.gov/cholesterol/about.htm",
+        "source": "CDC",
+        "description": "Learn about cholesterol types and how to manage high cholesterol."
+      },
+      {
+        "title": "Cholesterol Management",
+        "url": "https://www.heart.org/en/health-topics/cholesterol",
+        "source": "American Heart Association",
+        "description": "Strategies for maintaining healthy cholesterol levels."
+      }
+    ],
+    "lifestyleTips": [
+      "Follow a heart-healthy diet low in saturated and trans fats.",
+      "Include more fiber-rich foods like oats, beans, and vegetables.",
+      "Exercise regularly - aim for at least 150 minutes per week.",
+      "Maintain a healthy weight.",
+      "Quit smoking if you smoke.",
+      "Limit alcohol consumption.",
+      "Take cholesterol-lowering medications as prescribed."
+    ],
+    "videos": [
+      {
+        "title": "Managing High Cholesterol",
+        "url": "https://www.youtube.com/watch?v=example4",
+        "thumbnail": null,
+        "duration": "9:20"
+      }
+    ]
+  },
+  {
+    "conditionCode": "M81",
+    "articles": [
+      {
+        "title": "Osteoporosis: What You Need to Know",
+        "url": "https://www.bones.nih.gov/health-info/bone/osteoporosis/overview",
+        "source": "NIH Osteoporosis and Related Bone Diseases",
+        "description": "Comprehensive information about osteoporosis prevention and treatment."
+      }
+    ],
+    "lifestyleTips": [
+      "Get adequate calcium (1,000-1,200 mg daily) through diet or supplements.",
+      "Ensure sufficient vitamin D intake (800-1,000 IU daily).",
+      "Engage in weight-bearing and muscle-strengthening exercises regularly.",
+      "Avoid smoking and limit alcohol consumption.",
+      "Take fall-prevention measures at home (remove rugs, improve lighting).",
+      "Have your bone density checked as recommended by your doctor.",
+      "Take osteoporosis medications as prescribed."
+    ],
+    "videos": [
+      {
+        "title": "Living with Osteoporosis",
+        "url": "https://www.youtube.com/watch?v=example5",
+        "thumbnail": null,
+        "duration": "11:00"
+      }
+    ]
+  }
+]
