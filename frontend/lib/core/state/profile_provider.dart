@@ -23,6 +23,8 @@ class ProfileNotifier extends Notifier<Profile> {
       streak: 0,
       levelProgress: 0.0,
       lastXpAwardDate: null,
+      lastPopupShownDate: null,
+      lastXpGained: 0,
     );
   }
 
@@ -139,8 +141,11 @@ class ProfileNotifier extends Notifier<Profile> {
     // Add XP and update streak
     addXP(finalXp, newStreak: adherenceStreak);
 
-    // Update last award date
-    final updated = state.copyWith(lastXpAwardDate: date);
+    // Update last award date and store XP gained for popup
+    final updated = state.copyWith(
+      lastXpAwardDate: date,
+      lastXpGained: finalXp,
+    );
     save(updated);
   }
 
@@ -177,5 +182,31 @@ class ProfileNotifier extends Notifier<Profile> {
       lastXpAwardDate: null,
     );
     save(updated);
+  }
+
+  /// Check if we should show the XP gain popup
+  ///
+  /// Returns true if:
+  /// - We haven't shown the popup today
+  /// - XP was gained yesterday (lastXpGained > 0)
+  bool shouldShowXpPopup() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // If we've already shown the popup today, don't show it again
+    if (state.lastPopupShownDate != null && _isSameDay(state.lastPopupShownDate!, today)) {
+      return false;
+    }
+
+    // Show popup if XP was gained
+    return state.lastXpGained > 0;
+  }
+
+  /// Mark the popup as shown for today
+  Future<void> markPopupShown() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final updated = state.copyWith(lastPopupShownDate: today);
+    await save(updated);
   }
 }

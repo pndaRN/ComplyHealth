@@ -7,10 +7,12 @@ import 'core/models/medication.dart';
 import 'core/models/medication_log.dart';
 import 'core/models/education_content.dart';
 import 'core/services/notification_service.dart';
+import 'core/state/profile_provider.dart';
 import 'features/health/health_screen.dart';
 import 'features/medications/medications_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/profile/profile_screen.dart';
+import 'features/profile/xp_gain_popup.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,15 +32,16 @@ void main() async {
   runApp(const ProviderScope(child: SmartPatientApp()));
 }
 
-class SmartPatientApp extends StatefulWidget {
+class SmartPatientApp extends ConsumerStatefulWidget {
   const SmartPatientApp({super.key});
 
   @override
-  State<SmartPatientApp> createState() => _SmartPatientAppState();
+  ConsumerState<SmartPatientApp> createState() => _SmartPatientAppState();
 }
 
-class _SmartPatientAppState extends State<SmartPatientApp> {
+class _SmartPatientAppState extends ConsumerState<SmartPatientApp> {
   int _index = 0;
+  bool _hasCheckedPopup = false;
 
   final List<Widget> _screens = [
     DashboardScreen(),
@@ -62,6 +65,52 @@ class _SmartPatientAppState extends State<SmartPatientApp> {
     ),
     BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Check and show XP popup after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndShowXpPopup();
+    });
+  }
+
+  Future<void> _checkAndShowXpPopup() async {
+    if (_hasCheckedPopup) return;
+    _hasCheckedPopup = true;
+
+    final profileNotifier = ref.read(profileProvider.notifier);
+    final profile = ref.read(profileProvider);
+
+    // Wait a bit for profile to load
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (!mounted) return;
+
+    final shouldShow = profileNotifier.shouldShowXpPopup();
+    if (shouldShow && profile.lastXpGained > 0) {
+      final currentLevel = profileNotifier.getCurrentLevel(profile.xp);
+      final nextLevel = currentLevel + 1;
+      final xpForNextLevel = profileNotifier.getXpForNextLevel(currentLevel);
+
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => XpGainPopup(
+          xpGained: profile.lastXpGained,
+          currentLevel: currentLevel,
+          nextLevel: nextLevel,
+          levelProgress: profile.levelProgress,
+          currentXp: profile.xp,
+          xpForNextLevel: xpForNextLevel,
+          streak: profile.streak,
+        ),
+      );
+
+      // Mark popup as shown
+      await profileNotifier.markPopupShown();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -25,6 +25,12 @@ class Profile {
   @HiveField(6)
   final DateTime? lastXpAwardDate;
 
+  @HiveField(7)
+  final DateTime? lastPopupShownDate;
+
+  @HiveField(8)
+  final int lastXpGained;
+
   const Profile({
     required this.name,
     required this.dob,
@@ -33,6 +39,8 @@ class Profile {
     required this.streak,
     required this.levelProgress,
     this.lastXpAwardDate,
+    this.lastPopupShownDate,
+    this.lastXpGained = 0,
   });
 
   Profile copyWith({
@@ -43,6 +51,8 @@ class Profile {
     int? streak,
     double? levelProgress,
     DateTime? lastXpAwardDate,
+    DateTime? lastPopupShownDate,
+    int? lastXpGained,
   }) {
     return Profile(
       name: name ?? this.name,
@@ -52,6 +62,8 @@ class Profile {
       streak: streak ?? this.streak,
       levelProgress: levelProgress ?? this.levelProgress,
       lastXpAwardDate: lastXpAwardDate ?? this.lastXpAwardDate,
+      lastPopupShownDate: lastPopupShownDate ?? this.lastPopupShownDate,
+      lastXpGained: lastXpGained ?? this.lastXpGained,
     );
   }
 }
