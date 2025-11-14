@@ -22,6 +22,9 @@ class Profile {
   @HiveField(5)
   final double levelProgress;
 
+  @HiveField(6)
+  final DateTime? lastXpAwardDate;
+
   const Profile({
     required this.name,
     required this.dob,
@@ -29,6 +32,7 @@ class Profile {
     required this.xp,
     required this.streak,
     required this.levelProgress,
+    this.lastXpAwardDate,
   });
 
   Profile copyWith({
@@ -38,6 +42,7 @@ class Profile {
     int? xp,
     int? streak,
     double? levelProgress,
+    DateTime? lastXpAwardDate,
   }) {
     return Profile(
       name: name ?? this.name,
@@ -46,6 +51,7 @@ class Profile {
       xp: xp ?? this.xp,
       streak: streak ?? this.streak,
       levelProgress: levelProgress ?? this.levelProgress,
+      lastXpAwardDate: lastXpAwardDate ?? this.lastXpAwardDate,
     );
   }
 }
