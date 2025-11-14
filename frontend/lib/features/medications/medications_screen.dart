@@ -7,8 +7,15 @@ import 'dialogs/medication_add_dialog.dart';
 import 'dialogs/medication_edit_dialog.dart';
 import 'utils/medication_sorter.dart';
 
-class MedicationsScreen extends ConsumerWidget {
+class MedicationsScreen extends ConsumerStatefulWidget {
   const MedicationsScreen({super.key});
+
+  @override
+  ConsumerState<MedicationsScreen> createState() => _MedicationsScreenState();
+}
+
+class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
+  String _searchQuery = '';
 
   String _getTimingSummary(Medication medication) {
     if (medication.isPRN) {
@@ -53,14 +60,62 @@ class MedicationsScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final meds = ref.watch(medicationProvider);
     final notifier = ref.read(medicationProvider.notifier);
     final currentSortOption = notifier.sortOption;
 
+    // Filter medications by search query
+    final filteredMeds = _searchQuery.isEmpty
+        ? meds
+        : meds.where((medication) {
+            final searchLower = _searchQuery.toLowerCase();
+            final conditions = ref.read(conditionsProvider);
+
+            // Get display names for conditions
+            final conditionDisplayNames = medication.conditionNames.map((name) {
+              final matchingConditions = conditions.where((c) => c.name == name);
+              if (matchingConditions.isEmpty) return name;
+              final condition = matchingConditions.first;
+              return condition.commonName.isNotEmpty ? condition.commonName : name;
+            }).toList();
+
+            return medication.name.toLowerCase().contains(searchLower) ||
+                medication.dosage.toLowerCase().contains(searchLower) ||
+                conditionDisplayNames.any((name) => name.toLowerCase().contains(searchLower));
+          }).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Medications'),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(80),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search medications...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() => _searchQuery = '');
+                        },
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+              ),
+              onChanged: (value) {
+                setState(() => _searchQuery = value.toLowerCase());
+              },
+            ),
+          ),
+        ),
         actions: [
           PopupMenuButton<MedicationSortOption>(
             icon: const Icon(Icons.sort),
@@ -85,10 +140,55 @@ class MedicationsScreen extends ConsumerWidget {
         ],
       ),
       body: meds.isEmpty
-          ? const Center(child: Text('No medications yet.'))
-          : _buildMedicationsList(context, ref, meds, currentSortOption),
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.medication_outlined,
+                    size: 64,
+                    color: theme.colorScheme.outline,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No medications yet',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tap + to add your first medication',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : filteredMeds.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.search_off,
+                        size: 64,
+                        color: theme.colorScheme.outline,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No medications found',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : _buildMedicationsList(context, filteredMeds, currentSortOption),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddDialog(context, ref),
+        onPressed: () => _showAddDialog(context),
         child: const Icon(Icons.add),
       ),
     );
@@ -96,18 +196,17 @@ class MedicationsScreen extends ConsumerWidget {
 
   Widget _buildMedicationsList(
     BuildContext context,
-    WidgetRef ref,
     List<Medication> meds,
     MedicationSortOption sortOption,
   ) {
     if (sortOption == MedicationSortOption.groupedByCondition) {
-      return _buildGroupedList(context, ref, meds);
+      return _buildGroupedList(context, meds);
     } else {
-      return _buildSimpleList(context, ref, meds);
+      return _buildSimpleList(context, meds);
     }
   }
 
-  Widget _buildSimpleList(BuildContext context, WidgetRef ref, List<Medication> meds) {
+  Widget _buildSimpleList(BuildContext context, List<Medication> meds) {
     final notifier = ref.read(medicationProvider.notifier);
 
     return ListView.builder(
@@ -325,7 +424,7 @@ class MedicationsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildGroupedList(BuildContext context, WidgetRef ref, List<Medication> meds) {
+  Widget _buildGroupedList(BuildContext context, List<Medication> meds) {
     final notifier = ref.read(medicationProvider.notifier);
     final conditions = ref.watch(conditionsProvider);
 
@@ -569,7 +668,7 @@ class MedicationsScreen extends ConsumerWidget {
     return ListView(children: items);
   }
 
-  void _showAddDialog(BuildContext context, WidgetRef ref) async {
+  void _showAddDialog(BuildContext context) async {
     final conditions = ref.read(conditionsProvider);
 
     if (conditions.isEmpty) {
