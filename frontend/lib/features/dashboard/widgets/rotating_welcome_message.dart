@@ -7,10 +7,12 @@ class RotatingWelcomeMessage extends ConsumerStatefulWidget {
   const RotatingWelcomeMessage({super.key});
 
   @override
-  ConsumerState<RotatingWelcomeMessage> createState() => _RotatingWelcomeMessageState();
+  ConsumerState<RotatingWelcomeMessage> createState() =>
+      _RotatingWelcomeMessageState();
 }
 
-class _RotatingWelcomeMessageState extends ConsumerState<RotatingWelcomeMessage> {
+class _RotatingWelcomeMessageState
+    extends ConsumerState<RotatingWelcomeMessage> {
   final List<String> _defaultMessages = [
     "Hello! Welcome to SmartPatient.",
     "Let's keep your health on track!",
@@ -30,7 +32,7 @@ class _RotatingWelcomeMessageState extends ConsumerState<RotatingWelcomeMessage>
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 8), (timer) {
       if (mounted) {
         setState(() {
           final messages = _getMessages();
@@ -45,10 +47,7 @@ class _RotatingWelcomeMessageState extends ConsumerState<RotatingWelcomeMessage>
 
     // If user has a name, show personalized welcome message first
     if (profile.name.isNotEmpty) {
-      return [
-        "Welcome Back ${profile.name}!",
-        ..._defaultMessages,
-      ];
+      return ["Welcome Back ${profile.name}!", ..._defaultMessages];
     }
 
     return _defaultMessages;
@@ -85,9 +84,9 @@ class _RotatingWelcomeMessageState extends ConsumerState<RotatingWelcomeMessage>
           messages[currentIndex],
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
       ),
     );
