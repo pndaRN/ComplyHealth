@@ -6,6 +6,7 @@ import 'core/models/disease.dart';
 import 'core/models/medication.dart';
 import 'core/models/medication_log.dart';
 import 'core/models/education_content.dart';
+import 'core/models/feedback.dart';
 import 'core/services/notification_service.dart';
 import 'core/state/profile_provider.dart';
 import 'features/health/health_screen.dart';
@@ -13,6 +14,8 @@ import 'features/medications/medications_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/profile/xp_gain_popup.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +23,7 @@ void main() async {
   Hive.registerAdapter(DiseaseAdapter());
   Hive.registerAdapter(MedicationAdapterCustom());
   Hive.registerAdapter(ProfileAdapter());
+  Hive.registerAdapter(FeedbackAdapter());
   Hive.registerAdapter(DoseStatusAdapter());
   Hive.registerAdapter(MedicationLogAdapter());
   Hive.registerAdapter(EducationContentAdapter());
@@ -29,6 +33,8 @@ void main() async {
   // Initialize notification service
   await NotificationService().initialize();
 
+  // Init Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const ProviderScope(child: SmartPatientApp()));
 }
 
@@ -51,18 +57,12 @@ class _SmartPatientAppState extends ConsumerState<SmartPatientApp> {
   ];
 
   final List<BottomNavigationBarItem> _bottomNavigationBarItems = [
-    BottomNavigationBarItem(
-      icon: Icon(Icons.dashboard),
-      label: 'Dashboard',
-    ),
+    BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
     BottomNavigationBarItem(
       icon: Icon(Icons.health_and_safety),
       label: 'Health',
     ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.medication),
-      label: 'Medications',
-    ),
+    BottomNavigationBarItem(icon: Icon(Icons.medication), label: 'Medications'),
     BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
   ];
 
