@@ -17,7 +17,7 @@ class ProfileAdapter extends TypeAdapter<Profile> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Profile(
-      name: fields[0] as String,
+      firstName: fields[0] as String,
       dob: fields[1] as String,
       allergies: fields[2] as String,
       xp: fields[3] as int,
@@ -26,15 +26,16 @@ class ProfileAdapter extends TypeAdapter<Profile> {
       lastXpAwardDate: fields[6] as DateTime?,
       lastPopupShownDate: fields[7] as DateTime?,
       lastXpGained: fields[8] as int,
+      lastName: fields[9] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Profile obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
-      ..write(obj.name)
+      ..write(obj.firstName)
       ..writeByte(1)
       ..write(obj.dob)
       ..writeByte(2)
@@ -50,7 +51,9 @@ class ProfileAdapter extends TypeAdapter<Profile> {
       ..writeByte(7)
       ..write(obj.lastPopupShownDate)
       ..writeByte(8)
-      ..write(obj.lastXpGained);
+      ..write(obj.lastXpGained)
+      ..writeByte(9)
+      ..write(obj.lastName);
   }
 
   @override

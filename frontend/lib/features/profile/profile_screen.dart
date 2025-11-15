@@ -13,7 +13,8 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isEditing = false;
-  late TextEditingController _nameCtrl;
+  late TextEditingController _firstNameCtrl;
+  late TextEditingController _lastNameCtrl;
   late TextEditingController _dobCtrl;
   late TextEditingController _allergyCtrl;
 
@@ -21,14 +22,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void initState() {
     super.initState();
     final profile = ref.read(profileProvider);
-    _nameCtrl = TextEditingController(text: profile.name);
+    _firstNameCtrl = TextEditingController(text: profile.firstName);
+    _lastNameCtrl = TextEditingController(text: profile.lastName);
     _dobCtrl = TextEditingController(text: profile.dob);
     _allergyCtrl = TextEditingController(text: profile.allergies);
   }
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
+    _firstNameCtrl.dispose();
+    _lastNameCtrl.dispose();
     _dobCtrl.dispose();
     _allergyCtrl.dispose();
     super.dispose();
@@ -36,7 +39,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   void _enterEditMode() {
     final profile = ref.read(profileProvider);
-    _nameCtrl.text = profile.name;
+    _firstNameCtrl.text = profile.firstName;
+    _lastNameCtrl.text = profile.lastName;
     _dobCtrl.text = profile.dob;
     _allergyCtrl.text = profile.allergies;
     setState(() => _isEditing = true);
@@ -44,7 +48,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   void _cancelEdit() {
     final profile = ref.read(profileProvider);
-    _nameCtrl.text = profile.name;
+    _firstNameCtrl.text = profile.firstName;
+    _lastNameCtrl.text = profile.lastName;
     _dobCtrl.text = profile.dob;
     _allergyCtrl.text = profile.allergies;
     setState(() => _isEditing = false);
@@ -54,7 +59,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profile = ref.read(profileProvider);
     final notifier = ref.read(profileProvider.notifier);
     final p = Profile(
-      name: _nameCtrl.text,
+      firstName: _firstNameCtrl.text,
+      lastName: _lastNameCtrl.text,
       dob: _dobCtrl.text,
       allergies: _allergyCtrl.text,
       xp: profile.xp,
@@ -117,9 +123,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   if (_isEditing) ...[
                     // Edit Mode - Show text fields
                     TextField(
-                      controller: _nameCtrl,
+                      controller: _firstNameCtrl,
                       decoration: InputDecoration(
-                        labelText: 'Full Name',
+                        labelText: 'First Name',
+                        prefixIcon: const Icon(Icons.badge),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _lastNameCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Last Name',
                         prefixIcon: const Icon(Icons.badge),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -175,8 +192,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       context,
                       icon: Icons.badge,
                       label: 'Full Name',
-                      value: profile.name.isEmpty ? 'Not set' : profile.name,
-                      isEmpty: profile.name.isEmpty,
+                      value: (profile.firstName.isEmpty && profile.lastName.isEmpty)
+                          ? 'Not set'
+                          : '${profile.firstName} ${profile.lastName}'.trim(),
+                      isEmpty: profile.firstName.isEmpty && profile.lastName.isEmpty,
                     ),
                     const SizedBox(height: 12),
                     _buildInfoRow(

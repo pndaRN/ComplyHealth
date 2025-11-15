@@ -16,7 +16,7 @@ class ProfileNotifier extends Notifier<Profile> {
   Profile build() {
     _loadProfile();
     return Profile(
-      name: '',
+      firstName: '',
       dob: '',
       allergies: '',
       xp: 0,
@@ -25,6 +25,7 @@ class ProfileNotifier extends Notifier<Profile> {
       lastXpAwardDate: null,
       lastPopupShownDate: null,
       lastXpGained: 0,
+      lastName: '',
     );
   }
 

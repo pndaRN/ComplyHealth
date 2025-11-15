@@ -46,8 +46,8 @@ class _RotatingWelcomeMessageState
     final profile = ref.read(profileProvider);
 
     // If user has a name, show personalized welcome message first
-    if (profile.name.isNotEmpty) {
-      return ["Welcome Back ${profile.name}!", ..._defaultMessages];
+    if (profile.firstName.isNotEmpty) {
+      return ["Welcome Back ${profile.firstName}!", ..._defaultMessages];
     }
 
     return _defaultMessages;
