@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "818057086992",
+    "project_id": "smart-patient-65009",
+    "storage_bucket": "smart-patient-65009.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:818057086992:android:680c4bb85fb9132e342295",
+        "android_client_info": {
+          "package_name": "com.example.smartpatient"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5l9J18PYeM3yBBaM_wOv_DgTaRXq0osA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -23,13 +23,16 @@ class ProfileAdapter extends TypeAdapter<Profile> {
       xp: fields[3] as int,
       streak: fields[4] as int,
       levelProgress: fields[5] as double,
+      lastXpAwardDate: fields[6] as DateTime?,
+      lastPopupShownDate: fields[7] as DateTime?,
+      lastXpGained: fields[8] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, Profile obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -41,7 +44,13 @@ class ProfileAdapter extends TypeAdapter<Profile> {
       ..writeByte(4)
       ..write(obj.streak)
       ..writeByte(5)
-      ..write(obj.levelProgress);
+      ..write(obj.levelProgress)
+      ..writeByte(6)
+      ..write(obj.lastXpAwardDate)
+      ..writeByte(7)
+      ..write(obj.lastPopupShownDate)
+      ..writeByte(8)
+      ..write(obj.lastXpGained);
   }
 
   @override
