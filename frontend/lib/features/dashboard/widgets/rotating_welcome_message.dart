@@ -1,15 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/state/profile_provider.dart';
 
-class RotatingWelcomeMessage extends StatefulWidget {
+class RotatingWelcomeMessage extends ConsumerStatefulWidget {
   const RotatingWelcomeMessage({super.key});
 
   @override
-  State<RotatingWelcomeMessage> createState() => _RotatingWelcomeMessageState();
+  ConsumerState<RotatingWelcomeMessage> createState() => _RotatingWelcomeMessageState();
 }
 
-class _RotatingWelcomeMessageState extends State<RotatingWelcomeMessage> {
-  final List<String> messages = [
+class _RotatingWelcomeMessageState extends ConsumerState<RotatingWelcomeMessage> {
+  final List<String> _defaultMessages = [
     "Hello! Welcome to SmartPatient.",
     "Let's keep your health on track!",
     "Stay healthy with SmartPatient!",
@@ -31,10 +33,25 @@ class _RotatingWelcomeMessageState extends State<RotatingWelcomeMessage> {
     _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
       if (mounted) {
         setState(() {
+          final messages = _getMessages();
           currentIndex = (currentIndex + 1) % messages.length;
         });
       }
     });
+  }
+
+  List<String> _getMessages() {
+    final profile = ref.read(profileProvider);
+
+    // If user has a name, show personalized welcome message first
+    if (profile.name.isNotEmpty) {
+      return [
+        "Welcome Back ${profile.name}!",
+        ..._defaultMessages,
+      ];
+    }
+
+    return _defaultMessages;
   }
 
   @override
@@ -45,6 +62,8 @@ class _RotatingWelcomeMessageState extends State<RotatingWelcomeMessage> {
 
   @override
   Widget build(BuildContext context) {
+    final messages = _getMessages();
+
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 500),
       transitionBuilder: (Widget child, Animation<double> animation) {
