@@ -7,6 +7,7 @@ class ConditionCard extends StatelessWidget {
   final int medicationCount;
   final VoidCallback onTap;
   final VoidCallback onToggle;
+  final bool showToggle;
 
   const ConditionCard({
     super.key,
@@ -15,13 +16,14 @@ class ConditionCard extends StatelessWidget {
     required this.medicationCount,
     required this.onTap,
     required this.onToggle,
+    this.showToggle = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final displayName = condition.commonName?.isNotEmpty == true
-        ? condition.commonName!
+    final displayName = condition.commonName.isNotEmpty == true
+        ? condition.commonName
         : condition.name;
 
     return Card(
@@ -101,16 +103,17 @@ class ConditionCard extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(
-                    icon: Icon(
-                      isAdded ? Icons.check_circle : Icons.add_circle_outline,
-                      color: isAdded
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.outline,
+                  if (showToggle)
+                    IconButton(
+                      icon: Icon(
+                        isAdded ? Icons.check_circle : Icons.add_circle_outline,
+                        color: isAdded
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.outline,
+                      ),
+                      onPressed: onToggle,
+                      tooltip: isAdded ? 'Remove condition' : 'Add condition',
                     ),
-                    onPressed: onToggle,
-                    tooltip: isAdded ? 'Remove condition' : 'Add condition',
-                  ),
                   Icon(
                     Icons.arrow_forward_ios,
                     size: 16,

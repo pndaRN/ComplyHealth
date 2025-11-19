@@ -52,7 +52,10 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
             children: [
               // Filter chips
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     ChoiceChip(
@@ -60,7 +63,9 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
                       selected: _viewMode == HealthViewMode.myConditions,
                       onSelected: (selected) {
                         if (selected) {
-                          setState(() => _viewMode = HealthViewMode.myConditions);
+                          setState(
+                            () => _viewMode = HealthViewMode.myConditions,
+                          );
                         }
                       },
                     ),
@@ -120,7 +125,10 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
     }
   }
 
-  Widget _buildMyConditionsView(List<Disease> userConditions, List medications) {
+  Widget _buildMyConditionsView(
+    List<Disease> userConditions,
+    List medications,
+  ) {
     final theme = Theme.of(context);
 
     // Filter by search query
@@ -168,11 +176,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: theme.colorScheme.outline,
-            ),
+            Icon(Icons.search_off, size: 64, color: theme.colorScheme.outline),
             const SizedBox(height: 16),
             Text(
               'No conditions found',
@@ -200,6 +204,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
           medicationCount: medCount,
           onTap: () => _navigateToDetail(condition),
           onToggle: () => _removeCondition(condition),
+          showToggle: false,
         );
       },
     );
@@ -214,7 +219,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
         : _allConditions.where((condition) {
             final searchLower = _searchQuery.toLowerCase();
             return condition.name.toLowerCase().contains(searchLower) ||
-                (condition.commonName?.toLowerCase().contains(searchLower) ??
+                (condition.commonName.toLowerCase().contains(searchLower) ??
                     false) ||
                 condition.code.toLowerCase().contains(searchLower);
           }).toList();
@@ -224,11 +229,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: theme.colorScheme.outline,
-            ),
+            Icon(Icons.search_off, size: 64, color: theme.colorScheme.outline),
             const SizedBox(height: 16),
             Text(
               'No conditions found',
@@ -244,7 +245,9 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
     // Group by category
     final groupedConditions = <String, List<Disease>>{};
     for (final condition in filteredConditions) {
-      groupedConditions.putIfAbsent(condition.category, () => []).add(condition);
+      groupedConditions
+          .putIfAbsent(condition.category, () => [])
+          .add(condition);
     }
 
     // Sort categories alphabetically
@@ -264,14 +267,17 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          subtitle: Text('${conditions.length} condition${conditions.length != 1 ? 's' : ''}'),
-          initiallyExpanded: _searchQuery.isNotEmpty || sortedCategories.length == 1,
+          subtitle: Text(
+            '${conditions.length} condition${conditions.length != 1 ? 's' : ''}',
+          ),
+          initiallyExpanded:
+              _searchQuery.isNotEmpty || sortedCategories.length == 1,
           children: conditions.map((condition) {
             final isAdded = userConditions.any((c) => c.code == condition.code);
             final medCount = isAdded
                 ? medications
-                    .where((m) => m.conditionNames.contains(condition.name))
-                    .length
+                      .where((m) => m.conditionNames.contains(condition.name))
+                      .length
                 : 0;
 
             return ConditionCard(
@@ -303,7 +309,9 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Added ${condition.commonName != null && condition.commonName!.isNotEmpty ? condition.commonName : condition.name}'),
+          content: Text(
+            'Added ${condition.commonName != null && condition.commonName!.isNotEmpty ? condition.commonName : condition.name}',
+          ),
         ),
       );
     }
@@ -315,7 +323,9 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Removed ${condition.commonName != null && condition.commonName!.isNotEmpty ? condition.commonName : condition.name}'),
+          content: Text(
+            'Removed ${condition.commonName != null && condition.commonName!.isNotEmpty ? condition.commonName : condition.name}',
+          ),
         ),
       );
     }
