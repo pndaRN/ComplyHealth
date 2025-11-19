@@ -68,5 +68,460 @@
     "category": "Respiratory",
     "commonName": "Asthma",
     "description": "Asthma is a chronic inflammatory disease of the airways characterized by episodes of wheezing, shortness of breath, chest tightness, and coughing. Asthma means your breathing tubes inside your lungs sometimes get tight and irritated, making it hard to breathe.You might cough, wheeze, or feel like you can’t get enough air, especially when you’re sick, exercising, or around things like smoke or dust.\nIt’s like trying to breathe through a straw that keeps shrinking whenever the air gets dusty or cold — medicine helps open it back up so air can flow easily again."
+  },
+  {
+    "code": "G47.33",
+    "name": "Obstructive Sleep Apnea",
+    "category": "Respiratory",
+    "commonName": "OSA",
+    "description": "OSA is a condition where the throat muscles relax too much during sleep, blocking the airway and causing short pauses in breathing. The body wakes up slightly each time to reopen the airway, which can happen dozens of times a night. This repeated disruption prevents deep, restful sleep, leaving the person tired during the day. Think of it like a garden hose that keeps getting pinched—water can’t flow smoothly until the kink is released. Treatment, like CPAP machines or lifestyle changes, helps keep the airway open so the “water” flows freely"
+  },
+  {
+    "code": "K58.9",
+    "name": "Irritable Bowel Syndrome",
+    "category": "Gastrointestinal",
+    "commonName": "IBS",
+    "description": "IBS is when the stomach and intestines are overly sensitive, causing belly pain, cramping, gas, diarrhea, or constipation. It doesn’t damage the intestines but can make everyday life uncomfortable. Certain foods, stress, or changes in routine can trigger symptoms. Imagine your intestines are like a highway: sometimes traffic moves too fast, sometimes it slows down, causing jams or delays. Managing diet, stress, and sometimes medicine helps keep the “traffic” running smoothly."
+  },
+  {
+    "code": "L20.9",
+    "name": "Atopic Dermatitis, unspecified",
+    "category": "Integumentary",
+    "commonName": "Eczema",
+    "description": "Atopic dermatitis is a skin condition that makes the skin dry, itchy, red, or bumpy because it doesn’t hold moisture well. Scratching can make the skin worse and sometimes lead to infection. It’s not contagious, but it can flare up with irritants, allergens, or stress. Think of the skin as a sponge that has cracks—water leaks out and irritants get in. Moisturizers, gentle care, and sometimes medicine help patch the “sponge” so it can protect the body better."
+  },
+  {
+    "code": "R07.9",
+    "name": "Chest pain, unspecified",
+    "category": "Cardiovascular",
+    "commonName": "Angina",
+    "description": "Chest pain is discomfort, pressure, or tightness in the chest that can happen for many reasons. Sometimes it’s minor, like a pulled muscle or heartburn, and sometimes it’s serious, like a heart or lung problem. It can feel like a heavy weight, squeezing, or burning. Think of chest pain like a car’s warning light—it signals that something may need attention. If it’s sudden, severe, or unusual, it’s important to get checked immediately."
+  },
+  {
+    "code": "N39.0",
+    "name": "Urinary Tract Infection, unspecified",
+    "category": "Genitourinary",
+    "commonName": "UTI",
+    "description": "A UTI is an infection in the bladder or urinary system caused by bacteria. It can cause burning with urination, frequent urges to pee, cloudy or smelly urine, and sometimes lower belly pain. It’s like having tiny invaders in a castle—the germs make the castle uncomfortable until the guards (medicine and the immune system) fight them off. UTIs are common and usually easy to treat with antibiotics. Drinking water and good hygiene can help prevent future infections."
+  },
+  {
+    "code": "R55",
+    "name": "Syncope and Collapse",
+    "category": "Cardiovascular",
+    "commonName": "Fainting",
+    "description": "Syncope is when someone suddenly passes out because the brain doesn’t get enough blood for a short period. This can happen from standing up too quickly, being scared, or having a heart problem. Think of it like a computer that temporarily loses power—it shuts down briefly and then restarts quickly. People usually wake up quickly and feel okay, but repeated fainting should be checked. It’s a warning that something might be affecting blood flow to the brain."
+  },
+  {
+    "code": "E03.9",
+    "name": "Hypothyroidism, unspecified",
+    "category": "Endocrine",
+    "commonName": "Hypothyroidism",
+    "description": "Hypothyroidism is when the thyroid gland doesn’t produce enough hormones to control the body’s energy and metabolism. People with this condition can feel tired, gain weight, feel cold, have dry skin, or move and think more slowly. It’s like a factory running slowly because the power supply is low—the whole system slows down. Medicine can replace the missing hormones and get the “factory” running normally again. Regular check-ups help ensure the thyroid stays balanced."
+  },
+  {
+    "code": "N18.9",
+    "name": "Chronic Kidney Disease, unspecified",
+    "category": "Renal",
+    "commonName": "CKD",
+    "description": "CKD is when the kidneys gradually lose their ability to filter waste and extra water from the blood. Waste can build up in the body, causing tiredness, swelling, high blood pressure, or other health issues. Think of the kidneys as a water filter that gets clogged over time—the water (blood) isn’t cleaned as well. CKD usually progresses slowly, so early detection and treatment with medicine, diet changes, and sometimes dialysis are important. Keeping blood pressure and blood sugar under control helps protect the kidneys."
+  },
+  {
+    "code": "I11.9",
+    "name": "Hypertensive Heart Disease without Heart failure",
+    "category": "Cardiovascular",
+    "commonName": "Heart Disease",
+    "description": "This condition occurs when high blood pressure forces the heart to work harder than normal over time. The heart can become enlarged or weaker, making it harder to pump blood efficiently. Think of it like a pump pushing water through a pipe with extra pressure—it eventually wears out. People may experience fatigue, shortness of breath, or irregular heart rhythms. Controlling blood pressure through lifestyle changes and medication helps protect the heart from further damage."
+  },
+  {
+    "code": "I20.9",
+    "name": "Angina Pectoris, unspecified",
+    "category": "Cardiovascular",
+    "commonName": "Stable Angina",
+    "description": "Stable angina is chest pain or discomfort caused by reduced blood flow to the heart due to narrowed arteries. It usually happens with activity, stress, or excitement and goes away with rest or medicine. Think of it like a car engine struggling uphill—it works harder to get the blood (fuel) through the narrow arteries. People may feel pressure, squeezing, or heaviness in the chest, often in a predictable pattern. Managing diet, exercise, and medication helps keep the “engine” running safely."
+  },
+  {
+    "code": "I25.10",
+    "name": "Atherosclerotic Heart Disease of Native Coronary Artery without Angina Pectoris",
+    "category": "Cardiovascular",
+    "commonName": "CAD",
+    "description": "CAD without angina means the heart’s arteries are narrowed but don’t yet cause chest pain or noticeable symptoms. Blood flow is partially blocked, which can increase the risk of heart attacks in the future. Think of it like a river with narrow channels—water still flows, but a blockage could cause flooding later. Lifestyle changes, medicine, and regular check-ups help keep the river flowing smoothly. Even without pain, the heart needs protection."
+  },
+  {
+    "code": "I73.9",
+    "name": "Peripheral Arterial Disease, unspecified",
+    "category": "Cardiovascular",
+    "commonName": "PAD",
+    "description": "PAD happens when blood vessels in the legs are narrowed by plaque, reducing blood flow to the muscles. People may feel pain, cramping, or tiredness in the legs while walking, which improves with rest. It’s like a garden hose with kinks—the water struggles to get through until you stop and let it rest. PAD can also increase the risk of heart problems. Exercise, healthy habits, and medicine help keep the “hose” flowing properly."
+  },
+  {
+    "code": "I48.0",
+    "name": "Paroxysmal Atrial Fibrillation",
+    "category": "Cardiovascular",
+    "commonName": "Afib",
+    "description": "Paroxysmal AFib is when the heart suddenly starts beating irregularly and fast, but the episodes stop on their own within minutes to days. People may feel a racing heart, palpitations, dizziness, or shortness of breath during an episode. It’s like a sudden traffic jam on a highway that clears up on its own. Between episodes, the heart beats normally. Treatment and monitoring help prevent complications and reduce episodes."
+  },
+  {
+    "code": "I48.11",
+    "name": "Longstanding Persistent Atrial Fibrillation",
+    "category": "Cardiovascular",
+    "commonName": "Afib",
+    "description": "Persistent AFib is when the heart’s irregular and fast heartbeat lasts more than a week and doesn’t go away on its own. It usually requires medicine or a procedure to restore a normal rhythm. Think of it like a traffic jam that doesn’t clear without help from a traffic officer—the irregular flow continues until corrected. People may have palpitations, fatigue, shortness of breath, or no symptoms at all. Managing the condition helps prevent blood clots and reduces the risk of stroke."
+  },
+  {
+    "code": "E11.40",
+    "name": "Type 2 diabetes mellitus with diabetic neuropathy, unspecified",
+    "category": "Endocrine",
+    "commonName": "Neuropathy",
+    "description": "Diabetic neuropathy is nerve damage that happens when high blood sugar slowly harms the nerves, often in the feet, legs, or hands. This can cause numbness, tingling, burning, or sharp pain, and sometimes injuries go unnoticed because the nerves don’t send signals properly. Think of it like electrical wires getting frayed—the signals don’t travel clearly, so the body can’t feel things right. Over time, this can make balance tricky and increase the risk of infections or sores. Controlling blood sugar and taking care of the feet are crucial to prevent the damage from getting worse."
+  },
+  {
+    "code": "E05.9",
+    "name": "Thyrotoxicosis, unspecified",
+    "category": "Endocrine",
+    "commonName": "Hyperthyroidism",
+    "description": "Hyperthyroidism occurs when the thyroid gland produces too many hormones, causing the body to speed up. People may feel restless, anxious, lose weight, have a rapid heartbeat, or sweat excessively. It’s like a car engine stuck in high gear—the body is constantly running faster than normal. This overactivity can make daily tasks feel exhausting even though the person appears “hyperactive.” Treatment with medicines, radioactive therapy, or surgery helps slow the engine down and restore balance."
+  },
+  {
+    "code": "E55.9",
+    "name": "Vitamin D Deficiency, unspecified",
+    "category": "Other",
+    "commonName": "Vitamin D Deficiency",
+    "description": "Vitamin D deficiency happens when the body doesn’t have enough vitamin D, which is vital for strong bones and a healthy immune system. People may feel weak, tired, or experience bone and muscle pain. Think of it like a house missing sunlight—without it, the structure becomes weaker and fragile. Vitamin D helps calcium build strong bones, so low levels can make fractures more likely. Supplements, fortified foods, and moderate sun exposure help rebuild strength and improve overall health."
+  },
+  {
+    "code": "J45.4",
+    "name": "Moderate Peristent Asthma",
+    "category": "Respiratory",
+    "commonName": "Asthma",
+    "description": "Moderate persistent asthma is when the airways are frequently inflamed, causing coughing, wheezing, shortness of breath, and chest tightness several times a week. The airways become narrow and sensitive, making it harder for air to pass through. Think of it like breathing through a garden hose that’s partially pinched—the air struggles to flow, especially during activity. People usually need daily inhalers to reduce inflammation and a rescue inhaler for flare-ups. Avoiding triggers like smoke, dust, or allergens helps keep the “hose” more open and prevents attacks."
+  },
+  {
+    "code": "J45.5",
+    "name": "Severe Persistent Asthma",
+    "category": "Respiratory",
+    "commonName": "Asthma",
+    "description": "Severe persistent asthma is when the airways are constantly inflamed and narrowed, causing symptoms every day and frequent flare-ups. Even at rest, the person may experience coughing, wheezing, and trouble breathing. It’s like trying to breathe through a very tiny straw all the time—the airflow is severely limited. People often require multiple daily medications, including inhalers, steroids, or biologics, to control inflammation. Avoiding triggers and regular monitoring are crucial to prevent serious attacks that could be life-threatening."
+  },
+  {
+    "code": "N18.6",
+    "name": "End-Stage Renal Disease",
+    "category": "Renal",
+    "commonName": "ESRD",
+    "description": "ESRD is when the kidneys no longer function well enough to filter waste and extra water from the blood. This can lead to fluid buildup, fatigue, high blood pressure, and dangerous imbalances in the body. Think of it like a water filter that is completely clogged—nothing gets cleaned, and the water (blood) becomes polluted. Dialysis or a kidney transplant is often required to keep the body alive. Careful diet, medicines, and regular monitoring help manage the symptoms and prevent further complications."
+  },
+  {
+    "code": "I12.9",
+    "name": "Hypertensive Chronic Kidney Disease with Stage 1-4 CKD or unspecified",
+    "category": "Renal",
+    "commonName": "Hypertensive Kidney Disease",
+    "description": "Hypertensive CKD happens when long-term high blood pressure damages the kidneys, slowly reducing their ability to filter blood. Over time, waste products build up, causing tiredness, swelling, and higher risk of heart problems. Think of it like a garden hose that has been under too much pressure for years—it starts to weaken, leak, and doesn’t work as well. Controlling blood pressure with medication and lifestyle changes is key to slowing the damage. Early detection and regular monitoring help protect the kidneys and overall health."
+  },
+  {
+    "code": "K50",
+    "name": "Crohn Disease",
+    "category": "Autoimmune",
+    "commonName": "Crohn Disease",
+    "description": "Crohn disease is a type of inflammatory bowel disease that can affect any part of the digestive tract, causing inflammation, pain, diarrhea, and sometimes weight loss. The inflammation can lead to swelling, narrowing, or ulcers in the intestines. Think of it like a road that keeps getting potholes and blockages—the traffic (food and waste) can’t move smoothly. People may have flare-ups that come and go, triggered by stress, diet, or immune system activity. Treatments include medicines, lifestyle changes, and sometimes surgery to keep the “road” clear and reduce inflammation."
+  },
+  {
+    "code": "K51",
+    "name": "Ulcerative Colitis",
+    "category": "Autoimmune",
+    "commonName": "Ulcerative Colitis (UC)",
+    "description": "Ulcerative colitis is another type of inflammatory bowel disease that mainly affects the large intestine (colon), causing long-lasting inflammation and sores. This can lead to abdominal pain, diarrhea, and sometimes bleeding. Think of it like a garden with patches of weeds and dead spots—the colon lining becomes irritated and damaged. People may have periods of flare-ups and remission, with symptoms improving and worsening over time. Medicines, diet changes, and occasionally surgery help manage symptoms and keep the colon healthy."
+  },
+  {
+    "code": "K74.60",
+    "name": "Unspecified Cirrhosis of the Liver",
+    "category": "Gastrointestinal",
+    "commonName": "Cirrhosis",
+    "description": "Cirrhosis is when the liver becomes scarred and cannot work properly, often due to long-term damage from alcohol, hepatitis, or fatty liver disease. The liver is like a sponge that filters and cleans the blood, but scar tissue makes it stiff and less effective. Symptoms can include fatigue, swelling in the legs or belly, jaundice (yellow skin), and easy bruising. Over time, cirrhosis can lead to serious complications like internal bleeding or liver failure. Treating the cause, avoiding alcohol, and regular monitoring can slow the damage and protect liver function."
+  },
+  {
+    "code": "K76.0",
+    "name": "Fatty Liver, not elsewhere classified",
+    "category": "Gastrointestinal",
+    "commonName": "Fatty Liver Disease (NAFLD)",
+    "description": "Fatty liver disease happens when fat builds up in the liver, making it work less efficiently. Over time, this can cause inflammation, scarring, and sometimes cirrhosis. Think of it like a sponge soaking up too much oil—the sponge becomes heavy and less able to absorb water. People may feel tired or notice no symptoms at all, making it easy to go unnoticed. Lifestyle changes like healthy eating, exercise, and controlling weight are key to “lightening the sponge” and protecting the liver."
+  },
+  {
+    "code": "K86.1",
+    "name": "Chronic Pancreatitis",
+    "category": "Gastrointestinal",
+    "commonName": "Chronic pancretitis",
+    "description": "Chronic pancreatitis is long-term inflammation of the pancreas, often caused by alcohol use or other diseases. The pancreas makes digestive enzymes and hormones like insulin, so inflammation can lead to pain, poor digestion, and diabetes. Think of it like a factory with broken machinery—the work slows down, and some products are made incorrectly or not at all. People may have repeated abdominal pain, nausea, or weight loss. Treatment includes managing pain, supporting digestion with enzymes, and controlling blood sugar."
+  },
+  {
+    "code": "M54.5",
+    "name": "Low Back Pain (general)",
+    "category": "Musculoskeletal",
+    "commonName": "Low Back Pain",
+    "description": "Chronic low back pain is pain in the lower back lasting more than three months. It can be caused by muscle strain, spinal changes, or nerve issues. Think of it like a door hinge that is rusted or misaligned—it makes movement stiff, painful, and less smooth. Pain can affect daily activities, sleep, and overall quality of life. Treatment may include physical therapy, exercise, pain management, and posture improvements to “oil the hinge” and restore smoother motion."
+  },
+  {
+    "code": "M32.9",
+    "name": "Systemic Lupus Erythematosus, unspecified",
+    "category": "Autoimmune",
+    "commonName": "Lupus",
+    "description": "SLE is an autoimmune disease where the immune system mistakenly attacks healthy tissues in the body, causing inflammation. It can affect the skin, joints, kidneys, heart, and other organs. Think of it like an overactive security system that sets off alarms and damages the house itself. Symptoms may include fatigue, joint pain, rashes, and organ problems. Treatments like medicines and lifestyle adjustments help calm the immune system and protect the organs."
+  },
+  {
+    "code": "M06.9",
+    "name": "Rheumatoid Arthritis, unspecified",
+    "category": "Autoimmune",
+    "commonName": "RA",
+    "description": "RA is an autoimmune disease that mainly affects the joints, causing pain, swelling, and stiffness. The immune system attacks the joint lining, leading to damage over time. Think of it like rust forming inside a machine—movement becomes harder and parts wear down faster. People often notice morning stiffness and swelling in their hands, wrists, or knees. Medicines, exercise, and sometimes surgery help reduce inflammation and keep the “machine” moving smoothly."
+  },
+  {
+    "code": "M35.0",
+    "name": "Sjorgen's Syndrome",
+    "category": "Autoimmune",
+    "commonName": "Sjorgens",
+    "description": "Sjogren syndrome is an autoimmune disease that mainly attacks glands producing saliva and tears, causing dry mouth and dry eyes. It can also affect joints, kidneys, and other organs. Think of it like a watering system in a garden that dries up—the plants (body tissues) start to suffer. People may also feel fatigue or have swollen glands. Treatments focus on keeping eyes and mouth moist, relieving symptoms, and managing immune system activity."
+  },
+  {
+    "code": "M79.7",
+    "name": "Fibromyalgia",
+    "category": "Other",
+    "commonName": "Fibromyalgia",
+    "description": "Fibromyalgia is a condition that causes widespread muscle pain, tenderness, fatigue, and sleep problems. Think of it like a car with shocks that are worn out—every bump and movement feels painful and exhausting. The exact cause isn’t fully understood, but the nervous system is more sensitive to pain signals. People may also experience memory problems and headaches. Treatment involves medicine, gentle exercise, stress management, and sleep improvement to reduce discomfort."
+  },
+  {
+    "code": "F41.1",
+    "name": "Generalized Anxiety Disorder",
+    "category": "Psychiatric",
+    "commonName": "GAD",
+    "description": "GAD is when a person feels excessive, uncontrollable worry about many everyday things, often for months at a time. Think of it like an alarm system that keeps ringing even when there’s no danger—the body stays tense and alert. People may experience restlessness, trouble sleeping, muscle tension, and difficulty concentrating. These worries are more intense than normal everyday concern and can interfere with daily life. Therapy, stress management, and sometimes medicine help calm the “alarm system.”"
+  },
+  {
+    "code": "F31.9",
+    "name": "Bipolar Disorder, unspecified",
+    "category": "Psychiatric",
+    "commonName": "Bipolar",
+    "description": "Bipolar disorder is a mental health condition causing extreme mood swings, from very high energy or happiness (mania) to deep sadness or hopelessness (depression). Think of it like a rollercoaster with sudden peaks and drops—the rides can be thrilling but also exhausting and risky. These mood changes can affect sleep, energy, judgment, and relationships. Treatment with therapy and medicine helps stabilize moods and make the ride smoother. With support, people can manage symptoms and lead fulfilling lives."
+  },
+  {
+    "code": "F90.0",
+    "name": "Attention Deficit Hyperactivity Disorder, combined type",
+    "category": "Psychiatric",
+    "commonName": "ADHD",
+    "description": "ADHD is a condition that affects focus, attention, and self-control, often causing restlessness or impulsive behavior. Think of it like trying to watch multiple TV channels at once—your attention keeps flipping around and it’s hard to stay on one task. People with ADHD may struggle at school, work, or in relationships. Treatment includes therapy, lifestyle strategies, and sometimes medicine to help improve focus and organization. With support, people can use their energy and creativity effectively."
+  },
+  {
+    "code": "F43.1",
+    "name": "Post-Traumatic Stress Disorder",
+    "category": "Psychiatric",
+    "commonName": "PTSD",
+    "description": "PTSD is a mental health condition that can happen after experiencing or witnessing a scary or life-threatening event. People may have flashbacks, nightmares, or feel anxious and on edge even in safe situations. Think of it like a smoke alarm that keeps going off long after the fire is gone—it makes the body stay alert when it doesn’t need to. Symptoms can make it hard to sleep, concentrate, or feel safe in daily life. Therapy, support, and sometimes medicine help calm the “alarm system” and regain a sense of safety."
+  },
+  {
+    "code": "R56.9",
+    "name": "Seizure (convulsion), unspecified",
+    "category": "Neurological",
+    "commonName": "Seizure Disorder",
+    "description": "A seizure is a sudden burst of abnormal electrical activity in the brain, which can change behavior, movements, or consciousness. Think of it like a brief power surge in a city—lights flicker, and things don’t work normally for a short time. Seizures can be caused by epilepsy, fever, injury, or other medical problems. Some seizures last only a few seconds, while others can last minutes. Treatment depends on the cause and may include medicine, lifestyle adjustments, or monitoring to prevent future “power surges.”"
+  },
+  {
+    "code": "G40.9",
+    "name": "Epilepsy, unspecified",
+    "category": "Neurological",
+    "commonName": "Epilepsy",
+    "description": "Epilepsy is a brain disorder that causes recurrent seizures over time. The brain’s electrical signals misfire, leading to repeated episodes of abnormal movements, sensations, or loss of consciousness. Think of it like a circuit breaker that keeps tripping—it shuts down certain areas of the brain until it resets. Seizures can range from very brief lapses in attention to full-body convulsions. Medicines, lifestyle adjustments, and sometimes surgery help control seizures and allow people to live safely."
+  },
+  {
+    "code": "G20",
+    "name": "Parkinson's Disease",
+    "category": "Neurological",
+    "commonName": "Parkinsons",
+    "description": "Parkinson’s disease is a neurological disorder where nerve cells in the brain that control movement slowly die. This causes tremors, stiffness, slow movements, and balance problems. Think of it like a robot with worn-out motors—the movements become jerky, slow, and harder to control. Parkinson’s can also affect speech, facial expressions, and daily activities. Medicines, therapy, and sometimes surgery help manage symptoms and improve quality of life."
+  },
+  {
+    "code": "F03",
+    "name": "Unspecified Dementia",
+    "category": "Neurological",
+    "commonName": "Dementia",
+    "description": "Dementia is a group of conditions that slowly affect memory, thinking, and the ability to do daily activities. Think of it like a computer with files that gradually get deleted—the brain struggles to store, recall, and process information. People may forget names, get lost, or struggle with planning and problem-solving. Alzheimer’s is the most common type, but there are others with similar effects. Support, therapy, and medicine can help maintain function and quality of life for as long as possible."
+  },
+  {
+    "code": "G35",
+    "name": "Multiple Sclerosis",
+    "category": "Neurological",
+    "commonName": "Multiple Sclerosis (MS)",
+    "description": "MS is a disease where the immune system attacks the protective covering of nerves in the brain and spinal cord. This disrupts communication between the brain and body, causing weakness, numbness, balance problems, or vision changes. Think of it like a frayed internet cable—the messages don’t travel clearly, and signals get lost. MS can come in episodes or progress slowly over time. Medicines, therapy, and lifestyle strategies help reduce attacks and manage symptoms."
+  },
+  {
+    "code": "G70.0",
+    "name": "Myasthenia Gravis",
+    "category": "Neurological",
+    "commonName": "Myasthenia Gravis",
+    "description": "Myasthenia gravis is an autoimmune disease that causes weakness in the voluntary muscles, especially those controlling eyes, face, and swallowing. The immune system blocks signals from nerves to muscles, making them tire easily. Think of it like a remote-controlled car with a weak battery—the commands are sent, but the car doesn’t respond fully. Weakness often worsens with activity and improves with rest. Medicines, therapies, and sometimes surgery help improve muscle strength and quality of life."
+  },
+  {
+    "code": "I42.9",
+    "name": "Cardiomyopathy, unspecified",
+    "category": "Cardiovascular",
+    "commonName": "Heart disease",
+    "description": "Cardiomyopathy is a disease where the heart muscle becomes weak, thick, or stiff, making it harder to pump blood effectively. Think of it like a worn-out pump—the heart can’t push blood through the body as efficiently. This can cause fatigue, shortness of breath, swelling in the legs, or irregular heartbeats. Cardiomyopathy can be caused by genetics, infections, high blood pressure, or other diseases. Treatment includes medicines, lifestyle changes, and sometimes devices or surgery to support heart function."
+  },
+  {
+    "code": "I50.22",
+    "name": "Chronic Systolic (congestive) Heart Failure",
+    "category": "Cardiovascular",
+    "commonName": "Congestive Heart Failure (CHF)",
+    "description": "Systolic heart failure happens when the heart’s main pumping chamber can’t contract strongly enough to push blood out. This leads to fluid buildup in the lungs, legs, or belly and makes people feel tired or short of breath. Think of it like a water pump with weak pressure—it can’t move water through the system efficiently. Causes include heart attacks, high blood pressure, or cardiomyopathy. Medicines, devices, and lifestyle changes help the heart pump better and reduce symptoms."
+  },
+  {
+    "code": "I50.33",
+    "name": "Chronic Diastolic (congestive) Heart Failure",
+    "category": "Cardiovascular",
+    "commonName": "Congestive Heart Failure (CHF)",
+    "description": "Diastolic heart failure occurs when the heart’s main pumping chamber can’t relax properly, so it doesn’t fill with enough blood. Even though the heart contracts normally, less blood is available to circulate. Think of it like trying to fill a stiff balloon—the pump works, but it can’t hold enough water. This causes fatigue, shortness of breath, and fluid buildup. Treatment focuses on controlling blood pressure, managing fluid, and supporting heart function."
+  },
+  {
+    "code": "I49.5",
+    "name": "Sick Sinus Sydrome",
+    "category": "Cardiovascular",
+    "commonName": "SSS",
+    "description": "Sick sinus syndrome is when the heart’s natural pacemaker (the sinus node) doesn’t work properly, causing slow, fast, or irregular heartbeats. Think of it like a metronome that keeps skipping beats—the rhythm becomes unpredictable. This can cause dizziness, fainting, fatigue, or palpitations. Treatment may involve medicines or a pacemaker to keep the heart beating steadily. Regular monitoring ensures the rhythm stays safe and stable."
+  },
+  {
+    "code": "J84.1",
+    "name": "Other interstitial pulmonary diseases with fibrosis",
+    "category": "Respiratory",
+    "commonName": "Lung fibrosis",
+    "description": "Pulmonary fibrosis is a lung disease where the lung tissue becomes scarred and stiff, making it hard to breathe. Think of it like a sponge that has dried out—the lungs can’t stretch and fill with air properly. People may feel short of breath, have a dry cough, and tire easily with activity. The cause may be unknown or related to environmental exposures, infections, or autoimmune diseases. Treatment includes medicines, oxygen therapy, and lifestyle measures to protect lung function."
+  },
+  {
+    "code": "E27.1",
+    "name": "Primary Adrenalcorticoid Insufficiency",
+    "category": "Endocrine",
+    "commonName": "Adrenal Insufficiency",
+    "description": "Adrenal insufficiency is when the adrenal glands don’t produce enough hormones like cortisol, which help regulate stress, blood pressure, and metabolism. Think of it like a car running low on fuel and oil—it can’t respond properly when needed. People may feel tired, weak, dizzy, or crave salt. Severe cases can be life-threatening if the body faces stress. Treatment includes hormone replacement to restore balance and keep the body functioning normally."
+  },
+  {
+    "code": "K80.1",
+    "name": "Cholelithiasis without cholecystitis",
+    "category": "Gastrointestinal",
+    "commonName": "Gallstones",
+    "description": "Gallstones are hard deposits that form in the gallbladder, a small organ that stores bile to help digest fats. They can block the flow of bile, causing pain in the upper belly, nausea, or sometimes no symptoms at all. Think of it like rocks clogging a small stream—the liquid can’t flow smoothly, and pressure builds up. Gallstones can lead to inflammation or infection if untreated. Treatment includes diet changes, medicine, or sometimes surgical removal of the gallbladder."
+  },
+  {
+    "code": "K90.0",
+    "name": "Celiac Disease",
+    "category": "Metabolic",
+    "commonName": "Celiac",
+    "description": "Celiac disease is an autoimmune disorder where eating gluten damages the small intestine, making it hard to absorb nutrients. People may experience diarrhea, bloating, fatigue, or unintended weight loss. Think of it like a sponge with holes—the nutrients leak out before the body can absorb them. Even foods that seem harmless can trigger inflammation. A strict gluten-free diet helps “repair the sponge” and improves nutrient absorption and overall health."
+  },
+  {
+    "code": "K57",
+    "name": "Diverticular disease of Intestine",
+    "category": "Gastrointestinal",
+    "commonName": "Diverticulosis",
+    "description": "Diverticulosis is a condition where small pouches form in the walls of the colon. These pouches usually don’t cause symptoms but can sometimes get inflamed or infected (diverticulitis). Think of it like bubbles forming in a garden hose—they don’t affect water flow unless they rupture or get clogged. People may notice bloating, mild cramps, or changes in bowel habits. Eating a high-fiber diet and drinking enough water help prevent problems with these “pouches.”"
+  },
+  {
+    "code": "E28.2",
+    "name": "Polycystic Ovarian Syndrome",
+    "category": "Reproductive",
+    "commonName": "PCOS",
+    "description": "PCOS is a hormonal disorder that affects women, causing irregular periods, ovarian cysts, and sometimes excess hair or weight gain. It happens when hormones are out of balance, often affecting insulin and reproductive hormones. Think of it like a factory producing too much of some products and not enough of others—the body’s systems get out of sync. People with PCOS may also have trouble getting pregnant or develop long-term health risks. Lifestyle changes, medicine, and monitoring help balance hormones and manage symptoms."
+  },
+  {
+    "code": "G57.1",
+    "name": "Sciatica",
+    "category": "Musculoskeletal",
+    "commonName": "Sciatica",
+    "description": "Sciatica is pain that travels along the sciatic nerve, which runs from the lower back down the legs. It usually happens when a nerve is pinched by a herniated disc or spinal stenosis. Think of it like a kinked garden hose—the signal (pain) travels down the leg instead of flowing smoothly. People may feel sharp, burning, or shooting pain, sometimes with numbness or weakness. Treatment includes physical therapy, medicines, and sometimes procedures to relieve pressure on the nerve."
+  },
+  {
+    "code": "F42",
+    "name": "Obsessive Compulsive Disorder",
+    "category": "Psychiatric",
+    "commonName": "OCD",
+    "description": "OCD is a mental health condition where a person has unwanted thoughts (obsessions) and feels compelled to perform repetitive actions (compulsions). Think of it like a broken computer program stuck on repeat—it keeps running the same commands over and over. These obsessions and compulsions interfere with daily life, school, or work. Therapy, habit training, and sometimes medicine help interrupt the loop. With support, people can regain control and reduce anxiety."
+  },
+  {
+    "code": "L40.9",
+    "name": "Psoriasis, unspecified",
+    "category": "Autoimmune",
+    "commonName": "Psoriasis",
+    "description": "Psoriasis is an autoimmune skin condition where skin cells grow too quickly, forming red, scaly patches. Think of it like a conveyor belt in a factory running too fast—the products (skin cells) pile up before they’re ready. These patches can be itchy, painful, or crack and bleed. Psoriasis can flare up due to stress, infections, or other triggers. Treatments include creams, light therapy, and medicine to slow down skin cell growth and calm inflammation."
+  },
+  {
+    "code": "Z21",
+    "name": "Asymptomatic HIV infection status",
+    "category": "Autoimmune",
+    "commonName": "HIV",
+    "description": "HIV is a virus that attacks the immune system, specifically the cells that help fight infections. Think of it like soldiers in an army being weakened, leaving the body vulnerable to invaders. Over time, if untreated, HIV can lead to AIDS, where the immune system is very weak. People may feel tired, get frequent infections, or sometimes have no symptoms for years. Medicines called antiretrovirals help control the virus, protect the immune system, and prevent transmission."
+  },
+  {
+    "code": "B18.2",
+    "name": "Chronic Viral Hepatitis C",
+    "category": "Gastrointestinal",
+    "commonName": "Hep C",
+    "description": "Chronic hepatitis C is a viral infection that slowly damages the liver over years. It often causes fatigue, mild nausea, and sometimes jaundice (yellow skin), but many people feel fine at first. Think of it like rust slowly spreading through a machine—the liver gradually loses function if untreated. Over time, it can lead to cirrhosis or liver cancer. Modern antiviral medicines can cure most people, stopping the “rust” and protecting liver health."
+  },
+  {
+    "code": "D50.9",
+    "name": "Iron Deficiency Anemia, unspecified",
+    "category": "Hematologic",
+    "commonName": "Anemia",
+    "description": "Iron deficiency anemia happens when the body doesn’t have enough iron to make healthy red blood cells. This causes fatigue, weakness, pale skin, and trouble concentrating. Think of it like a delivery truck running low on fuel—the body can’t transport oxygen efficiently to tissues. Causes include blood loss, poor diet, or absorption problems. Iron supplements, diet changes, and treating underlying causes help “refuel” the body and restore energy."
+  },
+  {
+    "code": "C34",
+    "name": "SC and NSC Lung Cancer",
+    "category": "Respiratory",
+    "commonName": "Lung cancer",
+    "description": "Lung cancer is a disease where abnormal cells in the lungs grow uncontrollably, forming tumors that can make it hard to breathe. Symptoms may include coughing, chest pain, shortness of breath, weight loss, or coughing up blood, though early stages often have no noticeable signs. Think of it like weeds rapidly growing in an oxygen pipe—they block airflow and spread quickly if not removed. It can spread to other parts of the body, making early detection important. Treatment may include surgery, chemotherapy, radiation, or newer targeted medicines to remove or control the tumor and protect lung function."
+  },
+  {
+    "code": "I63",
+    "name": "Cerebral Infarction",
+    "category": "Neurological",
+    "commonName": "Stroke",
+    "description": "An ischemic stroke happens when a blood clot blocks an artery in the brain, stopping blood flow and causing brain cells to die. Think of it like a dam blocking a river—the areas downstream don’t get the water they need. Symptoms include weakness on one side, trouble speaking, vision changes, or sudden confusion. Quick medical treatment is critical to restore blood flow and prevent permanent damage. Recovery may involve rehabilitation and therapy to regain lost abilities."
+  },
+  {
+    "code": "I26",
+    "name": "Pulmonary Embolism",
+    "category": "Respiratory",
+    "commonName": "PE",
+    "description": "A PE is when a blood clot travels to the lungs and blocks a pulmonary artery. This can cause sudden shortness of breath, chest pain, or even collapse. Think of it like a blockage in a water pipe—the blood can’t flow through the lungs properly. Pulmonary embolisms can be life-threatening if not treated quickly. Treatment includes blood thinners, clot removal, or procedures to prevent future clots."
+  },
+  {
+    "code": "I82.40",
+    "name": "Acute embolism and thrombosis of unspecified deep veins of lower extremity",
+    "category": "Hematologic",
+    "commonName": "DVT",
+    "description": "DVT is a blood clot that forms in a deep vein, usually in the leg. It can cause swelling, pain, redness, or sometimes no symptoms at all. Think of it like a traffic jam in a main road—blood can’t move smoothly past the blockage. Parts of the clot can break off and travel to the lungs, causing a pulmonary embolism. Treatment with blood thinners and lifestyle measures prevents complications and keeps the “roads” clear."
+  },
+  {
+    "code": "M10.9",
+    "name": "Gout, unspecified",
+    "category": "Metabolic",
+    "commonName": "Gout",
+    "description": "Gout is a type of arthritis caused by too much uric acid in the blood, which forms crystals in the joints. This often leads to sudden, intense pain, swelling, and redness, usually in the big toe. Think of it like tiny shards of glass getting stuck in a hinge—movement becomes sharp and painful. Flare-ups can be triggered by certain foods, alcohol, or stress. Treatment includes medicines to reduce uric acid, anti-inflammatory drugs, and lifestyle changes to prevent future attacks."
+  },
+  {
+    "code": "F10",
+    "name": "Alcohol Abuse",
+    "category": "Other",
+    "commonName": "Alcohol abuse",
+    "description": "Alcohol abuse occurs when drinking alcohol becomes frequent or excessive, leading to health, social, or legal problems. It can damage the liver, brain, heart, and other organs over time. Think of it like pouring corrosive liquid into a machine repeatedly—the parts gradually wear out or fail. People may also develop dependency and struggle to control drinking. Treatment involves counseling, support groups, and sometimes medications to reduce cravings."
+  },
+  {
+    "code": "C61",
+    "name": "Malignant Neoplasm of prostate",
+    "category": "Other",
+    "commonName": "Prostate cancer",
+    "description": "Prostate cancer is a growth of abnormal cells in the prostate gland in men. It often grows slowly and may not cause symptoms early, but can lead to urinary problems, pain, or difficulty urinating. Think of it like weeds slowly growing around a water valve—they can block flow if left unchecked. Early detection with screening improves treatment success. Treatments include surgery, radiation, hormone therapy, or observation depending on the stage and risk."
+  },
+  {
+    "code": "D45",
+    "name": "Polycythemia Vera",
+    "category": "Hematologic",
+    "commonName": "Polycythemia",
+    "description": "Polycythemia is a condition where the body makes too many red blood cells, making the blood thicker than normal. This can cause headaches, dizziness, high blood pressure, and an increased risk of blood clots. Think of it like syrup flowing through pipes instead of water—the thicker liquid moves less efficiently and can clog the system. Causes can be primary (bone marrow disorder) or secondary (low oxygen levels). Treatment involves medicines, blood removal (phlebotomy), and managing risk factors to keep blood flow safe."
   }
 ]
