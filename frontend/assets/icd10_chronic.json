@@ -30,7 +30,7 @@
   {
     "code": "J44.9",
     "name": "Chronic obstructive pulmonary disease, unspecified",
-    "category": "Pulmonary",
+    "category": "Respiratory",
     "commonName": "COPD",
     "description": "Chronic obstructive pulmonary disease (COPD) means the airways in your lungs are damaged and narrowed, making it hard to breathe over time. It’s like trying to breathe through a straw that’s partly clogged—air still moves, but it takes more effort and never feels like quite enough. The damage builds up slowly, usually from smoking or long-term irritation, and can’t be fully undone once it’s there."
   },
@@ -58,7 +58,7 @@
   {
     "code": "E66.9",
     "name": "Obesity, Unspecified",
-    "category": "Multiple",
+    "category": "Other",
     "commonName": "Obesity",
     "description": "Obesity is defined as an excessive accumulation of body fat that poses a health risk, typically identified by a body mass index of 30.0 or higher. Obesity means your body is carrying more fat than it needs to stay healthy.\nIt can make your heart, joints, and other organs work harder than they should.\nIt’s like a car built to carry four people that’s always loaded with eight — it still runs, but the engine and tires wear out faster."
   },
