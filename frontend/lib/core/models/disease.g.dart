@@ -22,13 +22,16 @@ class DiseaseAdapter extends TypeAdapter<Disease> {
       category: fields[2] as String,
       commonName: fields[3] == null ? '' : fields[3] as String,
       description: fields[4] == null ? '' : fields[4] as String,
+      isCustom: fields[5] == null ? false : fields[5] as bool,
+      personalNotes: fields[6] as String?,
+      createdAt: fields[7] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Disease obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.code)
       ..writeByte(1)
@@ -38,7 +41,13 @@ class DiseaseAdapter extends TypeAdapter<Disease> {
       ..writeByte(3)
       ..write(obj.commonName)
       ..writeByte(4)
-      ..write(obj.description);
+      ..write(obj.description)
+      ..writeByte(5)
+      ..write(obj.isCustom)
+      ..writeByte(6)
+      ..write(obj.personalNotes)
+      ..writeByte(7)
+      ..write(obj.createdAt);
   }
 
   @override

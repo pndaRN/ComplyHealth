@@ -20,12 +20,24 @@ class Disease {
     @HiveField(4, defaultValue: '')
     final String description;
 
+    @HiveField(5, defaultValue: false)
+    final bool isCustom;
+
+    @HiveField(6)
+    final String? personalNotes;
+
+    @HiveField(7)
+    final DateTime? createdAt;
+
     Disease({
         required this.code,
         required this.name,
         required this.category,
         this.commonName = '',
         this.description = '',
+        this.isCustom = false,
+        this.personalNotes,
+        this.createdAt,
       });
 
     factory Disease.fromJson(Map<String, dynamic> json) => Disease (
@@ -34,6 +46,11 @@ class Disease {
       category: json['category'] ?? '',
       commonName: json['commonName'] ?? '',
       description: json['description'] ?? '',
+      isCustom: json['isCustom'] ?? false,
+      personalNotes: json['personalNotes'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : null,
     );
 
     Map<String, dynamic> toJson() => {
@@ -42,5 +59,8 @@ class Disease {
         'category': category,
         'commonName': commonName,
         'description': description,
+        'isCustom': isCustom,
+        'personalNotes': personalNotes,
+        'createdAt': createdAt?.toIso8601String(),
       };
   }

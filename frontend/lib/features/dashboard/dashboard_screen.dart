@@ -44,9 +44,9 @@ class DashboardScreen extends ConsumerWidget {
                 child: Text(
                   'No conditions tracked yet.\nAdd a condition to get started!',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
                 ),
               )
             else
@@ -56,21 +56,21 @@ class DashboardScreen extends ConsumerWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: conditions.length,
-                  itemBuilder: (context, i) {
-                    final c = conditions[i];
+                  itemBuilder: (context, index) {
+                    final condition = conditions[index];
                     final related = meds
-                        .where((m) => m.conditionNames.contains(c.name))
+                        .where((medication) => medication.conditionNames.contains(condition.name))
                         .toList();
                     return Card(
                       child: ListTile(
-                        title: Text(c.name),
+                        title: Text(condition.commonName),
                         subtitle: related.isEmpty
                             ? const Text('No medications yet')
                             : Text(
                                 related
                                     .map(
-                                      (m) =>
-                                          '${m.name} - ${m.dosage} - ${_getTimingSummary(m)}',
+                                      (medication) =>
+                                          '${medication.name} - ${medication.dosage} - ${_getTimingSummary(medication)}',
                                     )
                                     .join('\n'),
                               ),

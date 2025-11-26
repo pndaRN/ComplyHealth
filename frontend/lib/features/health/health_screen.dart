@@ -4,8 +4,12 @@ import '../../core/models/disease.dart';
 import '../../core/services/icd_service.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
+import '../../core/utils/condition_helper.dart';
+import '../../core/widgets/empty_state_widget.dart';
 import 'condition_detail_screen.dart';
 import 'widgets/condition_card.dart';
+import 'dialogs/add_custom_condition_dialog.dart';
+import 'dialogs/report_condition_dialog.dart';
 
 enum HealthViewMode { myConditions, browseAll }
 
@@ -17,6 +21,9 @@ class HealthScreen extends ConsumerStatefulWidget {
 }
 
 class _HealthScreenState extends ConsumerState<HealthScreen> {
+  // UI sizing constants
+  static const double _appBarBottomHeight = 120.0;
+
   HealthViewMode _viewMode = HealthViewMode.myConditions;
   String _searchQuery = '';
   List<Disease> _allConditions = [];
@@ -47,7 +54,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
       appBar: AppBar(
         title: const Text('Health'),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(120),
+          preferredSize: const Size.fromHeight(_appBarBottomHeight),
           child: Column(
             children: [
               // Filter chips
@@ -129,63 +136,21 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
     List<Disease> userConditions,
     List medications,
   ) {
-    final theme = Theme.of(context);
-
     // Filter by search query
-    final filteredConditions = _searchQuery.isEmpty
-        ? userConditions
-        : userConditions.where((condition) {
-            final searchLower = _searchQuery.toLowerCase();
-            return condition.name.toLowerCase().contains(searchLower) ||
-                (condition.commonName?.toLowerCase().contains(searchLower) ??
-                    false) ||
-                condition.code.toLowerCase().contains(searchLower);
-          }).toList();
+    final filteredConditions = _filterConditionsBySearch(userConditions);
 
     if (userConditions.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.healing_outlined,
-              size: 64,
-              color: theme.colorScheme.outline,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No conditions yet',
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tap "Browse All" to add your first condition',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
+      return EmptyStateWidget(
+        icon: Icons.healing_outlined,
+        title: 'No conditions yet',
+        subtitle: 'Tap "Browse All" to add your first condition',
       );
     }
 
     if (filteredConditions.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search_off, size: 64, color: theme.colorScheme.outline),
-            const SizedBox(height: 16),
-            Text(
-              'No conditions found',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
+      return EmptyStateWidget(
+        icon: Icons.search_off,
+        title: 'No conditions found',
       );
     }
 
@@ -210,47 +175,79 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
     );
   }
 
+  /// Filters conditions by search query across name, common name, and code
+  List<Disease> _filterConditionsBySearch(List<Disease> conditions) {
+    if (_searchQuery.isEmpty) return conditions;
+
+    return conditions.where((condition) {
+      final searchLower = _searchQuery.toLowerCase();
+      return condition.name.toLowerCase().contains(searchLower) ||
+          condition.commonName.toLowerCase().contains(searchLower) ||
+          condition.code.toLowerCase().contains(searchLower);
+    }).toList();
+  }
+
+  /// Groups conditions by category and returns sorted category list
+  Map<String, List<Disease>> _groupConditionsByCategory(
+    List<Disease> conditions,
+  ) {
+    final groupedConditions = <String, List<Disease>>{};
+    for (final condition in conditions) {
+      groupedConditions.putIfAbsent(condition.category, () => []).add(condition);
+    }
+    return groupedConditions;
+  }
+
   Widget _buildBrowseAllView(List<Disease> userConditions, List medications) {
     final theme = Theme.of(context);
 
     // Filter by search query
-    final filteredConditions = _searchQuery.isEmpty
-        ? _allConditions
-        : _allConditions.where((condition) {
-            final searchLower = _searchQuery.toLowerCase();
-            return condition.name.toLowerCase().contains(searchLower) ||
-                (condition.commonName.toLowerCase().contains(searchLower) ??
-                    false) ||
-                condition.code.toLowerCase().contains(searchLower);
-          }).toList();
+    final filteredConditions = _filterConditionsBySearch(_allConditions);
 
-    if (filteredConditions.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search_off, size: 64, color: theme.colorScheme.outline),
-            const SizedBox(height: 16),
-            Text(
-              'No conditions found',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+    if (filteredConditions.isEmpty && _searchQuery.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: EmptyStateWidget(
+          icon: Icons.search_off,
+          title: 'No conditions found',
+          action: Card(
+            child: InkWell(
+              onTap: _addCustomCondition,
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.add_circle_outline,
+                      size: 48,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Can\'t find your condition?',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Add it as a custom condition',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
+          ),
         ),
       );
     }
 
-    // Group by category
-    final groupedConditions = <String, List<Disease>>{};
-    for (final condition in filteredConditions) {
-      groupedConditions
-          .putIfAbsent(condition.category, () => [])
-          .add(condition);
-    }
-
-    // Sort categories alphabetically
+    // Group by category and sort
+    final groupedConditions = _groupConditionsByCategory(filteredConditions);
     final sortedCategories = groupedConditions.keys.toList()..sort();
 
     return ListView.builder(
@@ -310,7 +307,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Added ${condition.commonName != null && condition.commonName!.isNotEmpty ? condition.commonName : condition.name}',
+            'Added ${ConditionHelper.getDisplayName(condition)}',
           ),
         ),
       );
@@ -324,10 +321,35 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Removed ${condition.commonName != null && condition.commonName!.isNotEmpty ? condition.commonName : condition.name}',
+            'Removed ${ConditionHelper.getDisplayName(condition)}',
           ),
         ),
       );
+    }
+  }
+
+  Future<void> _addCustomCondition() async {
+    // Show dialog to create custom condition
+    final customCondition = await showDialog<Disease>(
+      context: context,
+      builder: (context) => const AddCustomConditionDialog(),
+    );
+
+    // If user canceled, return early
+    if (customCondition == null || !mounted) return;
+
+    // Show report prompt dialog
+    await showDialog(
+      context: context,
+      builder: (context) => ReportConditionDialog(
+        conditionName: customCondition.name,
+        userId: null, // Can be set if user authentication is implemented
+      ),
+    );
+
+    // Add the custom condition to user's conditions
+    if (mounted) {
+      await _addCondition(customCondition);
     }
   }
 }

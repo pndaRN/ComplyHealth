@@ -1,7 +1,8 @@
 import '../../../core/models/medication.dart';
+import '../../../core/utils/time_formatting_utils.dart';
 
 /// Sorting options for medications list
-enum MedicationSortOption { alphabetical, groupedByCondition, frequency }
+enum MedicationSortOption { alphabetical, groupedByCondition, dueTime }
 
 /// Utility class for sorting medications
 class MedicationSorter {
@@ -15,8 +16,8 @@ class MedicationSorter {
         return _sortAlphabetically(medications);
       case MedicationSortOption.groupedByCondition:
         return _sortByConditionGroups(medications);
-      case MedicationSortOption.frequency:
-        return _sortByFrequency(medications);
+      case MedicationSortOption.dueTime:
+        return _sortByDueTime(medications);
     }
   }
 
@@ -62,17 +63,29 @@ class MedicationSorter {
     return result;
   }
 
-  /// Sort medications by frequency (number of times per day)
-  /// PRN medications are sorted last, scheduled medications by times per day (ascending)
-  static List<Medication> _sortByFrequency(List<Medication> medications) {
+  /// Sort medications by their next scheduled due time
+  /// PRN medications are sorted last, scheduled medications by next due time (earliest first)
+  static List<Medication> _sortByDueTime(List<Medication> medications) {
+    final now = DateTime.now();
+    final currentTime = now.hour * 60 + now.minute; // Current time in minutes since midnight
+
     return List.from(medications)..sort((a, b) {
       // PRN medications go last
       if (a.isPRN && !b.isPRN) return 1;
       if (!a.isPRN && b.isPRN) return -1;
       if (a.isPRN && b.isPRN) return 0;
 
-      // Sort by number of scheduled times (ascending)
-      return a.scheduledTimes.length.compareTo(b.scheduledTimes.length);
+      // Get next scheduled time for each medication
+      final nextTimeA = TimeFormattingUtils.getNextScheduledTime(a.scheduledTimes, currentTime);
+      final nextTimeB = TimeFormattingUtils.getNextScheduledTime(b.scheduledTimes, currentTime);
+
+      // If no scheduled times, treat as later
+      if (nextTimeA == null && nextTimeB == null) return 0;
+      if (nextTimeA == null) return 1;
+      if (nextTimeB == null) return -1;
+
+      // Compare next scheduled times
+      return nextTimeA.compareTo(nextTimeB);
     });
   }
 
@@ -83,8 +96,8 @@ class MedicationSorter {
         return 'Alphabetical';
       case MedicationSortOption.groupedByCondition:
         return 'Grouped by Condition';
-      case MedicationSortOption.frequency:
-        return 'Frequency';
+      case MedicationSortOption.dueTime:
+        return 'Due Times';
     }
   }
 }

@@ -22,6 +22,7 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
   List<String> selectedConditions = [];
   bool isPRN = false;
   List<TimeOfDay> scheduledTimes = [];
+  List<TimeOfDay>? _savedScheduledTimes;
 
   @override
   void initState() {
@@ -63,10 +64,18 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
         isPRN: isPRN,
         onPRNChanged: (value) {
           setState(() {
-            isPRN = value;
             if (value) {
+              // Switching to PRN - save and clear times
+              _savedScheduledTimes = List.from(scheduledTimes);
               scheduledTimes = [];
+              isPRN = true;
             } else {
+              // Switching from PRN - restore times
+              if (_savedScheduledTimes != null) {
+                scheduledTimes = _savedScheduledTimes!;
+                _savedScheduledTimes = null;
+              }
+              isPRN = false;
               maxDosesCtrl.clear();
             }
           });
@@ -78,13 +87,6 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
           });
         },
         maxDosesController: maxDosesCtrl,
-        onPRNSelected: (maxDoses) {
-          setState(() {
-            isPRN = true;
-            maxDosesCtrl.text = maxDoses.toString();
-            scheduledTimes = [];
-          });
-        },
       ),
       actions: [
         TextButton(
