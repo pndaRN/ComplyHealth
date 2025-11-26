@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/profile.dart';
 import '../../core/state/profile_provider.dart';
+import '../dashboard/widgets/adherence_metrics_widget.dart';
 import 'dialogs/feedback_dialog.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -219,8 +220,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ),
 
-          // Gamification Card
-          Card(
+          // Adherence Metrics
+          const AdherenceMetricsWidget(),
+
+          // Gamification Card - Hidden for now, will be enabled in future release
+          /* Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -394,10 +398,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ],
               ),
             ),
-          ),
+          ), */
 
-          // Achievements Card
-          Card(
+          // Achievements Card - Hidden for now, will be enabled in future release
+          /* Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -450,7 +454,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ],
               ),
             ),
-          ),
+          ), */
+
           // Feedback & Support Card
           Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),

@@ -5,7 +5,6 @@ import '../../core/state/medication_provider.dart';
 import '../../core/models/medication.dart';
 import 'widgets/rotating_welcome_message.dart';
 import 'widgets/todays_medications_widget.dart';
-import 'widgets/adherence_metrics_widget.dart';
 import 'widgets/adherence_history_widget.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -35,7 +34,6 @@ class DashboardScreen extends ConsumerWidget {
             const RotatingWelcomeMessage(),
             const Divider(height: 1),
             const TodaysMedicationsWidget(),
-            const AdherenceMetricsWidget(),
             const AdherenceHistoryWidget(),
             const Divider(height: 1),
             if (conditions.isEmpty)
