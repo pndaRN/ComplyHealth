@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/profile.dart';
 import '../../core/state/profile_provider.dart';
+import '../../core/widgets/pdf_export_button.dart';
 import '../dashboard/widgets/adherence_metrics_widget.dart';
 import 'dialogs/feedback_dialog.dart';
 
@@ -112,12 +113,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                         ),
                       ),
-                      if (!_isEditing)
+                      if (!_isEditing) ...[
+                        PdfExportButton(
+                          tooltip: 'Export health report to PDF',
+                        ),
                         IconButton(
                           icon: const Icon(Icons.edit_outlined),
                           onPressed: _enterEditMode,
                           tooltip: 'Edit profile',
                         ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 16),

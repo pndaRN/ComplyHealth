@@ -6,6 +6,7 @@ import '../../core/state/conditions_provider.dart';
 import '../../core/utils/condition_helper.dart';
 import '../../core/utils/time_formatting_utils.dart';
 import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/pdf_export_button.dart';
 import 'dialogs/medication_add_dialog.dart';
 import 'dialogs/medication_edit_dialog.dart';
 import 'utils/medication_sorter.dart';
@@ -106,6 +107,9 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
           ),
         ),
         actions: [
+          PdfExportButton(
+            tooltip: 'Export medications to PDF',
+          ),
           PopupMenuButton<MedicationSortOption>(
             icon: const Icon(Icons.sort),
             tooltip: 'Sort medications',
