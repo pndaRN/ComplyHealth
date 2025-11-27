@@ -111,6 +111,11 @@ class MedicationNotifier extends Notifier<List<Medication>> {
   Future<void> incrementDoseCount(Medication med) async {
     if (!med.isPRN) return;
 
+    // Verify medication still exists in state
+    if (!state.any((m) => m.id == med.id)) {
+      throw StateError('Medication not found in provider state');
+    }
+
     final today = DateTime.now();
     int newCount = med.currentDoseCount;
     DateTime? resetDate = med.lastDoseCountReset;
@@ -121,6 +126,11 @@ class MedicationNotifier extends Notifier<List<Medication>> {
       resetDate = today;
     } else {
       newCount = med.currentDoseCount + 1;
+    }
+
+    // Validate against max doses
+    if (med.maxDailyDoses != null && newCount > med.maxDailyDoses!) {
+      throw StateError('Dose count would exceed maximum daily doses');
     }
 
     final updatedMed = Medication(

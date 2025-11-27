@@ -21,8 +21,20 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
   }
 
   Future<void> _initBox() async {
+    if (_box == null || !_box!.isOpen) {
+      _box = await Hive.openBox<MedicationLog>(boxName);
+      state = _box!.values.toList();
+    }
+  }
+
+  /// Get or open the Hive box (cached)
+  Future<Box<MedicationLog>> _getBox() async {
+    if (_box != null && _box!.isOpen) {
+      return _box!;
+    }
     _box = await Hive.openBox<MedicationLog>(boxName);
     state = _box!.values.toList();
+    return _box!;
   }
 
   /// Get all medication instances scheduled for today
@@ -96,18 +108,25 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     DateTime? actualTakenTime,
     String? notes,
   }) async {
-    final log = MedicationLog(
-      medicationId: medicationId,
-      medicationName: medicationName,
-      dosage: dosage,
-      scheduledTime: scheduledTime,
-      actualTakenTime: actualTakenTime ?? DateTime.now(),
-      status: DoseStatus.taken,
-      notes: notes,
-    );
+    try {
+      final log = MedicationLog(
+        medicationId: medicationId,
+        medicationName: medicationName,
+        dosage: dosage,
+        scheduledTime: scheduledTime,
+        actualTakenTime: actualTakenTime ?? DateTime.now(),
+        status: DoseStatus.taken,
+        notes: notes,
+      );
 
-    await _box?.put(log.id, log);
-    state = _box!.values.toList();
+      final box = await _getBox();
+      await box.put(log.id, log);
+      state = box.values.toList();
+    } catch (e) {
+      // Log error and rethrow
+      print('Error logging dose taken: $e');
+      rethrow;
+    }
   }
 
   /// Log a dose as skipped
@@ -119,18 +138,24 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     String? skipReason,
     String? notes,
   }) async {
-    final log = MedicationLog(
-      medicationId: medicationId,
-      medicationName: medicationName,
-      dosage: dosage,
-      scheduledTime: scheduledTime,
-      status: DoseStatus.skipped,
-      skipReason: skipReason,
-      notes: notes,
-    );
+    try {
+      final log = MedicationLog(
+        medicationId: medicationId,
+        medicationName: medicationName,
+        dosage: dosage,
+        scheduledTime: scheduledTime,
+        status: DoseStatus.skipped,
+        skipReason: skipReason,
+        notes: notes,
+      );
 
-    await _box?.put(log.id, log);
-    state = _box!.values.toList();
+      final box = await _getBox();
+      await box.put(log.id, log);
+      state = box.values.toList();
+    } catch (e) {
+      print('Error logging dose skipped: $e');
+      rethrow;
+    }
   }
 
   /// Auto-mark doses as missed if past grace period
@@ -163,28 +188,46 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     required String dosage,
     required DateTime scheduledTime,
   }) async {
-    final log = MedicationLog(
-      medicationId: medicationId,
-      medicationName: medicationName,
-      dosage: dosage,
-      scheduledTime: scheduledTime,
-      status: DoseStatus.missed,
-    );
+    try {
+      final log = MedicationLog(
+        medicationId: medicationId,
+        medicationName: medicationName,
+        dosage: dosage,
+        scheduledTime: scheduledTime,
+        status: DoseStatus.missed,
+      );
 
-    await _box?.put(log.id, log);
-    state = _box!.values.toList();
+      final box = await _getBox();
+      await box.put(log.id, log);
+      state = box.values.toList();
+    } catch (e) {
+      print('Error logging dose missed: $e');
+      rethrow;
+    }
   }
 
   /// Delete a log entry
   Future<void> deleteLog(String logId) async {
-    await _box?.delete(logId);
-    state = _box!.values.toList();
+    try {
+      final box = await _getBox();
+      await box.delete(logId);
+      state = box.values.toList();
+    } catch (e) {
+      print('Error deleting log: $e');
+      rethrow;
+    }
   }
 
   /// Update an existing log
   Future<void> updateLog(MedicationLog log) async {
-    await _box?.put(log.id, log);
-    state = _box!.values.toList();
+    try {
+      final box = await _getBox();
+      await box.put(log.id, log);
+      state = box.values.toList();
+    } catch (e) {
+      print('Error updating log: $e');
+      rethrow;
+    }
   }
 
   /// Get logs for a specific date

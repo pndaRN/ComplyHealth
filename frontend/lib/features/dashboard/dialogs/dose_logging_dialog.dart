@@ -37,7 +37,43 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
   }
 
   Future<void> _markAsTaken() async {
-    await ref.read(adherenceProvider.notifier).logDoseTaken(
+    // For PRN medications, increment count first to ensure atomicity
+    if (widget.instance.isPRN) {
+      // Get the latest medication state from provider
+      final medications = ref.read(medicationProvider);
+      final latestMed = medications.firstWhere(
+        (m) => m.id == widget.instance.medication.id,
+        orElse: () => widget.instance.medication,
+      );
+
+      try {
+        // Increment dose count first
+        await ref.read(medicationProvider.notifier).incrementDoseCount(latestMed);
+
+        // Then log the dose
+        await ref.read(adherenceProvider.notifier).logDoseTaken(
+          medicationId: latestMed.id,
+          medicationName: latestMed.name,
+          dosage: latestMed.dosage,
+          scheduledTime: widget.instance.scheduledTime,
+          actualTakenTime: _customTime,
+          notes: _notesController.text.isEmpty ? null : _notesController.text,
+        );
+      } catch (e) {
+        // Rollback dose count on error
+        await ref.read(medicationProvider.notifier).decrementDoseCount(latestMed);
+        // Show error to user
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to log dose: $e')),
+          );
+        }
+        return; // Don't close dialog on error
+      }
+    } else {
+      // For scheduled medications, just log the dose
+      try {
+        await ref.read(adherenceProvider.notifier).logDoseTaken(
           medicationId: widget.instance.medication.id,
           medicationName: widget.instance.medication.name,
           dosage: widget.instance.medication.dosage,
@@ -45,10 +81,14 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
           actualTakenTime: _customTime,
           notes: _notesController.text.isEmpty ? null : _notesController.text,
         );
-
-    // Increment dose count for PRN medications
-    if (widget.instance.isPRN) {
-      await ref.read(medicationProvider.notifier).incrementDoseCount(widget.instance.medication);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to log dose: $e')),
+          );
+        }
+        return; // Don't close dialog on error
+      }
     }
 
     if (mounted) Navigator.of(context).pop(true);
@@ -70,13 +110,29 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
     if (widget.instance.log != null) {
       final log = widget.instance.log!;
 
-      // Decrement dose count for PRN medications if the log was for a taken dose
-      if (widget.instance.isPRN && log.status == DoseStatus.taken) {
-        await ref.read(medicationProvider.notifier).decrementDoseCount(widget.instance.medication);
-      }
+      try {
+        // Delete the log first
+        await ref.read(adherenceProvider.notifier).deleteLog(log.id);
 
-      await ref.read(adherenceProvider.notifier).deleteLog(log.id);
-      if (mounted) Navigator.of(context).pop(true);
+        // Decrement dose count for PRN medications if the log was for a taken dose
+        if (widget.instance.isPRN && log.status == DoseStatus.taken) {
+          // Get the latest medication state from provider
+          final medications = ref.read(medicationProvider);
+          final latestMed = medications.firstWhere(
+            (m) => m.id == widget.instance.medication.id,
+            orElse: () => widget.instance.medication,
+          );
+          await ref.read(medicationProvider.notifier).decrementDoseCount(latestMed);
+        }
+
+        if (mounted) Navigator.of(context).pop(true);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to delete log: $e')),
+          );
+        }
+      }
     }
   }
 

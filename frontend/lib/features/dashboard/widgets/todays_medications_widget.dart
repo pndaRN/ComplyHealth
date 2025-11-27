@@ -124,16 +124,55 @@ class _TodaysMedicationsWidgetState
 
   Future<void> _quickMarkAsTaken(MedicationInstance instance) async {
     HapticFeedback.lightImpact();
-    await ref.read(adherenceProvider.notifier).logDoseTaken(
+
+    // For PRN medications, increment count first to ensure atomicity
+    if (instance.isPRN) {
+      // Get the latest medication state from provider
+      final medications = ref.read(medicationProvider);
+      final latestMed = medications.firstWhere(
+        (m) => m.id == instance.medication.id,
+        orElse: () => instance.medication,
+      );
+
+      try {
+        // Increment dose count first
+        await ref.read(medicationProvider.notifier).incrementDoseCount(latestMed);
+
+        // Then log the dose
+        await ref.read(adherenceProvider.notifier).logDoseTaken(
+          medicationId: latestMed.id,
+          medicationName: latestMed.name,
+          dosage: latestMed.dosage,
+          scheduledTime: instance.scheduledTime,
+        );
+      } catch (e) {
+        // Rollback dose count on error
+        await ref.read(medicationProvider.notifier).decrementDoseCount(latestMed);
+        // Show error to user
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to log dose: $e')),
+          );
+        }
+        rethrow;
+      }
+    } else {
+      // For scheduled medications, just log the dose
+      try {
+        await ref.read(adherenceProvider.notifier).logDoseTaken(
           medicationId: instance.medication.id,
           medicationName: instance.medication.name,
           dosage: instance.medication.dosage,
           scheduledTime: instance.scheduledTime,
         );
-
-    // Increment dose count for PRN medications
-    if (instance.isPRN) {
-      await ref.read(medicationProvider.notifier).incrementDoseCount(instance.medication);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to log dose: $e')),
+          );
+        }
+        rethrow;
+      }
     }
 
     await _loadAndCategorizeInstances();
@@ -347,18 +386,19 @@ class _TodaysMedicationsWidgetState
                 ),
           ),
         ),
-        ..._immediateInstances.map((instance) => _buildImmediateItem(instance)),
+        ..._immediateInstances.map((instance) => _buildImmediateItem(instance, key: Key('${instance.medication.id}_${instance.scheduledTime.millisecondsSinceEpoch}'))),
       ],
     );
   }
 
-  Widget _buildImmediateItem(MedicationInstance instance) {
+  Widget _buildImmediateItem(MedicationInstance instance, {Key? key}) {
     final now = DateTime.now();
     final isOverdue = now.isAfter(
       instance.scheduledTime.add(const Duration(minutes: _graceWindowMinutes)),
     );
 
     return Container(
+      key: key,
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         border: Border(
@@ -502,6 +542,7 @@ class _TodaysMedicationsWidgetState
       },
       children: _laterInstances.map((instance) {
         return Opacity(
+          key: Key('later_${instance.medication.id}_${instance.scheduledTime.millisecondsSinceEpoch}'),
           opacity: 0.6,
           child: ListTile(
             leading: Icon(
@@ -542,6 +583,7 @@ class _TodaysMedicationsWidgetState
         final doseColor = _getDoseCountColor(currentDoses, maxDoses);
 
         return Container(
+          key: Key('prn_${medication.id}'),
           decoration: BoxDecoration(
             color: Colors.purple.withOpacity(0.05),
           ),
