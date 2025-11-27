@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:smartpatient/core/state/adherence_provider.dart';
+import 'package:smartpatient/core/state/medication_provider.dart';
 import 'package:smartpatient/features/dashboard/dialogs/dose_logging_dialog.dart';
 
 class TodaysMedicationsWidget extends ConsumerStatefulWidget {
@@ -34,6 +35,10 @@ class _TodaysMedicationsWidgetState
   static const int _immediateWindowHours = 2;
   static const int _graceWindowMinutes = 30;
 
+  // Dose count color thresholds
+  static const double _maxDoseRatio = 1.0;
+  static const double _warningDoseRatio = 0.75;
+
   @override
   void initState() {
     super.initState();
@@ -54,14 +59,15 @@ class _TodaysMedicationsWidgetState
 
     // Categorize each instance
     for (final instance in instances) {
-      // Skip completed medications (taken, skipped, or missed)
-      if (instance.isTaken || instance.isSkipped || instance.isMissed) {
-        continue;
-      }
-
       if (instance.isPRN) {
+        // PRN medications always show regardless of status
         prn.add(instance);
       } else {
+        // Skip completed scheduled medications (taken, skipped, or missed)
+        if (instance.isTaken || instance.isSkipped || instance.isMissed) {
+          continue;
+        }
+
         final scheduledTime = instance.scheduledTime;
         final isOverdue = now.isAfter(
           scheduledTime.add(const Duration(minutes: _graceWindowMinutes)),
@@ -124,6 +130,12 @@ class _TodaysMedicationsWidgetState
           dosage: instance.medication.dosage,
           scheduledTime: instance.scheduledTime,
         );
+
+    // Increment dose count for PRN medications
+    if (instance.isPRN) {
+      await ref.read(medicationProvider.notifier).incrementDoseCount(instance.medication);
+    }
+
     await _loadAndCategorizeInstances();
   }
 
@@ -147,6 +159,14 @@ class _TodaysMedicationsWidgetState
     if (adherence >= 75) return Colors.blue;
     if (adherence >= 50) return Colors.orange;
     return Colors.red;
+  }
+
+  Color _getDoseCountColor(int current, int max) {
+    if (max == 0) return Colors.grey;
+    final ratio = current / max;
+    if (ratio >= _maxDoseRatio) return Colors.red;
+    if (ratio >= _warningDoseRatio) return Colors.orange;
+    return Colors.green;
   }
 
   BorderSide _getUrgencyBorder(MedicationInstance instance) {
@@ -519,6 +539,7 @@ class _TodaysMedicationsWidgetState
         final currentDoses = medication.currentDoseCount;
         final maxDoses = medication.maxDailyDoses ?? 0;
         final canTake = currentDoses < maxDoses;
+        final doseColor = _getDoseCountColor(currentDoses, maxDoses);
 
         return Container(
           decoration: BoxDecoration(
@@ -539,7 +560,7 @@ class _TodaysMedicationsWidgetState
                   'Taken: $currentDoses/$maxDoses doses today',
                   style: TextStyle(
                     fontSize: 12,
-                    color: canTake ? Colors.green[700] : Colors.red[700],
+                    color: doseColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

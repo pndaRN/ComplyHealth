@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:smartpatient/core/state/adherence_provider.dart';
+import 'package:smartpatient/core/state/medication_provider.dart';
 import 'package:smartpatient/core/models/medication_log.dart';
 
 class DoseLoggingDialog extends ConsumerStatefulWidget {
@@ -44,6 +45,12 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
           actualTakenTime: _customTime,
           notes: _notesController.text.isEmpty ? null : _notesController.text,
         );
+
+    // Increment dose count for PRN medications
+    if (widget.instance.isPRN) {
+      await ref.read(medicationProvider.notifier).incrementDoseCount(widget.instance.medication);
+    }
+
     if (mounted) Navigator.of(context).pop(true);
   }
 
@@ -61,7 +68,14 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
 
   Future<void> _deleteLog() async {
     if (widget.instance.log != null) {
-      await ref.read(adherenceProvider.notifier).deleteLog(widget.instance.log!.id);
+      final log = widget.instance.log!;
+
+      // Decrement dose count for PRN medications if the log was for a taken dose
+      if (widget.instance.isPRN && log.status == DoseStatus.taken) {
+        await ref.read(medicationProvider.notifier).decrementDoseCount(widget.instance.medication);
+      }
+
+      await ref.read(adherenceProvider.notifier).deleteLog(log.id);
       if (mounted) Navigator.of(context).pop(true);
     }
   }
