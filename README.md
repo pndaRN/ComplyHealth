@@ -83,6 +83,26 @@ The condition tracking feature uses a curated subset of ICD-10 codes focused on 
 
 The current condition database emphasizes common chronic conditions like diabetes, hypertension, asthma, etc.
 
+## Documentation
+
+Comprehensive documentation is available in the [`docs/`](docs/) directory:
+
+### For Users
+- **[Quick Start Guide](docs/QUICK_START.md)** - Get started in 5 minutes
+- **[User Guide](docs/USER_GUIDE.md)** - Complete guide to all features
+- **[Visual Guide](docs/VISUAL_GUIDE.md)** - UI reference and screen layouts
+- **[Documentation Index](docs/README.md)** - Navigate all documentation
+
+### For Developers
+- **[Development Guide](CLAUDE.md)** - Architecture and development workflow
+- **[Features Reference](docs/FEATURES.md)** - Technical specifications
+
+### Quick Links
+- 🚀 [Getting Started](docs/QUICK_START.md#step-1-add-your-first-condition-2-minutes)
+- 💊 [Adding Medications](docs/USER_GUIDE.md#medication-management)
+- 📊 [Understanding Adherence](docs/FEATURES.md#adherence-tracking)
+- ❓ [FAQ](docs/USER_GUIDE.md#faq)
+
 ## Contributing
 
 This is a personal health management project. Contributions, issues, and feature requests are welcome.
