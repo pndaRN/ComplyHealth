@@ -55,37 +55,6 @@ The app provides a clean, intuitive interface for daily health management with f
   - ICD-10 chronic condition database (JSON asset)
   - Local-first data persistence
 
-## Getting Started
-
-### Prerequisites
-- Flutter SDK 3.9.2 or higher
-- Dart SDK
-- Android Studio / Xcode (for mobile development)
-- Go 1.x (for backend development)
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/SmartPatient.git
-cd SmartPatient
-
-# Frontend setup
-cd frontend
-flutter pub get
-flutter pub run build_runner build
-
-# Run the app
-flutter run
-
-# Backend setup (optional - currently minimal functionality)
-cd ../backend
-go mod download
-go run main.go
-```
-
-See [CLAUDE.md](CLAUDE.md) for detailed development instructions and architecture documentation.
-
 ## Current Limitations
 
 ### Offline-Only Operation
