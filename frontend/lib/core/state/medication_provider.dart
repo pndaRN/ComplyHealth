@@ -16,9 +16,14 @@ class MedicationNotifier extends Notifier<List<Medication>> {
 
   @override
   List<Medication> build() {
-    _loadMeds();
-    checkAndResetDailyCounts();
+    _initializeAndLoad();
     return [];
+  }
+
+  /// Initialize and load medications from Hive
+  Future<void> _initializeAndLoad() async {
+    await _loadMeds();
+    await checkAndResetDailyCounts();
   }
 
   /// Check if two DateTime objects are on the same day
@@ -57,17 +62,25 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     await _loadSortPreference();
     final box = await _getBox();
     final meds = box.values.cast<Medication>().toList();
-    state = MedicationSorter.sort(meds, _sortOption);
+
+    // Only update state if we have data or state is empty
+    if (meds.isNotEmpty || state.isEmpty) {
+      state = MedicationSorter.sort(meds, _sortOption);
+    }
 
     // Schedule notifications for all medications
-    await NotificationService().scheduleAllMedications(meds);
+    if (meds.isNotEmpty) {
+      await NotificationService().scheduleAllMedications(meds);
+    }
   }
 
   Future<void> addMeds(Medication med) async {
     final box = await _getBox();
     await box.put(med.id, med);
-    final updatedMeds = [...state, med];
-    state = MedicationSorter.sort(updatedMeds, _sortOption);
+
+    // Get all unique medications from Hive to avoid duplicates
+    final uniqueMeds = box.values.cast<Medication>().toList();
+    state = MedicationSorter.sort(uniqueMeds, _sortOption);
 
     // Schedule notifications for the new medication
     await NotificationService().scheduleMedicationNotifications(med);
@@ -76,8 +89,10 @@ class MedicationNotifier extends Notifier<List<Medication>> {
   Future<void> deleteMeds(Medication med) async {
     final box = await _getBox();
     await box.delete(med.id);
-    final updatedMeds = state.where((m) => m.id != med.id).toList();
-    state = MedicationSorter.sort(updatedMeds, _sortOption);
+
+    // Get all unique medications from Hive to avoid duplicates
+    final uniqueMeds = box.values.cast<Medication>().toList();
+    state = MedicationSorter.sort(uniqueMeds, _sortOption);
 
     // Cancel notifications for the deleted medication
     await NotificationService().cancelMedicationNotifications(med.id);
@@ -86,8 +101,10 @@ class MedicationNotifier extends Notifier<List<Medication>> {
   Future<void> updateMeds(Medication med) async {
     final box = await _getBox();
     await box.put(med.id, med);
-    final updatedMeds = state.map((m) => m.id == med.id ? med : m).toList();
-    state = MedicationSorter.sort(updatedMeds, _sortOption);
+
+    // Get all unique medications from Hive to avoid duplicates
+    final uniqueMeds = box.values.cast<Medication>().toList();
+    state = MedicationSorter.sort(uniqueMeds, _sortOption);
 
     // Re-schedule notifications for the updated medication
     await NotificationService().scheduleMedicationNotifications(med);
@@ -98,7 +115,12 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     _sortOption = option;
     final settingsBox = await _getSettingsBox();
     await settingsBox.put('sortOption', option.index);
-    state = MedicationSorter.sort(state, _sortOption);
+
+    // Always sort from the unique medications in Hive, not from state
+    // This prevents duplication when switching between sort options
+    final box = await _getBox();
+    final uniqueMeds = box.values.cast<Medication>().toList();
+    state = MedicationSorter.sort(uniqueMeds, _sortOption);
   }
 
   /// Get current sort option
@@ -189,9 +211,13 @@ class MedicationNotifier extends Notifier<List<Medication>> {
   /// Check and reset dose counts for PRN medications if it's a new day
   Future<void> checkAndResetDailyCounts() async {
     final today = DateTime.now();
+    final box = await _getBox();
     bool hasUpdates = false;
 
-    final updatedMeds = state.map((med) {
+    // Get unique medications from Hive to avoid duplicates
+    final uniqueMeds = box.values.cast<Medication>().toList();
+
+    final updatedMeds = uniqueMeds.map((med) {
       if (!med.isPRN) return med;
 
       if (med.lastDoseCountReset == null ||
@@ -213,7 +239,6 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     }).toList();
 
     if (hasUpdates) {
-      final box = await _getBox();
       for (final med in updatedMeds) {
         if (med.isPRN) {
           await box.put(med.id, med);

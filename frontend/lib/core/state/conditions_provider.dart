@@ -11,7 +11,7 @@ class ConditionsNotifier extends Notifier<List<Disease>> {
 
   @override
   List<Disease> build() {
-    _loadConditions();
+    _initializeAndLoad();
     return [];
   }
 
@@ -24,10 +24,17 @@ class ConditionsNotifier extends Notifier<List<Disease>> {
     return _box!;
   }
 
+  /// Initialize and load conditions from Hive
+  Future<void> _initializeAndLoad() async {
+    await _loadConditions();
+  }
+
   Future<void> _loadConditions() async {
     final box = await _getBox();
     final saved = box.values.map((e) => e as Disease).toList();
-    state = saved;
+    if (saved.isNotEmpty || state.isEmpty) {
+      state = saved;
+    }
   }
 
   Future<void> addCondition(Disease disease) async {

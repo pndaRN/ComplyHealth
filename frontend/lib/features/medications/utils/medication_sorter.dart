@@ -30,6 +30,11 @@ class MedicationSorter {
 
   /// Group medications by condition, then sort alphabetically within groups
   /// Medications with multiple conditions will appear under each condition group
+  ///
+  /// NOTE: This intentionally returns duplicate Medication objects (same instance
+  /// appears multiple times in the result list). The UI layer handles this by
+  /// transforming the list into MapEntry to preserve which condition each entry
+  /// represents. See _createConditionGroupedMedications() in medications_screen.dart.
   static List<Medication> _sortByConditionGroups(List<Medication> medications) {
     if (medications.isEmpty) return [];
 

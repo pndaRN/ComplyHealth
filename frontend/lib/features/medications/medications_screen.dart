@@ -201,22 +201,29 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
     final notifier = ref.read(medicationProvider.notifier);
     final conditions = ref.watch(conditionsProvider);
 
+    // Transform the sorted list into condition-grouped entries
+    final conditionGroupedMeds = _createConditionGroupedMedications(meds);
+
+    // Sort by condition name alphabetically
+    conditionGroupedMeds.sort((a, b) =>
+      a.key.toLowerCase().compareTo(b.key.toLowerCase())
+    );
+
     // Build a list of widgets with section headers
     final List<Widget> items = [];
     String? currentCondition;
 
-    for (final medication in meds) {
-      // For grouped view, we need to determine which condition this medication instance belongs to
-      // Since medications can have multiple conditions, we'll show the first condition as the group
-      final firstConditionName = medication.conditionNames.isNotEmpty ? medication.conditionNames.first : 'Unknown';
+    for (final entry in conditionGroupedMeds) {
+      final conditionName = entry.key;
+      final medication = entry.value;
 
       // Add section header if this is a new condition group
-      if (currentCondition != firstConditionName) {
-        currentCondition = firstConditionName;
+      if (currentCondition != conditionName) {
+        currentCondition = conditionName;
 
         // Get display name for condition
         final displayName = ConditionHelper.getDisplayNameByConditionName(
-          conditionName: firstConditionName,
+          conditionName: conditionName,
           conditions: conditions,
         );
 
@@ -293,6 +300,27 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
     if (timeB == null) return -1;
 
     return timeA.compareTo(timeB);
+  }
+
+  /// Creates condition-grouped medication entries
+  /// Medications with multiple conditions will have multiple entries
+  List<MapEntry<String, Medication>> _createConditionGroupedMedications(
+    List<Medication> meds,
+  ) {
+    final List<MapEntry<String, Medication>> conditionGroupedMeds = [];
+
+    for (final medication in meds) {
+      if (medication.conditionNames.isEmpty) {
+        conditionGroupedMeds.add(MapEntry('Unknown', medication));
+      } else {
+        // Add an entry for each condition (intentional duplication)
+        for (final conditionName in medication.conditionNames) {
+          conditionGroupedMeds.add(MapEntry(conditionName, medication));
+        }
+      }
+    }
+
+    return conditionGroupedMeds;
   }
 
   /// Creates time-grouped medication entries

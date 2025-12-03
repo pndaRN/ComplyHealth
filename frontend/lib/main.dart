@@ -9,6 +9,8 @@ import 'core/models/education_content.dart';
 import 'core/models/feedback.dart';
 import 'core/services/notification_service.dart';
 import 'core/state/profile_provider.dart';
+import 'core/state/conditions_provider.dart';
+import 'core/state/medication_provider.dart';
 import 'features/health/health_screen.dart';
 import 'features/medications/medications_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
@@ -35,7 +37,22 @@ void main() async {
 
   // Init Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const ProviderScope(child: SmartPatientApp()));
+
+  // Create ProviderScope to initialize all providers early
+  final container = ProviderContainer();
+
+  // Initialize providers to ensure data is loaded before UI appears
+  container.read(profileProvider);
+  container.read(conditionsProvider);
+  container.read(medicationProvider);
+
+  // Give providers time to load from Hive
+  await Future.delayed(const Duration(milliseconds: 200));
+
+  runApp(UncontrolledProviderScope(
+    container: container,
+    child: const SmartPatientApp(),
+  ));
 }
 
 class SmartPatientApp extends ConsumerStatefulWidget {

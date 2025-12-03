@@ -34,6 +34,22 @@ class ProfileNotifier extends Notifier<Profile> {
     final saved = box.get('user');
     if (saved != null && saved is Profile) {
       state = saved;
+    } else {
+      // Create a default profile if none exists
+      final defaultProfile = Profile(
+        firstName: 'John',
+        lastName: 'Smith',
+        dob: '04/19/1985',
+        allergies: 'None',
+        xp: 0,
+        streak: 0,
+        levelProgress: 0.0,
+        lastXpAwardDate: null,
+        lastPopupShownDate: null,
+        lastXpGained: 0,
+      );
+      await box.put('user', defaultProfile);
+      state = defaultProfile;
     }
     // Check and award XP for yesterday when profile loads
     await checkAndAwardDailyXp();
@@ -83,14 +99,16 @@ class ProfileNotifier extends Notifier<Profile> {
     final today = DateTime(now.year, now.month, now.day);
 
     // If we've already awarded XP today, skip
-    if (state.lastXpAwardDate != null && _isSameDay(state.lastXpAwardDate!, today)) {
+    if (state.lastXpAwardDate != null &&
+        _isSameDay(state.lastXpAwardDate!, today)) {
       return;
     }
 
     // Award XP for yesterday (if we haven't already)
     final yesterday = today.subtract(const Duration(days: 1));
 
-    if (state.lastXpAwardDate == null || !_isSameDay(state.lastXpAwardDate!, yesterday)) {
+    if (state.lastXpAwardDate == null ||
+        !_isSameDay(state.lastXpAwardDate!, yesterday)) {
       await awardDailyXp(yesterday);
     }
   }
@@ -195,7 +213,8 @@ class ProfileNotifier extends Notifier<Profile> {
     final today = DateTime(now.year, now.month, now.day);
 
     // If we've already shown the popup today, don't show it again
-    if (state.lastPopupShownDate != null && _isSameDay(state.lastPopupShownDate!, today)) {
+    if (state.lastPopupShownDate != null &&
+        _isSameDay(state.lastPopupShownDate!, today)) {
       return false;
     }
 
