@@ -58,6 +58,18 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     }
   }
 
+  /// Apply sorting to medications, handling grouped view specially
+  List<Medication> _applySorting(List<Medication> meds) {
+    if (_sortOption == MedicationSortOption.groupedByCondition) {
+      // Just sort alphabetically for grouped view - UI will create condition groups
+      final sorted = List<Medication>.from(meds);
+      sorted.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      return sorted;
+    } else {
+      return MedicationSorter.sort(meds, _sortOption);
+    }
+  }
+
   Future<void> _loadMeds() async {
     await _loadSortPreference();
     final box = await _getBox();
@@ -65,7 +77,7 @@ class MedicationNotifier extends Notifier<List<Medication>> {
 
     // Only update state if we have data or state is empty
     if (meds.isNotEmpty || state.isEmpty) {
-      state = MedicationSorter.sort(meds, _sortOption);
+      state = _applySorting(meds);
     }
 
     // Schedule notifications for all medications
@@ -80,7 +92,7 @@ class MedicationNotifier extends Notifier<List<Medication>> {
 
     // Get all unique medications from Hive to avoid duplicates
     final uniqueMeds = box.values.cast<Medication>().toList();
-    state = MedicationSorter.sort(uniqueMeds, _sortOption);
+    state = _applySorting(uniqueMeds);
 
     // Schedule notifications for the new medication
     await NotificationService().scheduleMedicationNotifications(med);
@@ -92,7 +104,7 @@ class MedicationNotifier extends Notifier<List<Medication>> {
 
     // Get all unique medications from Hive to avoid duplicates
     final uniqueMeds = box.values.cast<Medication>().toList();
-    state = MedicationSorter.sort(uniqueMeds, _sortOption);
+    state = _applySorting(uniqueMeds);
 
     // Cancel notifications for the deleted medication
     await NotificationService().cancelMedicationNotifications(med.id);
@@ -104,7 +116,7 @@ class MedicationNotifier extends Notifier<List<Medication>> {
 
     // Get all unique medications from Hive to avoid duplicates
     final uniqueMeds = box.values.cast<Medication>().toList();
-    state = MedicationSorter.sort(uniqueMeds, _sortOption);
+    state = _applySorting(uniqueMeds);
 
     // Re-schedule notifications for the updated medication
     await NotificationService().scheduleMedicationNotifications(med);
@@ -120,7 +132,7 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     // This prevents duplication when switching between sort options
     final box = await _getBox();
     final uniqueMeds = box.values.cast<Medication>().toList();
-    state = MedicationSorter.sort(uniqueMeds, _sortOption);
+    state = _applySorting(uniqueMeds);
   }
 
   /// Get current sort option
@@ -244,7 +256,7 @@ class MedicationNotifier extends Notifier<List<Medication>> {
           await box.put(med.id, med);
         }
       }
-      state = MedicationSorter.sort(updatedMeds, _sortOption);
+      state = _applySorting(updatedMeds);
     }
   }
 }
