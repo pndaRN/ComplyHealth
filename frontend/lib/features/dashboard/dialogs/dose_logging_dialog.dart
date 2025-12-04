@@ -357,7 +357,7 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
 
                 // Skip reason dropdown
                 DropdownButtonFormField<String>(
-                  value: _selectedSkipReason,
+                  initialValue: _selectedSkipReason,
                   decoration: const InputDecoration(
                     labelText: 'Skip Reason',
                     border: OutlineInputBorder(),

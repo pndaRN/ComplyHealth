@@ -26,11 +26,10 @@ class _ConditionDetailScreenState
     extends ConsumerState<ConditionDetailScreen> {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final conditions = ref.watch(conditionsProvider);
     final isAdded = conditions.any((c) => c.code == widget.condition.code);
-    final displayName = widget.condition.commonName?.isNotEmpty == true
-        ? widget.condition.commonName!
+    final displayName = widget.condition.commonName.isNotEmpty
+        ? widget.condition.commonName
         : widget.condition.name;
 
     return DefaultTabController(
@@ -88,7 +87,7 @@ class _ConditionDetailScreenState
                     widget.condition.name,
                     style: theme.textTheme.titleMedium,
                   ),
-                  if (widget.condition.commonName?.isNotEmpty == true) ...[
+                  if (widget.condition.commonName.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Text(
                       'Common Name',
@@ -98,7 +97,7 @@ class _ConditionDetailScreenState
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      widget.condition.commonName!,
+                      widget.condition.commonName,
                       style: theme.textTheme.titleMedium,
                     ),
                   ],
@@ -147,8 +146,10 @@ class _ConditionDetailScreenState
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                widget.condition.description ?? 'No description available.',
-                style: theme.textTheme.bodyLarge,
+                widget.condition.description.isNotEmpty
+                    ? widget.condition.description
+                    : 'No description available.',
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),
           ),
@@ -306,9 +307,9 @@ class _ConditionDetailScreenState
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Educational resources for ${widget.condition.commonName ?? widget.condition.name} will be available here.',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                          'Educational resources for ${widget.condition.commonName.isNotEmpty ? widget.condition.commonName : widget.condition.name} will be available here.',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -350,7 +351,7 @@ class _ConditionDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Removed ${widget.condition.commonName != null && widget.condition.commonName!.isNotEmpty ? widget.condition.commonName : widget.condition.name}'),
+            content: Text('Removed ${widget.condition.commonName.isNotEmpty ? widget.condition.commonName : widget.condition.name}'),
           ),
         );
       }
@@ -359,7 +360,7 @@ class _ConditionDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Added ${widget.condition.commonName != null && widget.condition.commonName!.isNotEmpty ? widget.condition.commonName : widget.condition.name}'),
+            content: Text('Added ${widget.condition.commonName.isNotEmpty ? widget.condition.commonName : widget.condition.name}'),
           ),
         );
       }

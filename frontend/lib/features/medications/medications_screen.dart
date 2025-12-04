@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/medication.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/state/conditions_provider.dart';
+import '../../core/theme/theme_provider.dart';
+import '../../core/theme/status_colors.dart';
 import '../../core/utils/condition_helper.dart';
 import '../../core/utils/time_formatting_utils.dart';
 import '../../core/widgets/empty_state_widget.dart';
@@ -43,17 +45,16 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
     }
   }
 
-  Color _getDoseCountColor(int current, int max) {
-    if (max == 0) return Colors.grey;
+  Color _getDoseCountColor(int current, int max, ThemeData theme) {
+    if (max == 0) return theme.colorScheme.onSurfaceVariant;
     final ratio = current / max;
-    if (ratio >= _maxDoseRatio) return Colors.red;
-    if (ratio >= _warningDoseRatio) return Colors.orange;
-    return Colors.green;
+    if (ratio >= _maxDoseRatio) return theme.statusColors.error;
+    if (ratio >= _warningDoseRatio) return theme.statusColors.warning;
+    return theme.statusColors.success;
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final meds = ref.watch(medicationProvider);
     final notifier = ref.read(medicationProvider.notifier);
     final currentSortOption = notifier.sortOption;
@@ -107,6 +108,20 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
           ),
         ),
         actions: [
+          Consumer(
+            builder: (context, ref, child) {
+              final themeState = ref.watch(themeProvider);
+              final isDark = themeState.themeMode == ThemeMode.dark ||
+                  (themeState.themeMode == ThemeMode.system &&
+                      MediaQuery.of(context).platformBrightness == Brightness.dark);
+
+              return IconButton(
+                icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
+                tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+              );
+            },
+          ),
           PdfExportButton(
             tooltip: 'Export medications to PDF',
           ),
@@ -182,7 +197,7 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
 
         final timingSummary = _getTimingSummary(medication);
         final doseColor = medication.isPRN
-            ? _getDoseCountColor(medication.currentDoseCount, medication.maxDailyDoses ?? 0)
+            ? _getDoseCountColor(medication.currentDoseCount, medication.maxDailyDoses ?? 0, Theme.of(context))
             : null;
 
         return MedicationExpansionTile(
@@ -250,7 +265,7 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
       // Add medication tile
       final timingSummary = _getTimingSummary(medication);
       final doseColor = medication.isPRN
-          ? _getDoseCountColor(medication.currentDoseCount, medication.maxDailyDoses ?? 0)
+          ? _getDoseCountColor(medication.currentDoseCount, medication.maxDailyDoses ?? 0, Theme.of(context))
           : null;
 
       items.add(
@@ -396,7 +411,7 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
       // Add medication tile
       final timingSummary = _getTimingSummary(medication);
       final doseColor = medication.isPRN
-          ? _getDoseCountColor(medication.currentDoseCount, medication.maxDailyDoses ?? 0)
+          ? _getDoseCountColor(medication.currentDoseCount, medication.maxDailyDoses ?? 0, Theme.of(context))
           : null;
 
       items.add(

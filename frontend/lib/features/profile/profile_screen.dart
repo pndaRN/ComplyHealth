@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/profile.dart';
 import '../../core/state/profile_provider.dart';
+import '../../core/theme/theme_provider.dart';
 import '../../core/widgets/pdf_export_button.dart';
 import '../dashboard/widgets/adherence_metrics_widget.dart';
 import 'dialogs/feedback_dialog.dart';
@@ -85,6 +86,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
+        actions: [
+          Consumer(
+            builder: (context, ref, child) {
+              final themeState = ref.watch(themeProvider);
+              final isDark = themeState.themeMode == ThemeMode.dark ||
+                  (themeState.themeMode == ThemeMode.system &&
+                      MediaQuery.of(context).platformBrightness == Brightness.dark);
+
+              return IconButton(
+                icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
+                tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+              );
+            },
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -547,18 +564,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
                   color: isEmpty
-                      ? theme.colorScheme.surfaceContainerHighest.withOpacity(0.5)
+                      ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
                       : theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: theme.colorScheme.outline.withOpacity(0.2),
+                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Text(
                   value,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: isEmpty
-                        ? theme.colorScheme.onSurfaceVariant.withOpacity(0.6)
+                        ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6)
                         : theme.colorScheme.onSurface,
                     fontStyle: isEmpty ? FontStyle.italic : null,
                   ),

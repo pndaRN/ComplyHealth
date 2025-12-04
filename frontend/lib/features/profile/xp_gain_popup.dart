@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/state/profile_provider.dart';
+import 'package:smartpatient/core/theme/status_colors.dart';
 
 class XpGainPopup extends StatelessWidget {
   final int xpGained;
@@ -11,7 +11,7 @@ class XpGainPopup extends StatelessWidget {
   final int streak;
 
   const XpGainPopup({
-    Key? key,
+    super.key,
     required this.xpGained,
     required this.currentLevel,
     required this.nextLevel,
@@ -19,11 +19,12 @@ class XpGainPopup extends StatelessWidget {
     required this.currentXp,
     required this.xpForNextLevel,
     required this.streak,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final int xpNeeded = xpForNextLevel - currentXp;
+    final theme = Theme.of(context);
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -40,12 +41,12 @@ class XpGainPopup extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.amber.withOpacity(0.2),
+                color: theme.statusColors.streak.withValues(alpha: 0.2),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.emoji_events,
                 size: 64,
-                color: Colors.amber,
+                color: theme.statusColors.streak,
               ),
             ),
             const SizedBox(height: 16),
@@ -66,7 +67,7 @@ class XpGainPopup extends StatelessWidget {
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: Colors.blue.shade700,
+                color: theme.colorScheme.primary,
               ),
             ),
             const SizedBox(height: 4),
@@ -77,7 +78,7 @@ class XpGainPopup extends StatelessWidget {
                 '🔥 $streak day streak!',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.orange.shade700,
+                  color: theme.statusColors.streak,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -87,7 +88,7 @@ class XpGainPopup extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -96,8 +97,8 @@ class XpGainPopup extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildLevelBadge(currentLevel, true),
-                      _buildLevelBadge(nextLevel, false),
+                      _buildLevelBadge(currentLevel, true, theme),
+                      _buildLevelBadge(nextLevel, false, theme),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -109,7 +110,7 @@ class XpGainPopup extends StatelessWidget {
                       Container(
                         height: 24,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
+                          color: theme.colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
@@ -121,8 +122,8 @@ class XpGainPopup extends StatelessWidget {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                Colors.blue.shade400,
-                                Colors.blue.shade600,
+                                theme.colorScheme.primary.withValues(alpha: 0.8),
+                                theme.colorScheme.primary,
                               ],
                             ),
                             borderRadius: BorderRadius.circular(12),
@@ -158,7 +159,7 @@ class XpGainPopup extends StatelessWidget {
                     '$xpNeeded XP to Level $nextLevel',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey.shade700,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -172,8 +173,8 @@ class XpGainPopup extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade700,
-                  foregroundColor: Colors.white,
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -194,17 +195,17 @@ class XpGainPopup extends StatelessWidget {
     );
   }
 
-  Widget _buildLevelBadge(int level, bool isCurrent) {
+  Widget _buildLevelBadge(int level, bool isCurrent, ThemeData theme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isCurrent ? Colors.blue.shade700 : Colors.grey.shade400,
+        color: isCurrent ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         'Level $level',
         style: TextStyle(
-          color: Colors.white,
+          color: isCurrent ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
           fontWeight: FontWeight.bold,
           fontSize: isCurrent ? 14 : 12,
         ),

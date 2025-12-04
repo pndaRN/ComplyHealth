@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
+import '../../core/theme/theme_provider.dart';
 import '../../core/models/medication.dart';
 import 'widgets/rotating_welcome_message.dart';
 import 'widgets/todays_medications_widget.dart';
@@ -26,7 +27,25 @@ class DashboardScreen extends ConsumerWidget {
     final meds = ref.watch(medicationProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard')),
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+        actions: [
+          Consumer(
+            builder: (context, ref, child) {
+              final themeState = ref.watch(themeProvider);
+              final isDark = themeState.themeMode == ThemeMode.dark ||
+                  (themeState.themeMode == ThemeMode.system &&
+                      MediaQuery.of(context).platformBrightness == Brightness.dark);
+
+              return IconButton(
+                icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
+                tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+              );
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

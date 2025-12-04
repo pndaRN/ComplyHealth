@@ -11,6 +11,8 @@ import 'core/services/notification_service.dart';
 import 'core/state/profile_provider.dart';
 import 'core/state/conditions_provider.dart';
 import 'core/state/medication_provider.dart';
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 import 'features/health/health_screen.dart';
 import 'features/medications/medications_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
@@ -45,6 +47,7 @@ void main() async {
   container.read(profileProvider);
   container.read(conditionsProvider);
   container.read(medicationProvider);
+  container.read(themeProvider);
 
   // Give providers time to load from Hive
   await Future.delayed(const Duration(milliseconds: 200));
@@ -131,17 +134,18 @@ class _SmartPatientAppState extends ConsumerState<SmartPatientApp> {
 
   @override
   Widget build(BuildContext context) {
+    final themeState = ref.watch(themeProvider);
+
     return MaterialApp(
       title: 'SmartPatient',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: AppTheme.lightTheme(),
+      darkTheme: AppTheme.darkTheme(),
+      themeMode: themeState.themeMode,
       home: Scaffold(
         body: _screens[_index],
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _index,
           onTap: (i) => setState(() => _index = i),
-          backgroundColor: Colors.white, // Explicit background
-          selectedItemColor: Colors.blue, // Selected icon color
-          unselectedItemColor: Colors.grey,
           items: _bottomNavigationBarItems,
         ),
       ),

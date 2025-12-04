@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:smartpatient/core/state/adherence_provider.dart';
 import 'package:smartpatient/core/state/medication_provider.dart';
+import 'package:smartpatient/core/theme/status_colors.dart';
 import 'package:smartpatient/features/dashboard/dialogs/dose_logging_dialog.dart';
 
 class TodaysMedicationsWidget extends ConsumerStatefulWidget {
@@ -193,38 +194,38 @@ class _TodaysMedicationsWidgetState
     return DateFormat('h:mm a').format(time);
   }
 
-  Color _getAdherenceColor(double adherence) {
-    if (adherence >= 90) return Colors.green;
-    if (adherence >= 75) return Colors.blue;
-    if (adherence >= 50) return Colors.orange;
-    return Colors.red;
+  Color _getAdherenceColor(double adherence, ThemeData theme) {
+    if (adherence >= 90) return theme.statusColors.success;
+    if (adherence >= 75) return theme.statusColors.info;
+    if (adherence >= 50) return theme.statusColors.warning;
+    return theme.statusColors.error;
   }
 
-  Color _getDoseCountColor(int current, int max) {
-    if (max == 0) return Colors.grey;
+  Color _getDoseCountColor(int current, int max, ThemeData theme) {
+    if (max == 0) return theme.colorScheme.onSurfaceVariant;
     final ratio = current / max;
-    if (ratio >= _maxDoseRatio) return Colors.red;
-    if (ratio >= _warningDoseRatio) return Colors.orange;
-    return Colors.green;
+    if (ratio >= _maxDoseRatio) return theme.statusColors.error;
+    if (ratio >= _warningDoseRatio) return theme.statusColors.warning;
+    return theme.statusColors.success;
   }
 
-  BorderSide _getUrgencyBorder(MedicationInstance instance) {
+  BorderSide _getUrgencyBorder(MedicationInstance instance, ThemeData theme) {
     final now = DateTime.now();
     final scheduledTime = instance.scheduledTime;
 
     // Overdue (past grace period)
     if (now.isAfter(scheduledTime.add(const Duration(minutes: _graceWindowMinutes)))) {
-      return const BorderSide(color: Colors.red, width: 6);
+      return BorderSide(color: theme.statusColors.error, width: 6);
     }
 
     // Within 30 minutes of scheduled time
     if (now.isAfter(scheduledTime.subtract(const Duration(minutes: 30))) &&
         now.isBefore(scheduledTime.add(const Duration(minutes: 30)))) {
-      return const BorderSide(color: Colors.orange, width: 4);
+      return BorderSide(color: theme.statusColors.warning, width: 4);
     }
 
     // Within 2-hour window
-    return const BorderSide(color: Colors.blue, width: 4);
+    return BorderSide(color: theme.statusColors.info, width: 4);
   }
 
   @override
@@ -272,7 +273,7 @@ class _TodaysMedicationsWidgetState
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: _getAdherenceColor(_todayAdherence),
+              color: _getAdherenceColor(_todayAdherence, Theme.of(context)),
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -323,9 +324,9 @@ class _TodaysMedicationsWidgetState
             child: LinearProgressIndicator(
               value: _todayTotal > 0 ? _todayTaken / _todayTotal : 0.0,
               minHeight: 8,
-              backgroundColor: Colors.grey[300],
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(
-                _getAdherenceColor(_todayAdherence),
+                _getAdherenceColor(_todayAdherence, Theme.of(context)),
               ),
             ),
           ),
@@ -402,12 +403,12 @@ class _TodaysMedicationsWidgetState
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         border: Border(
-          left: _getUrgencyBorder(instance),
+          left: _getUrgencyBorder(instance, Theme.of(context)),
         ),
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -580,17 +581,18 @@ class _TodaysMedicationsWidgetState
         final currentDoses = medication.currentDoseCount;
         final maxDoses = medication.maxDailyDoses ?? 0;
         final canTake = currentDoses < maxDoses;
-        final doseColor = _getDoseCountColor(currentDoses, maxDoses);
+        final theme = Theme.of(context);
+        final doseColor = _getDoseCountColor(currentDoses, maxDoses, theme);
 
         return Container(
           key: Key('prn_${medication.id}'),
           decoration: BoxDecoration(
-            color: Colors.purple.withOpacity(0.05),
+            color: theme.statusColors.prn.withValues(alpha: 0.05),
           ),
           child: ListTile(
             leading: Icon(
               Icons.medication,
-              color: Colors.purple[400],
+              color: theme.statusColors.prn,
             ),
             title: Text(medication.name),
             subtitle: Column(

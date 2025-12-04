@@ -94,7 +94,6 @@ class ProfileNotifier extends Notifier<Profile> {
   /// - Awards XP for yesterday if not already done
   /// - Should be called when app opens or at midnight
   Future<void> checkAndAwardDailyXp() async {
-    final adherenceNotifier = ref.read(adherenceProvider.notifier);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
@@ -171,7 +170,6 @@ class ProfileNotifier extends Notifier<Profile> {
   /// Add XP and update level progress
   void addXP(int amount, {int? newStreak}) {
     int newXP = state.xp + amount;
-    int currentLevel = getCurrentLevel(state.xp);
     int newLevel = getCurrentLevel(newXP);
 
     // Calculate progress to next level

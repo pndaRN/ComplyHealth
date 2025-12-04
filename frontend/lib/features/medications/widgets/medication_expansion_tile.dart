@@ -229,7 +229,7 @@ class MedicationExpansionTile extends ConsumerWidget {
                 ],
               ),
             );
-          }).toList(),
+          }),
       ],
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smartpatient/core/state/adherence_provider.dart';
+import 'package:smartpatient/core/theme/status_colors.dart';
 
 class AdherenceMetricsWidget extends ConsumerStatefulWidget {
   const AdherenceMetricsWidget({super.key});
@@ -30,11 +31,11 @@ class _AdherenceMetricsWidgetState
     });
   }
 
-  Color _getAdherenceColor(double percentage) {
-    if (percentage >= 90) return Colors.green;
-    if (percentage >= 75) return Colors.lightGreen;
-    if (percentage >= 60) return Colors.orange;
-    return Colors.red;
+  Color _getAdherenceColor(double percentage, ThemeData theme) {
+    if (percentage >= 90) return theme.statusColors.success;
+    if (percentage >= 75) return theme.statusColors.info;
+    if (percentage >= 60) return theme.statusColors.warning;
+    return theme.statusColors.error;
   }
 
   @override
@@ -54,7 +55,8 @@ class _AdherenceMetricsWidgetState
     }
 
     final metrics = _metrics!;
-    final adherenceColor = _getAdherenceColor(metrics.weeklyAdherence);
+    final theme = Theme.of(context);
+    final adherenceColor = _getAdherenceColor(metrics.weeklyAdherence, theme);
 
     return Card(
       margin: const EdgeInsets.all(16),
@@ -74,7 +76,7 @@ class _AdherenceMetricsWidgetState
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: adherenceColor.withOpacity(0.1),
+                color: adherenceColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: adherenceColor, width: 2),
               ),
@@ -104,7 +106,7 @@ class _AdherenceMetricsWidgetState
                             '7-Day Adherence',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[700],
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -124,7 +126,7 @@ class _AdherenceMetricsWidgetState
                     icon: Icons.local_fire_department,
                     value: '${metrics.currentStreak}',
                     label: 'Day Streak',
-                    color: Colors.orange,
+                    color: theme.statusColors.streak,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -134,7 +136,7 @@ class _AdherenceMetricsWidgetState
                     icon: Icons.check_circle,
                     value: '${metrics.totalDosesTaken}',
                     label: 'Taken',
-                    color: Colors.green,
+                    color: theme.statusColors.success,
                   ),
                 ),
               ],
@@ -148,7 +150,7 @@ class _AdherenceMetricsWidgetState
                     icon: Icons.cancel,
                     value: '${metrics.totalDosesSkipped}',
                     label: 'Skipped',
-                    color: Colors.orange,
+                    color: theme.statusColors.warning,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -158,7 +160,7 @@ class _AdherenceMetricsWidgetState
                     icon: Icons.error,
                     value: '${metrics.totalDosesMissed}',
                     label: 'Missed',
-                    color: Colors.red,
+                    color: theme.statusColors.error,
                   ),
                 ),
               ],
@@ -170,7 +172,7 @@ class _AdherenceMetricsWidgetState
                 'Based on ${metrics.totalDosesScheduled} scheduled doses in the last 7 days',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey[600],
+                  color: theme.colorScheme.onSurfaceVariant,
                   fontStyle: FontStyle.italic,
                 ),
                 textAlign: TextAlign.center,
@@ -192,9 +194,9 @@ class _AdherenceMetricsWidgetState
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -213,7 +215,7 @@ class _AdherenceMetricsWidgetState
             label,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey[700],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],

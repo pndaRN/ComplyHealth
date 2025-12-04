@@ -4,6 +4,7 @@ import '../../core/models/disease.dart';
 import '../../core/services/icd_service.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
+import '../../core/theme/theme_provider.dart';
 import '../../core/utils/condition_helper.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import 'condition_detail_screen.dart';
@@ -46,13 +47,28 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final userConditions = ref.watch(conditionsProvider);
     final medications = ref.watch(medicationProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Health'),
+        actions: [
+          Consumer(
+            builder: (context, ref, child) {
+              final themeState = ref.watch(themeProvider);
+              final isDark = themeState.themeMode == ThemeMode.dark ||
+                  (themeState.themeMode == ThemeMode.system &&
+                      MediaQuery.of(context).platformBrightness == Brightness.dark);
+
+              return IconButton(
+                icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
+                tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+              );
+            },
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(_appBarBottomHeight),
           child: Column(

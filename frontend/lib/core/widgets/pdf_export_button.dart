@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smartpatient/core/services/pdf_export_service.dart';
+import 'package:smartpatient/core/theme/status_colors.dart';
 
 /// Reusable button widget for exporting medication reports to PDF
 /// Shows loading state during export and provides user feedback via SnackBar
@@ -49,7 +50,7 @@ class _PdfExportButtonState extends ConsumerState<PdfExportButton> {
               ),
             ],
           ),
-          backgroundColor: Colors.green,
+          backgroundColor: Theme.of(context).statusColors.success,
           duration: Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
@@ -70,7 +71,7 @@ class _PdfExportButtonState extends ConsumerState<PdfExportButton> {
               ),
             ],
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).statusColors.error,
           duration: Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
           action: SnackBarAction(

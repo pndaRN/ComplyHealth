@@ -115,7 +115,7 @@ class MedicationDetailDialog extends StatelessWidget {
                       ],
                     ),
                   );
-                }).toList(),
+                }),
             ],
           ],
         ),
