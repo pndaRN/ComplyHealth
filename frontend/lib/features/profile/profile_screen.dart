@@ -4,6 +4,7 @@ import '../../core/models/profile.dart';
 import '../../core/state/profile_provider.dart';
 import '../../core/theme/theme_provider.dart';
 import '../dashboard/widgets/adherence_metrics_widget.dart';
+import '../settings/settings_screen.dart';
 import 'dialogs/feedback_dialog.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -102,6 +103,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     case 'theme':
                       ref.read(themeProvider.notifier).toggleTheme();
                       break;
+                    case 'settings':
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                      );
+                      break;
                   }
                 },
                 itemBuilder: (context) => [
@@ -123,6 +129,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Icon(isDark ? Icons.light_mode : Icons.dark_mode),
                         const SizedBox(width: 12),
                         Text(isDark ? 'Light mode' : 'Dark mode'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'settings',
+                    child: Row(
+                      children: [
+                        Icon(Icons.settings_outlined),
+                        SizedBox(width: 12),
+                        Text('Settings'),
                       ],
                     ),
                   ),

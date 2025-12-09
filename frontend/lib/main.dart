@@ -13,12 +13,16 @@ import 'core/state/conditions_provider.dart';
 import 'core/state/medication_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
+import 'core/state/settings_provider.dart';
 import 'features/health/health_screen.dart';
+import 'features/onboarding/onboarding_screen.dart';
 import 'features/medications/medications_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/profile/xp_gain_popup.dart';
+import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -40,6 +44,13 @@ void main() async {
   // Init Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // Set up Crashlytics error handlers
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
   // Create ProviderScope to initialize all providers early
   final container = ProviderContainer();
 
@@ -48,6 +59,7 @@ void main() async {
   container.read(conditionsProvider);
   container.read(medicationProvider);
   container.read(themeProvider);
+  container.read(settingsProvider);
 
   // Give providers time to load from Hive
   await Future.delayed(const Duration(milliseconds: 200));
@@ -68,6 +80,7 @@ class SmartPatientApp extends ConsumerStatefulWidget {
 class _SmartPatientAppState extends ConsumerState<SmartPatientApp> {
   int _index = 0;
   bool _hasCheckedPopup = false;
+  bool _showOnboarding = true;
 
   final List<Widget> _screens = [
     DashboardScreen(),
@@ -135,20 +148,30 @@ class _SmartPatientAppState extends ConsumerState<SmartPatientApp> {
   @override
   Widget build(BuildContext context) {
     final themeState = ref.watch(themeProvider);
+    final settings = ref.watch(settingsProvider);
+
+    // Determine if we should show onboarding
+    final showOnboarding = _showOnboarding && !settings.hasCompletedOnboarding;
 
     return MaterialApp(
       title: 'SmartPatient',
       theme: AppTheme.lightTheme(),
       darkTheme: AppTheme.darkTheme(),
       themeMode: themeState.themeMode,
-      home: Scaffold(
-        body: _screens[_index],
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _index,
-          onTap: (i) => setState(() => _index = i),
-          items: _bottomNavigationBarItems,
-        ),
-      ),
+      home: showOnboarding
+          ? OnboardingScreen(
+              onComplete: () {
+                setState(() => _showOnboarding = false);
+              },
+            )
+          : Scaffold(
+              body: _screens[_index],
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: _index,
+                onTap: (i) => setState(() => _index = i),
+                items: _bottomNavigationBarItems,
+              ),
+            ),
     );
   }
 }
