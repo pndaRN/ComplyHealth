@@ -208,7 +208,7 @@ workflows:
         bundle_identifier: com.example.smartpatient
 
       groups:
-        - firebase-distribution
+        - firebase_credentials
 
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
@@ -337,8 +337,6 @@ workflows:
         firebase_service_account: $FIREBASE_SERVICE_ACCOUNT
         ios:
           app_id: $FIREBASE_IOS_APP_ID
-          groups:
-            - firebase_credentials
 
       email:
         recipients:
