@@ -338,7 +338,7 @@ workflows:
         ios:
           app_id: $FIREBASE_IOS_APP_ID
           groups:
-            - beta-testers
+            - firebase_credentials
 
       email:
         recipients:
