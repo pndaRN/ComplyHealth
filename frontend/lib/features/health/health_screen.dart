@@ -21,10 +21,12 @@ class HealthScreen extends ConsumerStatefulWidget {
   ConsumerState<HealthScreen> createState() => _HealthScreenState();
 }
 
-class _HealthScreenState extends ConsumerState<HealthScreen> {
+class _HealthScreenState extends ConsumerState<HealthScreen>
+    with SingleTickerProviderStateMixin {
   // UI sizing constants
-  static const double _appBarBottomHeight = 120.0;
+  static const double _appBarBottomHeight = 128.0;
 
+  late TabController _tabController;
   HealthViewMode _viewMode = HealthViewMode.myConditions;
   String _searchQuery = '';
   List<Disease> _allConditions = [];
@@ -33,7 +35,25 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_handleTabChange);
     _loadAllConditions();
+  }
+
+  void _handleTabChange() {
+    if (_tabController.indexIsChanging) return;
+    setState(() {
+      _viewMode = _tabController.index == 0
+          ? HealthViewMode.myConditions
+          : HealthViewMode.browseAll;
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.removeListener(_handleTabChange);
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadAllConditions() async {
@@ -61,10 +81,25 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
                   (themeState.themeMode == ThemeMode.system &&
                       MediaQuery.of(context).platformBrightness == Brightness.dark);
 
-              return IconButton(
-                icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
-                tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+              return PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert),
+                onSelected: (value) {
+                  if (value == 'theme') {
+                    ref.read(themeProvider.notifier).toggleTheme();
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'theme',
+                    child: Row(
+                      children: [
+                        Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                        const SizedBox(width: 12),
+                        Text(isDark ? 'Light mode' : 'Dark mode'),
+                      ],
+                    ),
+                  ),
+                ],
               );
             },
           ),
@@ -73,41 +108,18 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
           preferredSize: const Size.fromHeight(_appBarBottomHeight),
           child: Column(
             children: [
-              // Filter chips
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Row(
-                  children: [
-                    ChoiceChip(
-                      label: Text('My Conditions (${userConditions.length})'),
-                      selected: _viewMode == HealthViewMode.myConditions,
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(
-                            () => _viewMode = HealthViewMode.myConditions,
-                          );
-                        }
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                    ChoiceChip(
-                      label: const Text('Browse All'),
-                      selected: _viewMode == HealthViewMode.browseAll,
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(() => _viewMode = HealthViewMode.browseAll);
-                        }
-                      },
-                    ),
-                  ],
-                ),
+              // Tab bar
+              TabBar(
+                controller: _tabController,
+                tabs: [
+                  Tab(text: 'My Conditions (${userConditions.length})'),
+                  const Tab(text: 'Browse All'),
+                ],
               ),
+              const SizedBox(height: 8),
               // Search bar
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: 'Search conditions...',
@@ -124,6 +136,9 @@ class _HealthScreenState extends ConsumerState<HealthScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     filled: true,
+                    fillColor: Theme.of(context).brightness == Brightness.light
+                        ? const Color(0xFFF0F7FF)
+                        : const Color(0xFF1E3A5F),
                   ),
                   onChanged: (value) {
                     setState(() => _searchQuery = value.toLowerCase());

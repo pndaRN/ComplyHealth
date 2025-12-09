@@ -28,19 +28,36 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text('SmartPatient'),
         actions: [
           Consumer(
             builder: (context, ref, child) {
               final themeState = ref.watch(themeProvider);
-              final isDark = themeState.themeMode == ThemeMode.dark ||
+              final isDark =
+                  themeState.themeMode == ThemeMode.dark ||
                   (themeState.themeMode == ThemeMode.system &&
-                      MediaQuery.of(context).platformBrightness == Brightness.dark);
+                      MediaQuery.of(context).platformBrightness ==
+                          Brightness.dark);
 
-              return IconButton(
-                icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
-                tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+              return PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert),
+                onSelected: (value) {
+                  if (value == 'theme') {
+                    ref.read(themeProvider.notifier).toggleTheme();
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'theme',
+                    child: Row(
+                      children: [
+                        Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                        const SizedBox(width: 12),
+                        Text(isDark ? 'Light mode' : 'Dark mode'),
+                      ],
+                    ),
+                  ),
+                ],
               );
             },
           ),
@@ -76,7 +93,11 @@ class DashboardScreen extends ConsumerWidget {
                   itemBuilder: (context, index) {
                     final condition = conditions[index];
                     final related = meds
-                        .where((medication) => medication.conditionNames.contains(condition.name))
+                        .where(
+                          (medication) => medication.conditionNames.contains(
+                            condition.name,
+                          ),
+                        )
                         .toList();
                     return Card(
                       child: ListTile(

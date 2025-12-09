@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/profile.dart';
 import '../../core/state/profile_provider.dart';
 import '../../core/theme/theme_provider.dart';
-import '../../core/widgets/pdf_export_button.dart';
 import '../dashboard/widgets/adherence_metrics_widget.dart';
 import 'dialogs/feedback_dialog.dart';
 
@@ -81,7 +80,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final profile = ref.watch(profileProvider);
-    final notifier = ref.read(profileProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -94,10 +92,41 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   (themeState.themeMode == ThemeMode.system &&
                       MediaQuery.of(context).platformBrightness == Brightness.dark);
 
-              return IconButton(
-                icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
-                tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+              return PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert),
+                onSelected: (value) {
+                  switch (value) {
+                    case 'edit':
+                      _enterEditMode();
+                      break;
+                    case 'theme':
+                      ref.read(themeProvider.notifier).toggleTheme();
+                      break;
+                  }
+                },
+                itemBuilder: (context) => [
+                  if (!_isEditing)
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit_outlined),
+                          SizedBox(width: 12),
+                          Text('Edit profile'),
+                        ],
+                      ),
+                    ),
+                  PopupMenuItem(
+                    value: 'theme',
+                    child: Row(
+                      children: [
+                        Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                        const SizedBox(width: 12),
+                        Text(isDark ? 'Light mode' : 'Dark mode'),
+                      ],
+                    ),
+                  ),
+                ],
               );
             },
           ),
@@ -122,24 +151,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         color: theme.colorScheme.primary,
                       ),
                       const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Personal Information',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      Text(
+                        'Personal Information',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      if (!_isEditing) ...[
-                        PdfExportButton(
-                          tooltip: 'Export health report to PDF',
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.edit_outlined),
-                          onPressed: _enterEditMode,
-                          tooltip: 'Edit profile',
-                        ),
-                      ],
                     ],
                   ),
                   const SizedBox(height: 16),

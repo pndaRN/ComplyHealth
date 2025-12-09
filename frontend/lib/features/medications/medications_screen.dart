@@ -4,15 +4,15 @@ import '../../core/models/medication.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/theme/theme_provider.dart';
+import '../../core/services/pdf_export_service.dart';
 import '../../core/theme/status_colors.dart';
 import '../../core/utils/condition_helper.dart';
 import '../../core/utils/time_formatting_utils.dart';
 import '../../core/widgets/empty_state_widget.dart';
-import '../../core/widgets/pdf_export_button.dart';
 import 'dialogs/medication_add_dialog.dart';
-import 'dialogs/medication_edit_dialog.dart';
+import 'medication_detail_screen.dart';
 import 'utils/medication_sorter.dart';
-import 'widgets/medication_expansion_tile.dart';
+import 'widgets/medication_card.dart';
 
 class MedicationsScreen extends ConsumerStatefulWidget {
   const MedicationsScreen({super.key});
@@ -100,6 +100,9 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 filled: true,
+                fillColor: Theme.of(context).brightness == Brightness.light
+                    ? const Color(0xFFF0F7FF)
+                    : const Color(0xFF1E3A5F),
               ),
               onChanged: (value) {
                 setState(() => _searchQuery = value.toLowerCase());
@@ -115,35 +118,110 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
                   (themeState.themeMode == ThemeMode.system &&
                       MediaQuery.of(context).platformBrightness == Brightness.dark);
 
-              return IconButton(
-                icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
-                tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+              return PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert),
+                onSelected: (value) async {
+                  switch (value) {
+                    case 'theme':
+                      ref.read(themeProvider.notifier).toggleTheme();
+                      break;
+                    case 'export':
+                      try {
+                        final service = PdfExportService();
+                        await service.exportMedicationReport(
+                          context: context,
+                          ref: ref,
+                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('PDF exported successfully'),
+                              backgroundColor: Theme.of(context).statusColors.success,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Export failed: $e'),
+                              backgroundColor: Theme.of(context).statusColors.error,
+                            ),
+                          );
+                        }
+                      }
+                      break;
+                    case 'sort':
+                      // Show sort submenu
+                      final RenderBox button = context.findRenderObject() as RenderBox;
+                      final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+                      final RelativeRect position = RelativeRect.fromRect(
+                        Rect.fromPoints(
+                          button.localToGlobal(Offset.zero, ancestor: overlay),
+                          button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                        ),
+                        Offset.zero & overlay.size,
+                      );
+                      final selected = await showMenu<MedicationSortOption>(
+                        context: context,
+                        position: position,
+                        items: MedicationSortOption.values.map((option) {
+                          return PopupMenuItem<MedicationSortOption>(
+                            value: option,
+                            child: Row(
+                              children: [
+                                if (option == currentSortOption)
+                                  const Icon(Icons.check, size: 20)
+                                else
+                                  const SizedBox(width: 20),
+                                const SizedBox(width: 8),
+                                Text(MedicationSorter.getDisplayName(option)),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      );
+                      if (selected != null) {
+                        notifier.setSortOption(selected);
+                      }
+                      break;
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'theme',
+                    child: Row(
+                      children: [
+                        Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                        const SizedBox(width: 12),
+                        Text(isDark ? 'Light mode' : 'Dark mode'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'export',
+                    child: Row(
+                      children: [
+                        Icon(Icons.picture_as_pdf),
+                        SizedBox(width: 12),
+                        Text('Export to PDF'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'sort',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.sort),
+                        const SizedBox(width: 12),
+                        const Expanded(child: Text('Sort by')),
+                        const Icon(Icons.arrow_right),
+                      ],
+                    ),
+                  ),
+                ],
               );
             },
-          ),
-          PdfExportButton(
-            tooltip: 'Export medications to PDF',
-          ),
-          PopupMenuButton<MedicationSortOption>(
-            icon: const Icon(Icons.sort),
-            tooltip: 'Sort medications',
-            onSelected: (option) => notifier.setSortOption(option),
-            itemBuilder: (context) => MedicationSortOption.values.map((option) {
-              return PopupMenuItem(
-                value: option,
-                child: Row(
-                  children: [
-                    if (option == currentSortOption)
-                      const Icon(Icons.check, size: 20)
-                    else
-                      const SizedBox(width: 20),
-                    const SizedBox(width: 8),
-                    Text(MedicationSorter.getDisplayName(option)),
-                  ],
-                ),
-              );
-            }).toList(),
           ),
         ],
       ),
@@ -181,8 +259,6 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
   }
 
   Widget _buildSimpleList(BuildContext context, List<Medication> meds) {
-    final notifier = ref.read(medicationProvider.notifier);
-
     return ListView.builder(
       itemCount: meds.length,
       itemBuilder: (context, index) {
@@ -200,20 +276,26 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
             ? _getDoseCountColor(medication.currentDoseCount, medication.maxDailyDoses ?? 0, Theme.of(context))
             : null;
 
-        return MedicationExpansionTile(
+        return MedicationCard(
           medication: medication,
           conditionDisplayNames: conditionDisplayNames,
           timingSummary: timingSummary,
           doseColor: doseColor,
-          onEdit: () => _showEditDialog(context, medication),
-          onDelete: () => notifier.deleteMeds(medication),
+          onTap: () => _navigateToDetail(medication),
         );
       },
     );
   }
 
+  void _navigateToDetail(Medication medication) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MedicationDetailScreen(medication: medication),
+      ),
+    );
+  }
+
   Widget _buildGroupedList(BuildContext context, List<Medication> meds) {
-    final notifier = ref.read(medicationProvider.notifier);
     final conditions = ref.watch(conditionsProvider);
 
     // Transform the sorted list into condition-grouped entries
@@ -262,20 +344,19 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
         conditions: conditions,
       );
 
-      // Add medication tile
+      // Add medication card
       final timingSummary = _getTimingSummary(medication);
       final doseColor = medication.isPRN
           ? _getDoseCountColor(medication.currentDoseCount, medication.maxDailyDoses ?? 0, Theme.of(context))
           : null;
 
       items.add(
-        MedicationExpansionTile(
+        MedicationCard(
           medication: medication,
           conditionDisplayNames: conditionDisplayNames,
           timingSummary: timingSummary,
           doseColor: doseColor,
-          onEdit: () => _showEditDialog(context, medication),
-          onDelete: () => notifier.deleteMeds(medication),
+          onTap: () => _navigateToDetail(medication),
         ),
       );
     }
@@ -366,7 +447,6 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
   }
 
   Widget _buildDueTimeGroupedList(BuildContext context, List<Medication> meds) {
-    final notifier = ref.read(medicationProvider.notifier);
     final conditions = ref.watch(conditionsProvider);
 
     final now = DateTime.now();
@@ -408,20 +488,19 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
         conditions: conditions,
       );
 
-      // Add medication tile
+      // Add medication card
       final timingSummary = _getTimingSummary(medication);
       final doseColor = medication.isPRN
           ? _getDoseCountColor(medication.currentDoseCount, medication.maxDailyDoses ?? 0, Theme.of(context))
           : null;
 
       items.add(
-        MedicationExpansionTile(
+        MedicationCard(
           medication: medication,
           conditionDisplayNames: conditionDisplayNames,
           timingSummary: timingSummary,
           doseColor: doseColor,
-          onEdit: () => _showEditDialog(context, medication),
-          onDelete: () => notifier.deleteMeds(medication),
+          onTap: () => _navigateToDetail(medication),
         ),
       );
     }
@@ -466,13 +545,6 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
     showDialog(
       context: context,
       builder: (context) => const MedicationAddDialog(),
-    );
-  }
-
-  void _showEditDialog(BuildContext context, Medication medication) {
-    showDialog(
-      context: context,
-      builder: (context) => MedicationEditDialog(medication: medication),
     );
   }
 }
