@@ -72,6 +72,15 @@ class DashboardScreen extends ConsumerWidget {
             const TodaysMedicationsWidget(),
             const AdherenceHistoryWidget(),
             const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Text(
+                'At A Glance',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
             if (conditions.isEmpty)
               Padding(
                 padding: const EdgeInsets.all(20),
