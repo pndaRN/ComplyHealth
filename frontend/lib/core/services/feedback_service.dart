@@ -38,10 +38,9 @@ class FeedbackService {
       await _syncToFirestore(feedback);
       // Mark as synced in Hive
       await _markAsSynced(feedbackId);
-    } catch (e) {
+    } catch (_) {
       // Network error or Firestore error - feedback is queued locally
       // Will be synced later when connectivity is restored
-      print('Failed to sync feedback to Firestore: $e');
     }
   }
 
@@ -77,8 +76,7 @@ class FeedbackService {
           await _syncToFirestore(feedback);
           await _markAsSynced(feedback.id);
           syncedCount++;
-        } catch (e) {
-          print('Failed to sync feedback ${feedback.id}: $e');
+        } catch (_) {
           // Continue with next feedback
         }
       }

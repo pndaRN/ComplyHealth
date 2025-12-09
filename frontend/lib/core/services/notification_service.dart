@@ -75,7 +75,7 @@ class NotificationService {
   void _onNotificationTapped(NotificationResponse response) {
     // Handle notification tap - could navigate to specific screen
     // This can be expanded to open the medication details or adherence screen
-    print('Notification tapped: ${response.payload}');
+    // Payload contains: medicationId|scheduledTime
   }
 
   /// Schedule notifications for a medication

@@ -121,40 +121,39 @@ class SettingsScreen extends ConsumerWidget {
   void _showThemeDialog(BuildContext context, WidgetRef ref, ThemeMode currentMode) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => SimpleDialog(
         title: const Text('Choose Theme'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListTile<ThemeMode>(
-              title: const Text('Light'),
-              value: ThemeMode.light,
-              groupValue: currentMode,
-              onChanged: (value) {
-                ref.read(themeProvider.notifier).setThemeMode(value!);
-                Navigator.of(context).pop();
-              },
-            ),
-            RadioListTile<ThemeMode>(
-              title: const Text('Dark'),
-              value: ThemeMode.dark,
-              groupValue: currentMode,
-              onChanged: (value) {
-                ref.read(themeProvider.notifier).setThemeMode(value!);
-                Navigator.of(context).pop();
-              },
-            ),
-            RadioListTile<ThemeMode>(
-              title: const Text('System default'),
-              value: ThemeMode.system,
-              groupValue: currentMode,
-              onChanged: (value) {
-                ref.read(themeProvider.notifier).setThemeMode(value!);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ),
+        children: [
+          _buildThemeOption(context, ref, 'Light', ThemeMode.light, currentMode),
+          _buildThemeOption(context, ref, 'Dark', ThemeMode.dark, currentMode),
+          _buildThemeOption(context, ref, 'System default', ThemeMode.system, currentMode),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(
+    BuildContext context,
+    WidgetRef ref,
+    String title,
+    ThemeMode mode,
+    ThemeMode currentMode,
+  ) {
+    final isSelected = mode == currentMode;
+    return SimpleDialogOption(
+      onPressed: () {
+        ref.read(themeProvider.notifier).setThemeMode(mode);
+        Navigator.of(context).pop();
+      },
+      child: Row(
+        children: [
+          Icon(
+            isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+            color: isSelected ? Theme.of(context).colorScheme.primary : null,
+          ),
+          const SizedBox(width: 16),
+          Text(title),
+        ],
       ),
     );
   }

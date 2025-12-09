@@ -122,9 +122,7 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
       final box = await _getBox();
       await box.put(log.id, log);
       state = box.values.toList();
-    } catch (e) {
-      // Log error and rethrow
-      print('Error logging dose taken: $e');
+    } catch (_) {
       rethrow;
     }
   }
@@ -152,8 +150,7 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
       final box = await _getBox();
       await box.put(log.id, log);
       state = box.values.toList();
-    } catch (e) {
-      print('Error logging dose skipped: $e');
+    } catch (_) {
       rethrow;
     }
   }
@@ -200,8 +197,7 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
       final box = await _getBox();
       await box.put(log.id, log);
       state = box.values.toList();
-    } catch (e) {
-      print('Error logging dose missed: $e');
+    } catch (_) {
       rethrow;
     }
   }
@@ -212,8 +208,7 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
       final box = await _getBox();
       await box.delete(logId);
       state = box.values.toList();
-    } catch (e) {
-      print('Error deleting log: $e');
+    } catch (_) {
       rethrow;
     }
   }
@@ -224,8 +219,7 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
       final box = await _getBox();
       await box.put(log.id, log);
       state = box.values.toList();
-    } catch (e) {
-      print('Error updating log: $e');
+    } catch (_) {
       rethrow;
     }
   }
