@@ -18,5 +18,9 @@
 		"svelte": "^5.43.8",
 		"tailwindcss": "^4.1.17",
 		"vite": "^7.2.2"
+	},
+	"dependencies": {
+		"@sveltejs/adapter-static": "^3.0.10",
+		"firebase": "^12.6.0"
 	}
 }

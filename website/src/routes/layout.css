@@ -1,2 +1,62 @@
+/* Google Fonts - Poppins for headings, Raleway for body */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Raleway:wght@400;500;600&display=swap');
+
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
+
+/* Custom CSS variables matching the Flutter app theme */
+@theme {
+	/* Primary Colors (Blue - Medical Trust) */
+	--color-primary: #2563EB;
+	--color-primary-dark: #60A5FA;
+
+	/* Secondary Colors (Violet - Innovation) */
+	--color-secondary: #7C3AED;
+	--color-secondary-dark: #A78BFA;
+
+	/* Tertiary Colors (Emerald - Health) */
+	--color-tertiary: #059669;
+	--color-tertiary-dark: #34D399;
+
+	/* Error Colors */
+	--color-error: #DC2626;
+
+	/* Background Colors */
+	--color-background: #FFFFFF;
+	--color-surface: #F9FAFB;
+	--color-surface-variant: #F1F5F9;
+
+	/* Text Colors */
+	--color-text-primary: #0F172A;
+	--color-text-secondary: #64748B;
+
+	/* Border Colors */
+	--color-outline: #E2E8F0;
+
+	/* Font families */
+	--font-heading: 'Poppins', sans-serif;
+	--font-body: 'Raleway', sans-serif;
+}
+
+/* Base styles */
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	font-family: var(--font-body);
+	background-color: var(--color-background);
+	color: var(--color-text-primary);
+	line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: var(--font-heading);
+	line-height: 1.2;
+}
+
+/* Focus styles for accessibility */
+:focus-visible {
+	outline: 2px solid var(--color-primary);
+	outline-offset: 2px;
+}
