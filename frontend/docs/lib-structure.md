@@ -92,15 +92,15 @@ lib/
     ├── medications/                    # Medication management feature
     │   ├── medications_screen.dart     # Main medications screen
     │   ├── dialogs/
-    │   │   ├── medication_add_dialog.dart  # Add new medication dialog
-    │   │   ├── medication_edit_dialog.dart # Edit existing medication
-    │   │   └── prn_setup_dialog.dart       # PRN medication setup
+    │   │   ├── medication_add_dialog.dart    # Add new medication dialog
+    │   │   ├── medication_detail_dialog.dart # Medication details popup
+    │   │   ├── medication_edit_dialog.dart   # Edit existing medication
+    │   │   └── prn_setup_dialog.dart         # PRN medication setup
     │   ├── utils/
     │   │   ├── medication_validator.dart # Medication validation logic
     │   │   └── medication_sorter.dart    # Medication sorting algorithms
     │   └── widgets/
     │       ├── medication_expansion_tile.dart # Expandable medication item
-    │       ├── medication_detail_dialog.dart  # Medication details popup
     │       ├── medication_form_content.dart   # Shared medication form UI
     │       ├── prn_section.dart              # PRN-specific UI components
     │       ├── time_picker_section.dart      # Time selection interface
@@ -724,6 +724,15 @@ Comprehensive medication management with scheduling, PRN support, and multiple s
 
 **Update**: Calls updateMeds() on provider which updates Hive and re-schedules notifications.
 
+#### dialogs/medication_detail_dialog.dart
+**Purpose**: Read-only dialog showing full medication details.
+
+**Content**: Displays all medication fields including name, dosage, conditions, schedule, PRN info, in a formatted view.
+
+**Actions**: Close button, optional edit button.
+
+**Usage**: Opened from medication list for quick reference without editing.
+
 #### dialogs/prn_setup_dialog.dart
 **Purpose**: Specialized dialog for configuring PRN (as-needed) medications.
 
@@ -780,15 +789,6 @@ Comprehensive medication management with scheduling, PRN support, and multiple s
 - `onDelete` (VoidCallback): Delete action handler
 
 **PRN Features**: Shows dose counter with +/- buttons, color-codes based on proximity to max doses (green < 75%, orange 75-100%, red = max).
-
-#### widgets/medication_detail_dialog.dart
-**Purpose**: Read-only dialog showing full medication details.
-
-**Content**: Displays all medication fields including name, dosage, conditions, schedule, PRN info, in a formatted view.
-
-**Actions**: Close button, optional edit button.
-
-**Usage**: Opened from medication list for quick reference without editing.
 
 #### widgets/medication_form_content.dart
 **Purpose**: Shared form UI components used in both add and edit dialogs.
