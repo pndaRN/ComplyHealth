@@ -9,6 +9,9 @@ workflows:
         distribution_type: app_store  # or 'ad_hoc' for internal distribution
         bundle_identifier: com.example.smartpatient
 
+      groups:
+        - app_store_connect_credentials  # Create this group in Codemagic settings with your credentials
+
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
@@ -102,15 +105,13 @@ workflows:
 
       app_store_connect:
         # Submit to App Store Connect
-        # Requires APP_STORE_CONNECT_ISSUER_ID, APP_STORE_CONNECT_KEY_IDENTIFIER,
+        # Requires APP_STORE_CONNECT_ISSUER_ID, APP_STORE_CONNECT_KEY_ID,
         # and APP_STORE_CONNECT_PRIVATE_KEY environment variables
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
-        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
-
-        # Optional: Automatically submit for beta testing
+        auth: integration
+        
+        # Automatically submit for beta testing
         submit_to_testflight: true
-
+        
         # Optional: Automatically submit for App Store review
         # submit_to_app_store: true
 
