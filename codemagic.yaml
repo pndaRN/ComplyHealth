@@ -10,7 +10,7 @@ workflows:
     environment:
       ios_signing:
         distribution_type: app_store  # or 'ad_hoc' for internal distribution
-        bundle_identifier: com.example.smartpatient
+        bundle_identifier: com.pndaRN.smartpatient
 
       groups:
         - app_store_connect_credentials  # Create this group in Codemagic settings with your credentials
@@ -18,7 +18,7 @@ workflows:
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
-        BUNDLE_ID: "com.example.smartpatient"
+        BUNDLE_ID: "com.pndaRN.smartpatient"
         APP_STORE_APPLE_ID: 1234567890  # Update with your App Store Connect app ID
 
       flutter: stable  # or specify version like '3.24.0'
@@ -126,12 +126,12 @@ workflows:
     environment:
       ios_signing:
         distribution_type: ad_hoc
-        bundle_identifier: com.example.smartpatient
+        bundle_identifier: com.pndaRN.smartpatient
 
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
-        BUNDLE_ID: "com.example.smartpatient"
+        BUNDLE_ID: "com.pndaRN.smartpatient"
 
       flutter: stable
       xcode: latest
@@ -209,7 +209,7 @@ workflows:
     environment:
       ios_signing:
         distribution_type: ad_hoc
-        bundle_identifier: com.example.smartpatient
+        bundle_identifier: com.pndaRN.smartpatient
 
       groups:
         - firebase_credentials
@@ -217,7 +217,7 @@ workflows:
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
-        BUNDLE_ID: "com.example.smartpatient"
+        BUNDLE_ID: "com.pndaRN.smartpatient"
 
       flutter: stable
       xcode: latest
