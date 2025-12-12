@@ -1,10 +1,10 @@
-# SmartPatient
+# ComplyHealth
 
 A comprehensive cross-platform medical condition and medication tracker designed to help users manage chronic conditions and maintain medication adherence.
 
 ## Overview
 
-SmartPatient is a mobile-first health tracking application that enables users to:
+ComplyHealth is a mobile-first health tracking application that enables users to:
 - Track chronic medical conditions using standardized ICD-10 codes
 - Manage medication schedules with customizable dosing times
 - Monitor medication adherence with visual tracking and statistics
@@ -65,7 +65,7 @@ The app currently operates entirely offline with no cloud sync functionality. Al
 - No web dashboard or remote access to health data
 
 ### Manual Medication Entry
-Medications must be manually entered by the user. Unlike some commercial health apps, SmartPatient does not include:
+Medications must be manually entered by the user. Unlike some commercial health apps, ComplyHealth does not include:
 - Integration with medication databases (e.g., FDA, RxNorm)
 - Automatic medication lookup by name or NDC code
 - Pill identification features
@@ -113,4 +113,4 @@ This is a personal health management project. Contributions, issues, and feature
 
 ## Disclaimer
 
-SmartPatient is a personal health tracking tool and is not intended to replace professional medical advice, diagnosis, or treatment. Always consult with qualified healthcare providers regarding medical conditions and medication management.
+ComplyHealth is a personal health tracking tool and is not intended to replace professional medical advice, diagnosis, or treatment. Always consult with qualified healthcare providers regarding medical conditions and medication management.

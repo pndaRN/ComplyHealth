@@ -1,7 +1,7 @@
-# SmartPatient Marketing Website - Development Plan
+# ComplyHealth Marketing Website - Development Plan
 
 ## Project Overview
-Static SvelteKit website for SmartPatient beta launch. Clean, approachable design focused on medication management empowerment.
+Static SvelteKit website for ComplyHealth beta launch. Clean, approachable design focused on medication management empowerment.
 
 ## Tech Stack
 - SvelteKit (static adapter)
@@ -15,7 +15,7 @@ Static SvelteKit website for SmartPatient beta launch. Clean, approachable desig
 "Meds under control. Finally."
 
 **Body Copy:**
-You're juggling enough already. Built by a nurse who gets it, SmartPatient takes the mental load off medication management so you can focus on what matters - your health and your life.
+You're juggling enough already. Built by a nurse who gets it, ComplyHealth takes the mental load off medication management so you can focus on what matters - your health and your life.
 
 **CTA Button:**
 "Join the Beta"
@@ -57,7 +57,7 @@ Learn about the conditions you're managing and how your medications help. Knowle
 - Error handling for failed submissions
 
 ### 4. Footer
-- Copyright: © 2024 SmartPatient
+- Copyright: © 2024 ComplyHealth
 - Optional links: Privacy Policy, Contact
 - Keep minimal for beta
 

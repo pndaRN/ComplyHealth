@@ -1,12 +1,12 @@
-# SmartPatient Quick Start Guide
+# ComplyHealth Quick Start Guide
 
-Get up and running with SmartPatient in just 5 minutes!
+Get up and running with ComplyHealth in just 5 minutes!
 
 ---
 
 ## Step 1: Add Your First Condition (2 minutes)
 
-1. Open SmartPatient
+1. Open ComplyHealth
 2. Tap the **Health** icon (🏥) in the bottom navigation
 3. Tap **Browse All** at the top
 4. Use the search bar or browse categories
@@ -123,6 +123,6 @@ Get up and running with SmartPatient in just 5 minutes!
 
 ---
 
-**You're all set!** Start taking control of your health with SmartPatient.
+**You're all set!** Start taking control of your health with ComplyHealth.
 
 *Happy tracking!* 🎯

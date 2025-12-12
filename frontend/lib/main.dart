@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:smartpatient/core/models/profile.dart';
+import 'package:complyhealth/core/models/profile.dart';
 import 'core/models/disease.dart';
 import 'core/models/medication.dart';
 import 'core/models/medication_log.dart';
@@ -66,18 +66,18 @@ void main() async {
 
   runApp(UncontrolledProviderScope(
     container: container,
-    child: const SmartPatientApp(),
+    child: const ComplyHealthApp(),
   ));
 }
 
-class SmartPatientApp extends ConsumerStatefulWidget {
-  const SmartPatientApp({super.key});
+class ComplyHealthApp extends ConsumerStatefulWidget {
+  const ComplyHealthApp({super.key});
 
   @override
-  ConsumerState<SmartPatientApp> createState() => _SmartPatientAppState();
+  ConsumerState<ComplyHealthApp> createState() => _ComplyHealthAppState();
 }
 
-class _SmartPatientAppState extends ConsumerState<SmartPatientApp> {
+class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
   int _index = 0;
   bool _hasCheckedPopup = false;
   bool _showOnboarding = true;
@@ -154,7 +154,7 @@ class _SmartPatientAppState extends ConsumerState<SmartPatientApp> {
     final showOnboarding = _showOnboarding && !settings.hasCompletedOnboarding;
 
     return MaterialApp(
-      title: 'SmartPatient',
+      title: 'ComplyHealth',
       theme: AppTheme.lightTheme(),
       darkTheme: AppTheme.darkTheme(),
       themeMode: themeState.themeMode,

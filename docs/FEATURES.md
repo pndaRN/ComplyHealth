@@ -1,6 +1,6 @@
-# SmartPatient Feature Reference
+# ComplyHealth Feature Reference
 
-Complete technical reference for all SmartPatient features and functionality.
+Complete technical reference for all ComplyHealth features and functionality.
 
 ---
 
@@ -363,7 +363,7 @@ class MedicationLog {
 **Report Sections:**
 
 **Header:**
-- "SmartPatient Medication Report" or "SmartPatient Health Report"
+- "ComplyHealth Medication Report" or "ComplyHealth Health Report"
 - Generation date and time
 - Disclaimer text
 

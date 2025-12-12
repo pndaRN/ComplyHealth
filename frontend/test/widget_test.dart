@@ -1,4 +1,4 @@
-// Basic widget tests for SmartPatient app.
+// Basic widget tests for ComplyHealth app.
 //
 // Note: Full integration tests that require Hive/Firebase initialization
 // should be run separately as integration tests.

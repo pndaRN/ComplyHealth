@@ -54,7 +54,7 @@ class _AboutScreenState extends State<AboutScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'SmartPatient',
+                  'ComplyHealth',
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -121,7 +121,7 @@ class _AboutScreenState extends State<AboutScreen> {
             onTap: () {
               showLicensePage(
                 context: context,
-                applicationName: 'SmartPatient',
+                applicationName: 'ComplyHealth',
                 applicationVersion: _packageInfo?.version,
                 applicationIcon: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -164,7 +164,7 @@ class _AboutScreenState extends State<AboutScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'SmartPatient is intended for personal health tracking only and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for medical guidance.',
+                      'ComplyHealth is intended for personal health tracking only and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for medical guidance.',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:smartpatient/core/state/adherence_provider.dart';
-import 'package:smartpatient/core/state/medication_provider.dart';
-import 'package:smartpatient/core/models/medication_log.dart';
+import 'package:complyhealth/core/state/adherence_provider.dart';
+import 'package:complyhealth/core/state/medication_provider.dart';
+import 'package:complyhealth/core/models/medication_log.dart';
 
 class DoseLoggingDialog extends ConsumerStatefulWidget {
   final MedicationInstance instance;

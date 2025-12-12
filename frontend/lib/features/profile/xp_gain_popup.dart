@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smartpatient/core/theme/status_colors.dart';
+import 'package:complyhealth/core/theme/status_colors.dart';
 
 class XpGainPopup extends StatelessWidget {
   final int xpGained;

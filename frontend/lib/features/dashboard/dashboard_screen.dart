@@ -28,7 +28,7 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SmartPatient'),
+        title: const Text('ComplyHealth'),
         actions: [
           Consumer(
             builder: (context, ref, child) {

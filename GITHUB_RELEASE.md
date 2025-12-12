@@ -1,6 +1,6 @@
-# SmartPatient v1.0.0 - First Release
+# ComplyHealth v1.0.0 - First Release
 
-We're excited to introduce **SmartPatient**, your personal health companion for tracking chronic conditions and managing medications with confidence.
+We're excited to introduce **ComplyHealth**, your personal health companion for tracking chronic conditions and managing medications with confidence.
 
 ## Highlights
 
@@ -87,4 +87,4 @@ We'd love to hear from you! Use the in-app feedback feature (Profile → Send Fe
 
 ---
 
-Thank you for choosing SmartPatient to support your health journey!
+Thank you for choosing ComplyHealth to support your health journey!

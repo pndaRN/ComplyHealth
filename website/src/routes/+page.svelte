@@ -57,7 +57,7 @@
   <!-- Header -->
   <header class="px-6 py-4">
     <span class="text-2xl font-semibold text-primary font-heading"
-      >SmartPatient</span
+      >ComplyHealth</span
     >
   </header>
 
@@ -71,7 +71,7 @@
     <p
       class="text-lg md:text-xl text-text-secondary max-w-2xl mx-auto mb-10 leading-relaxed"
     >
-      You're juggling enough already. Built by a nurse who gets it, SmartPatient
+      You're juggling enough already. Built by a nurse who gets it, ComplyHealth
       takes the mental load off medication management so you can focus on what
       matters — your health and your life.
     </p>
@@ -189,7 +189,7 @@
         Join the Beta
       </h2>
       <p class="text-text-secondary text-center mb-10">
-        Be among the first to try SmartPatient. We'll reach out with early
+        Be among the first to try ComplyHealth. We'll reach out with early
         access.
       </p>
 
@@ -355,7 +355,7 @@
   <!-- Footer -->
   <footer class="px-6 py-8 border-t border-outline">
     <div class="max-w-6xl mx-auto text-center text-text-secondary text-sm">
-      <p>&copy; 2025 SmartPatient. All rights reserved.</p>
+      <p>&copy; 2025 ComplyHealth. All rights reserved.</p>
     </div>
   </footer>
 </main>

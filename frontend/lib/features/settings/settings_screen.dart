@@ -70,7 +70,7 @@ class SettingsScreen extends ConsumerWidget {
           _buildSectionHeader(context, 'About'),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('About SmartPatient'),
+            title: const Text('About ComplyHealth'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               Navigator.of(context).push(
@@ -188,12 +188,12 @@ class SettingsScreen extends ConsumerWidget {
 
       // Save to file and share
       final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/smartpatient_backup.json');
+      final file = File('${directory.path}/complyhealth_backup.json');
       await file.writeAsString(jsonString);
 
       await Share.shareXFiles(
         [XFile(file.path)],
-        subject: 'SmartPatient Backup',
+        subject: 'ComplyHealth Backup',
       );
     } catch (e) {
       if (context.mounted) {

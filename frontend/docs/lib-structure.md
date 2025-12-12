@@ -1,8 +1,8 @@
-# SmartPatient Frontend: lib/ Folder Structure
+# ComplyHealth Frontend: lib/ Folder Structure
 
 ## Introduction
 
-The SmartPatient frontend follows a **feature-based architecture** with centralized **core modules**. This architecture promotes code organization, reusability, and maintainability by separating concerns between shared business logic (core) and feature-specific implementations (features).
+The ComplyHealth frontend follows a **feature-based architecture** with centralized **core modules**. This architecture promotes code organization, reusability, and maintainability by separating concerns between shared business logic (core) and feature-specific implementations (features).
 
 ### Technology Stack
 - **Framework**: Flutter (Dart)
@@ -124,7 +124,7 @@ The `lib/core/` directory contains shared modules used across all features, incl
 ### Entry Points
 
 #### main.dart
-**Purpose**: Application initialization and entry point for the SmartPatient app.
+**Purpose**: Application initialization and entry point for the ComplyHealth app.
 
 **Responsibilities**:
 - Initializes Flutter bindings and Hive database

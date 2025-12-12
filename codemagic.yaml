@@ -10,7 +10,7 @@ workflows:
     environment:
       ios_signing:
         distribution_type: app_store  # or 'ad_hoc' for internal distribution
-        bundle_identifier: com.pndaRN.smartpatient
+        bundle_identifier: com.complyhealth.app
 
       groups:
         - app_store_connect_credentials  # Create this group in Codemagic settings with your credentials
@@ -18,7 +18,7 @@ workflows:
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
-        BUNDLE_ID: "com.pndaRN.smartpatient"
+        BUNDLE_ID: "com.complyhealth.app"
         APP_STORE_APPLE_ID: 1234567890  # Update with your App Store Connect app ID
 
       flutter: stable  # or specify version like '3.24.0'
@@ -126,12 +126,12 @@ workflows:
     environment:
       ios_signing:
         distribution_type: ad_hoc
-        bundle_identifier: com.pndaRN.smartpatient
+        bundle_identifier: com.complyhealth.app
 
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
-        BUNDLE_ID: "com.pndaRN.smartpatient"
+        BUNDLE_ID: "com.complyhealth.app"
 
       flutter: stable
       xcode: latest
@@ -209,7 +209,7 @@ workflows:
     environment:
       ios_signing:
         distribution_type: ad_hoc
-        bundle_identifier: com.pndaRN.smartpatient
+        bundle_identifier: com.complyhealth.app
 
       groups:
         - firebase_credentials
@@ -217,7 +217,7 @@ workflows:
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
-        BUNDLE_ID: "com.pndaRN.smartpatient"
+        BUNDLE_ID: "com.complyhealth.app"
 
       flutter: stable
       xcode: latest
@@ -294,7 +294,7 @@ workflows:
           if git describe --tags --abbrev=0 HEAD^ 2>/dev/null; then
             prev_tag=$(git describe --tags --abbrev=0 HEAD^)
             echo "Generating release notes from $prev_tag to HEAD"
-            echo "SmartPatient iOS Beta" > release_notes.txt
+            echo "ComplyHealth iOS Beta" > release_notes.txt
             echo "" >> release_notes.txt
             echo "Build: #$CM_BUILD_ID" >> release_notes.txt
             echo "Branch: $CM_BRANCH" >> release_notes.txt
@@ -307,7 +307,7 @@ workflows:
             git log --pretty=format:"- %s" "$prev_tag"..HEAD >> release_notes.txt
           else
             # Fallback: use recent commits
-            echo "SmartPatient iOS Beta" > release_notes.txt
+            echo "ComplyHealth iOS Beta" > release_notes.txt
             echo "" >> release_notes.txt
             echo "Build: #$CM_BUILD_ID" >> release_notes.txt
             echo "Branch: $CM_BRANCH" >> release_notes.txt

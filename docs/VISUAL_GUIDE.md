@@ -1,4 +1,4 @@
-# SmartPatient Visual Guide
+# ComplyHealth Visual Guide
 
 This document provides descriptions of the app's key screens and UI elements to help users understand the visual interface. Screenshots should be taken from the actual application to accompany this guide.
 
@@ -301,7 +301,7 @@ The app uses a bottom navigation bar with four tabs:
 │ 💬 Feedback & Support                  │
 ├────────────────────────────────────────┤
 │ We value your feedback! Help us        │
-│ improve SmartPatient by sharing your   │
+│ improve ComplyHealth by sharing your   │
 │ thoughts, reporting bugs, or           │
 │ requesting features.                   │
 │                                        │

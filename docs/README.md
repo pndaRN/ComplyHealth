@@ -1,6 +1,6 @@
-# SmartPatient Documentation
+# ComplyHealth Documentation
 
-**Complete documentation suite for SmartPatient - your personal health tracking companion**
+**Complete documentation suite for ComplyHealth - your personal health tracking companion**
 
 Version 1.0 | Last Updated: November 2025
 
@@ -8,16 +8,16 @@ Version 1.0 | Last Updated: November 2025
 
 ## 📚 Documentation Overview
 
-This documentation suite provides comprehensive information about SmartPatient for users, healthcare providers, and developers.
+This documentation suite provides comprehensive information about ComplyHealth for users, healthcare providers, and developers.
 
 ### For End Users
 
-Start here if you're using SmartPatient to track your health:
+Start here if you're using ComplyHealth to track your health:
 
 #### 🚀 [Quick Start Guide](QUICK_START.md)
 **Time to read: 5 minutes**
 
-Get up and running with SmartPatient in just a few steps:
+Get up and running with ComplyHealth in just a few steps:
 - Add your first condition
 - Set up your first medication
 - Complete your profile
@@ -76,14 +76,14 @@ Technical reference for all features:
 #### 💻 [Development Guide](../CLAUDE.md)
 **Time to read: 20-30 minutes**
 
-Technical guide for developers working on SmartPatient:
+Technical guide for developers working on ComplyHealth:
 - Project architecture
 - Code structure and patterns
 - Development commands
 - State management
 - Contributing guidelines
 
-**Perfect for:** Developers contributing to or modifying SmartPatient
+**Perfect for:** Developers contributing to or modifying ComplyHealth
 
 ---
 
@@ -184,11 +184,11 @@ Technical guide for developers working on SmartPatient:
 
 ---
 
-## 📱 SmartPatient At a Glance
+## 📱 ComplyHealth At a Glance
 
-### What is SmartPatient?
+### What is ComplyHealth?
 
-SmartPatient is a **cross-platform mobile application** for managing chronic health conditions and tracking medication adherence. Built with Flutter, it provides an intuitive interface for:
+ComplyHealth is a **cross-platform mobile application** for managing chronic health conditions and tracking medication adherence. Built with Flutter, it provides an intuitive interface for:
 
 ✅ Tracking chronic conditions using ICD-10 codes
 ✅ Managing scheduled and as-needed (PRN) medications
@@ -274,7 +274,7 @@ A: Currently no (offline-only). See [Features - Future Features](FEATURES.md#clo
 
 **Version 1.0** (November 2025)
 - Initial documentation suite release
-- Covers SmartPatient v1.0 features
+- Covers ComplyHealth v1.0 features
 - Includes: User Guide, Quick Start, Visual Guide, Features Reference
 
 ### Upcoming Documentation
@@ -318,7 +318,7 @@ Contributions to improve documentation are appreciated:
 
 ### Medical Disclaimer
 
-SmartPatient is a personal health tracking tool and **is not intended to**:
+ComplyHealth is a personal health tracking tool and **is not intended to**:
 - Replace professional medical advice, diagnosis, or treatment
 - Provide medication interaction checking
 - Validate dosages or schedules
@@ -328,7 +328,7 @@ SmartPatient is a personal health tracking tool and **is not intended to**:
 
 ### Privacy Notice
 
-SmartPatient:
+ComplyHealth:
 - ✅ Stores all data locally on your device
 - ✅ Does not transmit data to external servers
 - ✅ Requires no account or email
@@ -347,7 +347,7 @@ See [Features - Security & Privacy](FEATURES.md#security--privacy) for complete 
 ### Feedback & Bug Reports
 
 Use the in-app feedback feature:
-1. Open SmartPatient
+1. Open ComplyHealth
 2. Navigate to Profile tab
 3. Tap "Feedback & Support"
 4. Submit your feedback
@@ -408,10 +408,10 @@ Help us improve these docs:
 
 ---
 
-**Welcome to SmartPatient!** 🎯
+**Welcome to ComplyHealth!** 🎯
 
 Start your health tracking journey with the [Quick Start Guide](QUICK_START.md) →
 
 ---
 
-*SmartPatient Documentation v1.0 - November 2025*
+*ComplyHealth Documentation v1.0 - November 2025*

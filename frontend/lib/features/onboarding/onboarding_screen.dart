@@ -78,7 +78,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   // Page 1: Welcome
                   OnboardingPage(
                     icon: Icons.health_and_safety,
-                    title: 'Welcome to SmartPatient',
+                    title: 'Welcome to ComplyHealth',
                     description:
                         'Your personal health companion for tracking chronic conditions and medications.',
                   ),

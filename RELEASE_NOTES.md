@@ -1,10 +1,10 @@
-# SmartPatient Release Notes
+# ComplyHealth Release Notes
 
 ## Version 1.0.0 - First Release
 
 **Release Date**: December 9, 2024
 
-We're excited to introduce SmartPatient, your personal health companion for tracking chronic conditions and managing medications with confidence.
+We're excited to introduce ComplyHealth, your personal health companion for tracking chronic conditions and managing medications with confidence.
 
 ---
 
@@ -95,7 +95,7 @@ We're actively working on exciting features for future releases:
 - Use the in-app feedback feature to report issues
 
 **Not a Substitute for Medical Advice**
-- SmartPatient is a tracking tool, not a medical device
+- ComplyHealth is a tracking tool, not a medical device
 - Always consult healthcare professionals for medical decisions
 - Do not use this app for emergency situations
 
@@ -119,4 +119,4 @@ We'd love to hear from you! Use the in-app feedback feature (Profile → Send Fe
 
 ---
 
-Thank you for choosing SmartPatient to support your health journey!
+Thank you for choosing ComplyHealth to support your health journey!

@@ -537,7 +537,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'We value your feedback! Help us improve SmartPatient by sharing your thoughts, reporting bugs, or requesting new features.',
+                    'We value your feedback! Help us improve ComplyHealth by sharing your thoughts, reporting bugs, or requesting new features.',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

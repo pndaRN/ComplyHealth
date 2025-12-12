@@ -14,9 +14,9 @@ class RotatingWelcomeMessage extends ConsumerStatefulWidget {
 class _RotatingWelcomeMessageState
     extends ConsumerState<RotatingWelcomeMessage> {
   final List<String> _defaultMessages = [
-    "Hello! Welcome to SmartPatient.",
+    "Hello! Welcome to ComplyHealth.",
     "Let's keep your health on track!",
-    "Stay healthy with SmartPatient!",
+    "Stay healthy with ComplyHealth!",
     "Your medication, your peace of mind.",
     "Managing your health, one day at a time.",
     "Welcome back! Ready to track your wellness?",

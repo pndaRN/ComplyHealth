@@ -1,10 +1,10 @@
 # Notification System Tests
 
-This document describes the comprehensive test suite for the SmartPatient notification system.
+This document describes the comprehensive test suite for the ComplyHealth notification system.
 
 ## Overview
 
-The notification system in SmartPatient handles medication reminders using local notifications. These tests validate the notification logic, medication handling, time formatting, and various edge cases.
+The notification system in ComplyHealth handles medication reminders using local notifications. These tests validate the notification logic, medication handling, time formatting, and various edge cases.
 
 ## Test File
 

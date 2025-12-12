@@ -1,6 +1,6 @@
 {
-    "name": "SmartPatient",
-    "short_name": "SmartPatient",
+    "name": "ComplyHealth",
+    "short_name": "ComplyHealth",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

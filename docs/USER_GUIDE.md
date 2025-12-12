@@ -1,4 +1,4 @@
-# SmartPatient User Guide
+# ComplyHealth User Guide
 
 **Version 1.0**
 Last Updated: November 2025
@@ -21,7 +21,7 @@ Last Updated: November 2025
 
 ## Introduction
 
-SmartPatient is a comprehensive health tracking application designed to help you manage chronic medical conditions and maintain medication adherence. The app provides an intuitive interface for tracking conditions using standardized ICD-10 codes, managing medication schedules, monitoring adherence, and accessing health information.
+ComplyHealth is a comprehensive health tracking application designed to help you manage chronic medical conditions and maintain medication adherence. The app provides an intuitive interface for tracking conditions using standardized ICD-10 codes, managing medication schedules, monitoring adherence, and accessing health information.
 
 ### Key Features
 
@@ -37,7 +37,7 @@ SmartPatient is a comprehensive health tracking application designed to help you
 
 - **Offline-First**: All data is stored locally on your device using secure storage
 - **Privacy**: Your health data stays on your device - no cloud sync or external sharing
-- **Disclaimer**: SmartPatient is a personal tracking tool and does not replace professional medical advice
+- **Disclaimer**: ComplyHealth is a personal tracking tool and does not replace professional medical advice
 
 ---
 
@@ -45,7 +45,7 @@ SmartPatient is a comprehensive health tracking application designed to help you
 
 ### First Launch
 
-When you first open SmartPatient, you'll see the Dashboard with empty state messages prompting you to:
+When you first open ComplyHealth, you'll see the Dashboard with empty state messages prompting you to:
 
 1. Add your first health condition
 2. Set up your medications
@@ -60,7 +60,7 @@ When you first open SmartPatient, you'll see the Dashboard with empty state mess
 
 ### Navigation
 
-SmartPatient uses a bottom navigation bar with four main sections:
+ComplyHealth uses a bottom navigation bar with four main sections:
 
 - **Dashboard** (Home icon): Daily overview and medication checklist
 - **Health** (Health & Safety icon): Manage your conditions
@@ -350,7 +350,7 @@ Submit feedback directly from the app:
    - Feature Request
    - General Feedback
 4. Describe your feedback
-5. Submit to help improve SmartPatient
+5. Submit to help improve ComplyHealth
 
 ### Future Features (Coming Soon)
 
@@ -363,7 +363,7 @@ The following features are in development:
 
 ## Tips & Best Practices
 
-### Getting the Most from SmartPatient
+### Getting the Most from ComplyHealth
 
 #### Daily Routine
 1. **Morning**: Check Dashboard for today's medication schedule
@@ -377,7 +377,7 @@ The following features are in development:
 - **Set Realistic Times**: Schedule doses at times you can consistently take them
 
 #### Adherence Success
-- **Set Reminders**: Use phone alarms alongside SmartPatient
+- **Set Reminders**: Use phone alarms alongside ComplyHealth
 - **Build Habits**: Take medications with daily activities (meals, bedtime)
 - **Keep It Current**: Remove discontinued medications promptly
 - **Review Weekly**: Check adherence trends every Sunday
@@ -453,7 +453,7 @@ The following features are in development:
 4. Restart the app and try again
 
 #### Lost my data
-**Important**: SmartPatient stores data locally only
+**Important**: ComplyHealth stores data locally only
 - Data is lost if app is uninstalled without backup
 - Enable device backup/sync to preserve data
 - Consider regular PDF exports as backup documentation
@@ -465,13 +465,13 @@ The following features are in development:
 ### General
 
 **Q: Is my health data shared with anyone?**
-A: No. SmartPatient stores all data locally on your device. Nothing is sent to external servers or shared without your explicit action (like exporting a PDF).
+A: No. ComplyHealth stores all data locally on your device. Nothing is sent to external servers or shared without your explicit action (like exporting a PDF).
 
-**Q: Can I use SmartPatient on multiple devices?**
+**Q: Can I use ComplyHealth on multiple devices?**
 A: Currently, no. The app is offline-only with no cloud sync. Data stays on the device where you enter it.
 
-**Q: Is SmartPatient a replacement for medical advice?**
-A: No. SmartPatient is a tracking tool only. Always consult healthcare professionals for medical decisions.
+**Q: Is ComplyHealth a replacement for medical advice?**
+A: No. ComplyHealth is a tracking tool only. Always consult healthcare professionals for medical decisions.
 
 ### Conditions
 
@@ -525,14 +525,14 @@ A: Indefinitely, until you delete medications/conditions or uninstall the app. A
 
 ### Technical
 
-**Q: Which platforms does SmartPatient support?**
-A: SmartPatient is built with Flutter and supports:
+**Q: Which platforms does ComplyHealth support?**
+A: ComplyHealth is built with Flutter and supports:
 - Android devices (phones and tablets)
 - iOS devices (iPhone and iPad)
 - Web browsers (limited features)
 
 **Q: Does the app require internet?**
-A: No. SmartPatient works completely offline. Internet is only needed for optional features like submitting feedback.
+A: No. ComplyHealth works completely offline. Internet is only needed for optional features like submitting feedback.
 
 **Q: Will my data sync if I switch phones?**
 A: No, there's no automatic sync. You'll need to manually transfer data or rebuild your medication list on the new device.
@@ -543,7 +543,7 @@ A: No, there's no automatic sync. You'll need to manually transfer data or rebui
 
 ### For Healthcare Providers
 
-SmartPatient generates PDF reports that include:
+ComplyHealth generates PDF reports that include:
 - Complete medication list with dosages and schedules
 - Adherence statistics and trends
 - Patient condition list
@@ -553,13 +553,13 @@ These reports can help facilitate medication reviews and patient consultations.
 
 ### Medical Disclaimer
 
-SmartPatient is provided for informational and tracking purposes only. It is not intended to:
+ComplyHealth is provided for informational and tracking purposes only. It is not intended to:
 - Replace professional medical advice, diagnosis, or treatment
 - Provide medication interaction checking
 - Validate dosages or schedules
 - Serve as a clinical decision support tool
 
-Always seek the advice of qualified health providers with questions regarding medical conditions and medications. Never disregard professional medical advice or delay seeking it because of information tracked in SmartPatient.
+Always seek the advice of qualified health providers with questions regarding medical conditions and medications. Never disregard professional medical advice or delay seeking it because of information tracked in ComplyHealth.
 
 ### Support & Feedback
 
@@ -571,10 +571,10 @@ Use the in-app Feedback feature:
 3. Choose appropriate category
 4. Describe your issue or suggestion
 
-Your feedback helps make SmartPatient better for everyone!
+Your feedback helps make ComplyHealth better for everyone!
 
 ---
 
-**SmartPatient** - Take control of your health, one dose at a time.
+**ComplyHealth** - Take control of your health, one dose at a time.
 
 *User Guide Version 1.0 - November 2025*

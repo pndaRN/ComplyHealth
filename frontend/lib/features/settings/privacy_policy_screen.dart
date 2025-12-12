@@ -34,7 +34,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             _buildSection(
               context,
               title: 'Information We Collect',
-              content: '''SmartPatient collects the following information that you provide:
+              content: '''ComplyHealth collects the following information that you provide:
 
 • Personal information (name, date of birth)
 • Health information (medical conditions, allergies)
@@ -94,7 +94,7 @@ This information helps us improve the app and fix issues. Crash reports are proc
             _buildSection(
               context,
               title: 'Children\'s Privacy',
-              content: '''SmartPatient is not intended for use by children under 13 years of age. We do not knowingly collect personal information from children under 13.''',
+              content: '''ComplyHealth is not intended for use by children under 13 years of age. We do not knowingly collect personal information from children under 13.''',
             ),
 
             _buildSection(
