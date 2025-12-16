@@ -19,7 +19,7 @@ workflows:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
         BUNDLE_ID: "com.complyhealth.app"
-        APP_STORE_APPLE_ID: 1234567890  # Update with your App Store Connect app ID
+        APP_STORE_APPLE_ID: 6756626678  # Update with your App Store Connect app ID
 
       flutter: stable  # or specify version like '3.24.0'
       xcode: latest  # or specify version like '15.0'
