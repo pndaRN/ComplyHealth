@@ -5,7 +5,7 @@ workflows:
     instance_type: mac_mini_m2
 
     integrations:
-      app_store_connect: codemagic  # Use the App Store Connect API key integration name configured in Codemagic
+      app_store_connect: Codemagic API  # Use the App Store Connect API key integration name configured in Codemagic
 
     environment:
       ios_signing:
