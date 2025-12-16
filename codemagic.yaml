@@ -167,11 +167,6 @@ workflows:
           cd frontend
           flutter pub run build_runner build --delete-conflicting-outputs
 
-      - name: Install pods
-        script: |
-          cd frontend/ios
-          pod install
-
       - name: Build iOS ad-hoc
         script: |
           cd frontend
