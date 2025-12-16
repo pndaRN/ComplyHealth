@@ -121,10 +121,8 @@ workflows:
 
     environment:
       ios_signing:
-        distribution_type: app_store
+        distribution_type: ad_hoc 
         bundle_identifier: com.complyhealth.app
-        certificate: DISTRIBUTION_CERTIFICATE
-        profile: APP_STORE_PROFILE
 
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
