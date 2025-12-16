@@ -43,11 +43,10 @@ workflows:
         script: |
           keychain initialize
 
-      - name: Fetch signing files
+      - name: Set up code signing from uploaded profiles 
         script: |
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create
+          # Use the manually uploaded certificates and provisioning profiles
+          xcode-project use-profiles
 
       - name: Set up signing certificate
         script: |
@@ -122,8 +121,10 @@ workflows:
 
     environment:
       ios_signing:
-        distribution_type: ad_hoc
+        distribution_type: app_store
         bundle_identifier: com.complyhealth.app
+        certificate: DISTRIBUTION_CERTIFICATE
+        profile: APP_STORE_PROFILE
 
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
