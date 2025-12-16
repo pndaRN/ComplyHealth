@@ -12,9 +12,6 @@ workflows:
         distribution_type: app_store  # or 'ad_hoc' for internal distribution
         bundle_identifier: com.complyhealth.app
 
-      groups:
-        - app_store_connect_credentials  # Create this group in Codemagic settings with your credentials
-
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
