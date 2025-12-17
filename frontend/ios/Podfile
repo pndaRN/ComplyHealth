@@ -42,12 +42,18 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+      config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+      config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'GPB_USE_PROTOBUF_FRAMEWORK_IMPORTS=1'
+      
       # Fix for firebase_crashlytics non-modular header includes
-      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+      if target.name == 'firebase_crashlytics'
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+      end
     end
 
     # Fix for Xcode 16 + BoringSSL-GRPC incompatibility
-    # https://github.com/firebase/flutterfire/issues/12960
     if target.name == 'BoringSSL-GRPC'
       target.source_build_phase.files.each do |file|
         if file.settings && file.settings['COMPILER_FLAGS']
@@ -60,7 +66,6 @@ post_install do |installer|
   end
 
   # Fix for Xcode 16 + gRPC C++ template error
-  # https://github.com/grpc/grpc/issues/39458
   ['gRPC-Core', 'gRPC-C++'].each do |grpc_pod|
     basic_seq_path = File.join(installer.sandbox.root, "#{grpc_pod}/src/core/lib/promise/detail/basic_seq.h")
     if File.exist?(basic_seq_path)
