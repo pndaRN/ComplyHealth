@@ -200,6 +200,7 @@ workflows:
 
       groups:
         - firebase_credentials
+        - appstore_credentials
 
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
