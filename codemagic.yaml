@@ -66,10 +66,6 @@ workflows:
           cd frontend
           flutter pub run build_runner build --delete-conflicting-outputs
 
-      - name: Install pods
-        script: |
-          cd frontend/ios
-          pod install
 
       - name: Flutter analyze
         script: |
@@ -253,11 +249,6 @@ workflows:
         script: |
           cd frontend
           flutter pub run build_runner build --delete-conflicting-outputs
-
-      - name: Install CocoaPods dependencies
-        script: |
-          cd frontend/ios
-          pod install
 
       - name: Flutter analyze
         script: |
