@@ -56,4 +56,13 @@ post_install do |installer|
       end
     end
   end
+
+  # Fix for Xcode 16 + gRPC-Core C++ template error
+  # https://github.com/grpc/grpc/issues/39458
+  basic_seq_path = File.join(installer.sandbox.root, 'gRPC-Core/src/core/lib/promise/detail/basic_seq.h')
+  if File.exist?(basic_seq_path)
+    content = File.read(basic_seq_path)
+    patched = content.gsub('Traits::template CallSeqFactory(', 'Traits::template CallSeqFactory<>(')
+    File.write(basic_seq_path, patched)
+  end
 end
