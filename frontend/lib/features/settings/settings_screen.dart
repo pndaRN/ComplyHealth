@@ -191,9 +191,11 @@ class SettingsScreen extends ConsumerWidget {
       final file = File('${directory.path}/complyhealth_backup.json');
       await file.writeAsString(jsonString);
 
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: 'ComplyHealth Backup',
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          subject: 'ComplyHealth Backup',
+        ),
       );
     } catch (e) {
       if (context.mounted) {
