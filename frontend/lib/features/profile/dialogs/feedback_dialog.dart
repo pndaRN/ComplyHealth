@@ -112,7 +112,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
               const SizedBox(height: 20),
               // Feedback Type Dropdown
               DropdownButtonFormField<String>(
-                initialValue: _selectedType,
+                value: _selectedType,
                 decoration: InputDecoration(
                   labelText: 'Feedback Type',
                   prefixIcon: const Icon(Icons.category),

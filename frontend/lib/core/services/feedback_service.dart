@@ -12,6 +12,21 @@ class FeedbackService {
   final String _boxName = 'feedback';
   final Uuid _uuid = const Uuid();
 
+  /// Map feedback type to Firestore collection name
+  String _getCollectionName(String type) {
+    switch (type) {
+      case 'Bug Report':
+        return 'bugReports';
+      case 'Feature Request':
+        return 'featureRequests';
+      case 'Request Condition Addition':
+        return 'conditionRequests';
+      case 'General Feedback':
+      default:
+        return 'feedback';
+    }
+  }
+
   /// Submit feedback - tries Firestore first, queues locally if offline
   Future<void> submitFeedback({
     required String type,
@@ -52,7 +67,8 @@ class FeedbackService {
 
   /// Sync feedback to Firestore
   Future<void> _syncToFirestore(local_feedback.Feedback feedback) async {
-    await _firestore.collection('feedback').add(feedback.toFirestore());
+    final collection = _getCollectionName(feedback.type);
+    await _firestore.collection(collection).add(feedback.toFirestore());
   }
 
   /// Mark feedback as synced in local storage
