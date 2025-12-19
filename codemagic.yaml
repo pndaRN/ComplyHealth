@@ -59,6 +59,11 @@ workflows:
           cd frontend
           flutter packages pub get
 
+      - name: Update Local databases
+        script: |
+          chmod +x ./run_with_update
+          ./run_with_update
+
       - name: Generate Hive type adapters
         script: |
           cd frontend
@@ -170,6 +175,11 @@ workflows:
         script: |
           cd frontend
           flutter packages pub get
+
+      - name: Update Local databases
+        script: |
+          chmod +x ./run_with_update
+          ./run_with_update
 
       - name: Generate Hive type adapters
         script: |
