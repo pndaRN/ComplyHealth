@@ -24,9 +24,7 @@ workflows:
 
     triggering:
       events:
-        - push
         - tag
-        - pull_request
       branch_patterns:
         - pattern: 'main'
           include: true
@@ -116,78 +114,6 @@ workflows:
         # Optional: Automatically submit for App Store review
         # submit_to_app_store: true
 
-  ios-adhoc-workflow:
-    name: iOS Ad-Hoc Build (Internal Distribution)
-    max_build_duration: 120
-    instance_type: mac_mini_m2
-
-    environment:
-      ios_signing:
-        distribution_type: ad_hoc 
-        bundle_identifier: com.complyhealth.app
-
-      vars:
-        XCODE_WORKSPACE: "Runner.xcworkspace"
-        XCODE_SCHEME: "Runner"
-        BUNDLE_ID: "com.complyhealth.app"
-
-      flutter: stable
-      xcode: latest
-      cocoapods: default
-
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: 'develop'
-          include: true
-          source: true
-        - pattern: 'feature/*'
-          include: true
-          source: true
-
-    scripts:
-      - name: Set up keychain
-        script: |
-          keychain initialize
-
-      - name: Set up signing certificate
-        script: |
-          keychain add-certificates
-
-      - name: Set up code signing settings
-        script: |
-          xcode-project use-profiles
-
-      - name: Get Flutter packages
-        script: |
-          cd frontend
-          flutter packages pub get
-
-      - name: Generate Hive adapters
-        script: |
-          cd frontend
-          flutter pub run build_runner build --delete-conflicting-outputs
-
-      - name: Build iOS ad-hoc
-        script: |
-          cd frontend
-          flutter build ipa \
-            --release \
-            --export-options-plist=/Users/builder/export_options.plist
-
-    artifacts:
-      - frontend/build/ios/ipa/*.ipa
-      - /tmp/xcodebuild_logs/*.log
-
-    publishing:
-      email:
-        recipients:
-          - pndaRN.dev@proton.me
-        notify:
-          success: true
-          failure: true
-
   ios-firebase-distribution:
     name: iOS Firebase App Distribution
     max_build_duration: 120
@@ -213,7 +139,6 @@ workflows:
 
     triggering:
       events:
-        - push
         - tag
       branch_patterns:
         - pattern: 'develop'
@@ -263,43 +188,6 @@ workflows:
           flutter test
         ignore_failure: true
 
-      - name: Generate release notes from git commits
-        script: |
-          cd frontend
-
-          # Check if previous tag exists
-          if git describe --tags --abbrev=0 HEAD^ 2>/dev/null; then
-            prev_tag=$(git describe --tags --abbrev=0 HEAD^)
-            echo "Generating release notes from $prev_tag to HEAD"
-            echo "ComplyHealth iOS Beta" > release_notes.txt
-            echo "" >> release_notes.txt
-            echo "Build: #$CM_BUILD_ID" >> release_notes.txt
-            echo "Branch: $CM_BRANCH" >> release_notes.txt
-            if [ -n "$CM_TAG" ]; then
-              echo "Tag: $CM_TAG" >> release_notes.txt
-            fi
-            echo "Commit: ${CM_COMMIT:0:8}" >> release_notes.txt
-            echo "" >> release_notes.txt
-            echo "What's New:" >> release_notes.txt
-            git log --pretty=format:"- %s" "$prev_tag"..HEAD >> release_notes.txt
-          else
-            # Fallback: use recent commits
-            echo "ComplyHealth iOS Beta" > release_notes.txt
-            echo "" >> release_notes.txt
-            echo "Build: #$CM_BUILD_ID" >> release_notes.txt
-            echo "Branch: $CM_BRANCH" >> release_notes.txt
-            if [ -n "$CM_TAG" ]; then
-              echo "Tag: $CM_TAG" >> release_notes.txt
-            fi
-            echo "Commit: ${CM_COMMIT:0:8}" >> release_notes.txt
-            echo "" >> release_notes.txt
-            echo "Recent Changes:" >> release_notes.txt
-            git log --pretty=format:"- %s" -10 >> release_notes.txt
-          fi
-
-          echo "Release notes generated:"
-          cat release_notes.txt
-
       - name: Build iOS IPA for distribution
         script: |
           cd frontend
@@ -311,7 +199,6 @@ workflows:
       - frontend/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
       - frontend/flutter_drive.log
-      - frontend/release_notes.txt
 
     publishing:
       firebase:

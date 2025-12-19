@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:818057086992:android:680c4bb85fb9132e342295",
+        "mobilesdk_app_id": "1:818057086992:android:50d734df9590e6b1342295",
         "android_client_info": {
-          "package_name": "com.example.smartpatient"
+          "package_name": "com.complyhealth.app"
         }
       },
       "oauth_client": [],
