@@ -1,7 +1,5 @@
 name: complyhealth
 description: "A comprehensive medical condition and medication tracker"
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
@@ -19,7 +17,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # To run the Flutter app with the pre-update script, use:
 # ./run_with_update.sh
 
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ^3.9.2
