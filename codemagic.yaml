@@ -208,99 +208,99 @@ workflows:
           failure: true
           
   # ========================================
-  # Android Production (Google Play)
+  # Android Production (Google Play, still need to set up play store)
   # ========================================
-  android-workflow:
-    name: Android Production
-    max_build_duration: 120
-    instance_type: linux_x2
+  #android-workflow:
+  #  name: Android Production
+  #  max_build_duration: 120
+  #  instance_type: linux_x2
 
-    environment:
-      android_signing:
-        - complyhealth_keystore  # Name of your keystore uploaded to CodeMagic
+  #  environment:
+  #    android_signing:
+  #      - complyhealth_keystore  # Name of your keystore uploaded to CodeMagic
 
-      groups:
-        - google_play_credentials  # Contains GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+  #    groups:
+  #      - google_play_credentials  # Contains GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
 
-      vars:
-        PACKAGE_NAME: "com.complyhealth.app"
+  #    vars:
+  #      PACKAGE_NAME: "com.complyhealth.app"
 
-      flutter: stable
-      java: 17  
+  #    flutter: stable
+  #    java: 17  
 
-    triggering:
-      events:
-        - push
-        - tag
-      branch_patterns:
-        - pattern: 'main'
-          include: true
-          source: true
-      tag_patterns:
-        - pattern: 'v*'
-          include: true
-      cancel_previous_builds: true
+  #  triggering:
+  #    events:
+  #      - push
+  #      - tag
+  #    branch_patterns:
+  #      - pattern: 'main'
+  #        include: true
+  #        source: true
+  #    tag_patterns:
+  #      - pattern: 'v*'
+  #        include: true
+  #    cancel_previous_builds: true
 
-    scripts:
-      - name: Set up local.properties for Android signing
-        script: |
-          cd frontend/android
-          cat >> local.properties << EOF
-          flutter.sdk=$HOME/programs/flutter
-          sdk.dir=$ANDROID_SDK_ROOT
-          EOF
+  #  scripts:
+  #    - name: Set up local.properties for Android signing
+  #      script: |
+  #        cd frontend/android
+  #        cat >> local.properties << EOF
+  #        flutter.sdk=$HOME/programs/flutter
+  #        sdk.dir=$ANDROID_SDK_ROOT
+  #        EOF
 
-      - name: Get Flutter packages
-        script: |
-          cd frontend
-          flutter packages pub get
+  #    - name: Get Flutter packages
+  #      script: |
+  #        cd frontend
+  #        flutter packages pub get
 
-      - name: Update local databases
-        script: |
-          if [ -f "./run_with_update" ]; then
-            chmod +x ./run_with_update
-            ./run_with_update
-          fi
+  #    - name: Update local databases
+  #      script: |
+  #        if [ -f "./run_with_update" ]; then
+  #          chmod +x ./run_with_update
+  #          ./run_with_update
+  #        fi
 
-      - name: Generate Hive type adapters
-        script: |
-          cd frontend
-          flutter pub run build_runner build --delete-conflicting-outputs
+  #    - name: Generate Hive type adapters
+  #      script: |
+  #        cd frontend
+  #        flutter pub run build_runner build --delete-conflicting-outputs
 
-      - name: Flutter analyze
-        script: |
-          cd frontend
-          flutter analyze
+  #    - name: Flutter analyze
+  #      script: |
+  #        cd frontend
+  #        flutter analyze
 
-      - name: Flutter test
-        script: |
-          cd frontend
-          flutter test
-        ignore_failure: false  # Block build if tests fail
+  #    - name: Flutter test
+  #      script: |
+  #        cd frontend
+  #        flutter test
+  #      ignore_failure: false  # Block build if tests fail
 
-      - name: Build Android App Bundle
-        script: |
-          cd frontend
-          flutter build appbundle --release
+  #    - name: Build Android App Bundle
+  #      script: |
+  #        cd frontend
+  #        flutter build appbundle --release
 
-    artifacts:
-      - frontend/build/app/outputs/**/*.aab
-      - frontend/build/app/outputs/**/*.apk
-      - frontend/build/app/outputs/**/mapping.txt  # ProGuard mapping for crash reports
+  #  artifacts:
+  #    - frontend/build/app/outputs/**/*.aab
+  #    - frontend/build/app/outputs/**/*.apk
+  #    - frontend/build/app/outputs/**/mapping.txt  # ProGuard mapping for crash reports
 
-    publishing:
-      email:
-        recipients:
-          - pndaRN.dev@proton.me
-        notify:
-          success: true
-          failure: true
+  #  publishing:
+  #    email:
+  #      recipients:
+  #        - pndaRN.dev@proton.me
+  #      notify:
+  #        success: true
+  #        failure: true
 
-      google_play:
-        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
-        track: internal  # Options: internal, alpha, beta, production
-        submit_as_draft: false  # Set to true to manually publish
-        in_app_update_priority: 3  # 0-5, controls update urgency
+  #    google_play:
+  #      credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+  #      track: internal  # Options: internal, alpha, beta, production
+  #      submit_as_draft: false  # Set to true to manually publish
+  #      in_app_update_priority: 3  # 0-5, controls update urgency
 
   # ========================================
   # Android Firebase Distribution (Beta Testing)
