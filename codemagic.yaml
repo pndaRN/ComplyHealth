@@ -1,15 +1,18 @@
 workflows:
+  # ========================================
+  # iOS App Store Workflow
+  # ========================================
   ios-workflow:
     name: iOS Workflow
     max_build_duration: 120
     instance_type: mac_mini_m2
 
     integrations:
-      app_store_connect: App Store Connect  # Use the App Store Connect API key integration name configured in Codemagic
+      app_store_connect: App Store Connect
 
     environment:
       ios_signing:
-        distribution_type: app_store  # or 'ad_hoc' for internal distribution
+        distribution_type: app_store
         bundle_identifier: com.complyhealth.app
 
       vars:
@@ -18,41 +21,32 @@ workflows:
         BUNDLE_ID: "com.complyhealth.app"
         APP_STORE_APPLE_ID: 6756626678  # Update with your App Store Connect app ID
 
-      flutter: stable  # or specify version like '3.24.0'
-      xcode: latest  # or specify version like '15.0'
+      flutter: stable
+      xcode: latest
       cocoapods: default
 
     triggering:
       events:
+        - push
         - tag
       branch_patterns:
         - pattern: 'main'
           include: true
           source: true
-        - pattern: 'develop'
-          include: true
-          source: true
       tag_patterns:
         - pattern: 'v*'
           include: true
+      cancel_previous_builds: true
 
     scripts:
       - name: Set up keychain for code signing
-        script: |
-          keychain initialize
-
-      - name: Set up code signing from uploaded profiles 
-        script: |
-          # Use the manually uploaded certificates and provisioning profiles
-          xcode-project use-profiles
+        script: keychain initialize
 
       - name: Set up signing certificate
-        script: |
-          keychain add-certificates
-
-      - name: Set up code signing settings on Xcode project
-        script: |
-          xcode-project use-profiles
+        script: keychain add-certificates
+          
+      - name: Set up code signing from uploaded profiles 
+        script: xcode-project use-profiles
 
       - name: Get Flutter packages
         script: |
@@ -61,14 +55,17 @@ workflows:
 
       - name: Update Local databases
         script: |
-          chmod +x ./run_with_update
-          ./run_with_update
-
+          if [ -f "./run_with_update" ]; then
+            chmod +x ./run_with_update
+            ./run_with_update
+          else
+            echo "No update script found, skipping..."
+          fi
+          
       - name: Generate Hive type adapters
         script: |
           cd frontend
           flutter pub run build_runner build --delete-conflicting-outputs
-
 
       - name: Flutter analyze
         script: |
@@ -79,21 +76,13 @@ workflows:
         script: |
           cd frontend
           flutter test
-        ignore_failure: true  # Set to false if you want tests to block the build
-
-      - name: Clean Flutter build
-        script: |
-            cd frontend
-            flutter clean
-            flutter pub get
+        ignore_failure: false
 
       - name: Build iOS app
         script: |
           cd frontend
-          flutter build ipa \
-            --release \
-            --export-options-plist=/Users/builder/export_options.plist
-
+          flutter build ipa --release
+          
     artifacts:
       - frontend/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
@@ -108,19 +97,14 @@ workflows:
           failure: true
 
       app_store_connect:
-        # Submit to App Store Connect
-        # Requires APP_STORE_CONNECT_ISSUER_ID, APP_STORE_CONNECT_KEY_ID,
-        # and APP_STORE_CONNECT_PRIVATE_KEY environment variables
         auth: integration
-        
-        # Automatically submit for beta testing
         submit_to_testflight: true
         
-        # Optional: Automatically submit for App Store review
-        # submit_to_app_store: true
-
+  # ========================================
+  # iOS Firebase Distribution (Beta Testing)
+  # ========================================
   ios-firebase-distribution:
-    name: iOS Firebase App Distribution
+    name: iOS Beta (Firebase)
     max_build_duration: 120
     instance_type: mac_mini_m2
 
@@ -144,12 +128,13 @@ workflows:
 
     triggering:
       events:
+        - push
         - tag
       branch_patterns:
         - pattern: 'develop'
           include: true
           source: true
-        - pattern: 'release/*'
+        - pattern: 'beta/*'
           include: true
           source: true
       tag_patterns:
@@ -157,19 +142,17 @@ workflows:
           include: true
         - pattern: 'v*-beta'
           include: true
+      cancel_previous_builds: true
 
     scripts:
       - name: Set up keychain for code signing
-        script: |
-          keychain initialize
+        script: keychain initialize
 
       - name: Set up signing certificate
-        script: |
-          keychain add-certificates
+        script: keychain add-certificates
 
       - name: Set up code signing settings on Xcode project
-        script: |
-          xcode-project use-profiles
+        script: xcode-project use-profiles
 
       - name: Get Flutter packages
         script: |
@@ -178,9 +161,10 @@ workflows:
 
       - name: Update Local databases
         script: |
-          chmod +x ./run_with_update
-          ./run_with_update
-
+          if [ -f "./run_with_update" ]; then
+            chmod +x ./run_with_update
+            ./run_with_update
+          fi
       - name: Generate Hive type adapters
         script: |
           cd frontend
@@ -201,9 +185,7 @@ workflows:
       - name: Build iOS IPA for distribution
         script: |
           cd frontend
-          flutter build ipa \
-            --release \
-            --export-options-plist=/Users/builder/export_options.plist
+          flutter build ipa --release
 
     artifacts:
       - frontend/build/ios/ipa/*.ipa
@@ -215,6 +197,8 @@ workflows:
         firebase_service_account: $FIREBASE_SERVICE_ACCOUNT
         ios:
           app_id: $FIREBASE_IOS_APP_ID
+          groups:
+            - beta-testers
 
       email:
         recipients:
@@ -222,3 +206,199 @@ workflows:
         notify:
           success: true
           failure: true
+          
+  # ========================================
+  # Android Production (Google Play)
+  # ========================================
+  android-workflow:
+    name: Android Production
+    max_build_duration: 120
+    instance_type: linux_x2
+
+    environment:
+      android_signing:
+        - complyhealth_keystore  # Name of your keystore uploaded to CodeMagic
+
+      groups:
+        - google_play_credentials  # Contains GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+
+      vars:
+        PACKAGE_NAME: "com.complyhealth.app"
+
+      flutter: stable
+      java: 17  
+
+    triggering:
+      events:
+        - push
+        - tag
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+          source: true
+      tag_patterns:
+        - pattern: 'v*'
+          include: true
+      cancel_previous_builds: true
+
+    scripts:
+      - name: Set up local.properties for Android signing
+        script: |
+          cd frontend/android
+          cat >> local.properties << EOF
+          flutter.sdk=$HOME/programs/flutter
+          sdk.dir=$ANDROID_SDK_ROOT
+          EOF
+
+      - name: Get Flutter packages
+        script: |
+          cd frontend
+          flutter packages pub get
+
+      - name: Update local databases
+        script: |
+          if [ -f "./run_with_update" ]; then
+            chmod +x ./run_with_update
+            ./run_with_update
+          fi
+
+      - name: Generate Hive type adapters
+        script: |
+          cd frontend
+          flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Flutter analyze
+        script: |
+          cd frontend
+          flutter analyze
+
+      - name: Flutter test
+        script: |
+          cd frontend
+          flutter test
+        ignore_failure: false  # Block build if tests fail
+
+      - name: Build Android App Bundle
+        script: |
+          cd frontend
+          flutter build appbundle --release
+
+    artifacts:
+      - frontend/build/app/outputs/**/*.aab
+      - frontend/build/app/outputs/**/*.apk
+      - frontend/build/app/outputs/**/mapping.txt  # ProGuard mapping for crash reports
+
+    publishing:
+      email:
+        recipients:
+          - pndaRN.dev@proton.me
+        notify:
+          success: true
+          failure: true
+
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal  # Options: internal, alpha, beta, production
+        submit_as_draft: false  # Set to true to manually publish
+        in_app_update_priority: 3  # 0-5, controls update urgency
+
+  # ========================================
+  # Android Firebase Distribution (Beta Testing)
+  # ========================================
+  android-firebase-distribution:
+    name: Android Beta (Firebase)
+    max_build_duration: 120
+    instance_type: linux_x2
+
+    environment:
+      android_signing:
+        - complyhealth_keystore
+
+      groups:
+        - firebase_credentials  # Contains FIREBASE_SERVICE_ACCOUNT and FIREBASE_ANDROID_APP_ID
+
+      vars:
+        PACKAGE_NAME: "com.complyhealth.app"
+
+      flutter: stable
+      java: 17
+
+    triggering:
+      events:
+        - push
+        - tag
+      branch_patterns:
+        - pattern: 'develop'
+          include: true
+          source: true
+        - pattern: 'beta/*'
+          include: true
+          source: true
+      tag_patterns:
+        - pattern: 'beta-*'
+          include: true
+        - pattern: 'v*-beta'
+          include: true
+      cancel_previous_builds: true
+
+    scripts:
+      - name: Set up local.properties
+        script: |
+          cd frontend/android
+          cat >> local.properties << EOF
+          flutter.sdk=$HOME/programs/flutter
+          sdk.dir=$ANDROID_SDK_ROOT
+          EOF
+
+      - name: Get Flutter packages
+        script: |
+          cd frontend
+          flutter packages pub get
+
+      - name: Update local databases
+        script: |
+          if [ -f "./run_with_update" ]; then
+            chmod +x ./run_with_update
+            ./run_with_update
+          fi
+
+      - name: Generate Hive type adapters
+        script: |
+          cd frontend
+          flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Flutter analyze
+        script: |
+          cd frontend
+          flutter analyze
+        ignore_failure: true
+
+      - name: Flutter test
+        script: |
+          cd frontend
+          flutter test
+        ignore_failure: true
+
+      - name: Build Android APK for distribution
+        script: |
+          cd frontend
+          flutter build apk --release
+
+    artifacts:
+      - frontend/build/app/outputs/**/*.apk
+      - frontend/build/app/outputs/**/mapping.txt
+
+    publishing:
+      firebase:
+        firebase_service_account: $FIREBASE_SERVICE_ACCOUNT
+        android:
+          app_id: $FIREBASE_ANDROID_APP_ID
+          groups:
+            - beta-testers  # Must match group name in Firebase Console
+
+      email:
+        recipients:
+          - pndaRN.dev@proton.me
+        notify:
+          success: true
+          failure: true  
