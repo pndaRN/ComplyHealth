@@ -112,14 +112,8 @@ workflows:
     instance_type: mac_mini_m2
 
     environment:
-      ios_signing:
-        distribution_type: ad_hoc
-        bundle_identifier: com.complyhealth.app
-        profile_name: Ad_hoc
-
       groups:
         - firebase_credentials
-        - appstore_credentials
 
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
