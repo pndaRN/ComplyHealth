@@ -83,10 +83,13 @@ workflows:
           cd frontend
           flutter build ipa --release
           
+          echo "=== Checking build outputs ==="
+          ls -lah build/ios/ipa/ || echo "No IPA directory found"
+          find build/ios -name "*.ipa" -type f || echo "No IPA files found"
+          
     artifacts:
       - frontend/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-      - frontend/flutter_drive.log
 
     publishing:
       email:
@@ -186,19 +189,22 @@ workflows:
         script: |
           cd frontend
           flutter build ipa --release
+          
+          echo "=== Checking build outputs ==="
+          ls -lah build/ios/ipa/ || echo "No IPA directory found"
+          find build/ios -name "*.ipa" -type f || echo "No IPA files found"
 
     artifacts:
       - frontend/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-      - frontend/flutter_drive.log
-
+      
     publishing:
       firebase:
         firebase_service_account: $FIREBASE_SERVICE_ACCOUNT
         ios:
           app_id: $FIREBASE_IOS_APP_ID
           groups:
-            - beta-testers
+            - iOS Testers
 
       email:
         recipients:
@@ -385,8 +391,9 @@ workflows:
           flutter build apk --release
 
     artifacts:
-      - frontend/build/app/outputs/**/*.apk
-      - frontend/build/app/outputs/**/mapping.txt
+      - frontend/build/app/outputs/flutter-apk/*.apk
+      - frontend/build/app/outputs/bundle/release/*.aab
+      - frontend/build/app/outputs/mapping.txt
 
     publishing:
       firebase:
@@ -394,7 +401,7 @@ workflows:
         android:
           app_id: $FIREBASE_ANDROID_APP_ID
           groups:
-            - beta-testers  # Must match group name in Firebase Console
+            - Android Testers
 
       email:
         recipients:
