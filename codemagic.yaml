@@ -188,7 +188,7 @@ workflows:
       - name: Build iOS IPA for distribution
         script: |
           cd frontend
-          flutter build ipa --release
+          flutter build ipa --release --export-method ad-hoc
           
           echo "=== Checking build outputs ==="
           ls -lah build/ios/ipa/ || echo "No IPA directory found"
