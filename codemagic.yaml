@@ -143,7 +143,9 @@ workflows:
 
     scripts:
       # Removed manual keychain/certificate setup - using automatic signing instead
-      
+      - name: Set up code signing settings on Xcode project
+        script : xcode-project use-profiles
+
       - name: Get Flutter packages
         script: |
           cd frontend
