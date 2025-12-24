@@ -419,16 +419,6 @@ class _TodaysMedicationsWidgetState
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            // Large checkbox
-            SizedBox(
-              width: 28,
-              height: 28,
-              child: Checkbox(
-                value: false,
-                onChanged: (_) => _quickMarkAsTaken(instance),
-              ),
-            ),
-            const SizedBox(width: 12),
             // Medication icon
             Container(
               width: 40,
@@ -487,43 +477,23 @@ class _TodaysMedicationsWidgetState
                 ],
               ),
             ),
-            // Action buttons
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ElevatedButton(
-                  onPressed: () => _quickMarkAsTaken(instance),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text(
-                    'Mark Taken',
-                    style: TextStyle(fontSize: 12),
-                  ),
+            // Action button
+            ElevatedButton(
+              onPressed: () => _quickMarkAsTaken(instance),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
                 ),
-                TextButton(
-                  onPressed: () => _openDetailedDialog(instance),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
-                    ),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text(
-                    'Details',
-                    style: TextStyle(fontSize: 11),
-                  ),
-                ),
-              ],
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text(
+                'Mark Taken',
+                style: TextStyle(fontSize: 13),
+              ),
             ),
           ],
         ),

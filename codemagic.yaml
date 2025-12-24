@@ -120,7 +120,7 @@ workflows:
         BUNDLE_ID: "com.complyhealth.app"
 
       flutter: stable
-      xcode: latest
+      xcode: 16.2
       cocoapods: default
 
     triggering:
