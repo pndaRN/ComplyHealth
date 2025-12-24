@@ -106,6 +106,11 @@ workflows:
       app_store_connect: App Store Connect
 
     environment:
+      # Use automatic signing - CodeMagic will fetch certificates via App Store Connect
+      ios_signing:
+        distribution_type: ad_hoc
+        bundle_identifier: com.complyhealth.app
+
       groups:
         - firebase_credentials
 
@@ -137,15 +142,8 @@ workflows:
       cancel_previous_builds: true
 
     scripts:
-      - name: Set up keychain for code signing
-        script: keychain initialize
-
-      - name: Set up signing certificate
-        script: keychain add-certificates
-
-      - name: Set up code signing settings on Xcode project
-        script: xcode-project use-profiles
-
+      # Removed manual keychain/certificate setup - using automatic signing instead
+      
       - name: Get Flutter packages
         script: |
           cd frontend
@@ -157,6 +155,7 @@ workflows:
             chmod +x ./run_with_update
             ./run_with_update
           fi
+          
       - name: Generate Hive type adapters
         script: |
           cd frontend
