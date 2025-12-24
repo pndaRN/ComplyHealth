@@ -306,7 +306,7 @@ workflows:
 
     environment:
       android_signing:
-        - complyhealth_keystore
+        - ComplyHealth Android
 
       groups:
         - firebase_credentials  # Contains FIREBASE_SERVICE_ACCOUNT and FIREBASE_ANDROID_APP_ID
