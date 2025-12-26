@@ -7,6 +7,9 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
 
+    integrations:
+      app_store_connect: App Store Connect
+
     environment:
       flutter: stable
       xcode: latest
@@ -14,12 +17,12 @@ workflows:
       groups:
         - appstore_credentials
       ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.complyhealth.app
         provisioning_profiles:
           - APP_STORE_PROFILE
+        certificates:
+          - DISTRIBUTION_APP_STORE
       vars:
-        XCODE_WORKSPACE: "ios/Runner.xcworkspace"
+        XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
 
     triggering:
@@ -69,6 +72,9 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
 
+    integrations:
+      app_store_connect: App Store Connect
+
     environment:
       flutter: stable
       xcode: latest
@@ -76,12 +82,12 @@ workflows:
       groups:
         - firebase_credentials
       ios_signing:
-        distribution_type: ad_hoc
-        bundle_identifier: com.complyhealth.app
         provisioning_profiles:
           - AD_HOC
+        certificates:
+          - DISTRIBUTION_CERTIFICATE
       vars:
-        XCODE_WORKSPACE: "ios/Runner.xcworkspace"
+        XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
 
     triggering:
