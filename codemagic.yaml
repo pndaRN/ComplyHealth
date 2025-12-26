@@ -124,8 +124,9 @@ workflows:
       - frontend/flutter_drive.log
 
     publishing:
-      firebase_app_distribution:
-        app: $FIREBASE_IOS_APP_ID
-        service_credentials_file: $FIREBASE_SERVICE_ACCOUNT
-        groups:
-          - iOS Testers
+      firebase:
+        firebase_service_account: $FIREBASE_SERVICE_ACCOUNT
+        ios:
+          app_id: $FIREBASE_IOS_APP_ID
+          groups:
+            - iOS Testers
