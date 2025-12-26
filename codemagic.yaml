@@ -41,7 +41,7 @@ workflows:
       - name: Get Flutter packages
         script: |
           cd frontend
-          flutter packages pub get
+          flutter pub get
 
       - name: Install CocoaPods dependencies
         script: |
@@ -59,6 +59,12 @@ workflows:
       - frontend/flutter_drive.log
 
     publishing:
+      email:
+        recipients:
+          - pndaRN.dev@proton.me
+        notify:
+          success: true
+          failure: true
       app_store_connect:
         auth: integration
         submit_to_testflight: true
@@ -106,7 +112,7 @@ workflows:
       - name: Get Flutter packages
         script: |
           cd frontend
-          flutter packages pub get
+          flutter pub get
 
       - name: Install CocoaPods dependencies
         script: |
@@ -124,6 +130,12 @@ workflows:
       - frontend/flutter_drive.log
 
     publishing:
+      email:
+        recipients:
+          - pndaRN.dev@proton.me
+        notify:
+          success: true
+          failure: true
       firebase:
         firebase_service_account: $FIREBASE_SERVICE_ACCOUNT
         ios:
