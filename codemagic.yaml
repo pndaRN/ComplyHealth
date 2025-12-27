@@ -51,7 +51,7 @@ workflows:
       - name: Flutter build ipa
         script: |
           cd frontend
-          flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+          flutter build ipa --release --build-number=$BUILD_NUMBER --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
       - frontend/build/ios/ipa/*.ipa
@@ -119,15 +119,23 @@ workflows:
           cd frontend/ios
           pod install
 
+      - name: Extract release notes from CHANGELOG
+        script: |
+          # Extract the latest version section (between first two ## headers)
+          sed -n '/^## \[.*\] -/,/^## \[.*\] -/p' CHANGELOG.md | head -n -1 | tail -n +1 > release_notes.txt
+          echo "Release notes extracted:"
+          cat release_notes.txt
+
       - name: Flutter build ipa
         script: |
           cd frontend
-          flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+          flutter build ipa --release --build-number=$BUILD_NUMBER --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
       - frontend/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
       - frontend/flutter_drive.log
+      - release_notes.txt
 
     publishing:
       email:
@@ -142,3 +150,4 @@ workflows:
           app_id: $FIREBASE_IOS_APP_ID
           groups:
             - ios-testers
+          release_notes_file: release_notes.txt
