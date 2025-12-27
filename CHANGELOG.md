@@ -10,6 +10,8 @@ All notable changes to ComplyHealth will be documented in this file.
 - Swipe-to-skip gesture for Due Now medications
 - Notification tap navigates to dashboard and refreshes medications
 - Auto-hiding scrollbar in medication add dialog
+- Auto-generated release notes from CHANGELOG for Firebase builds
+- Auto-incrementing build numbers in CI/CD
 
 ### Improved
 - Text truncation for long medication names on dashboard
