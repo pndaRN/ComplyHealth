@@ -91,7 +91,7 @@ workflows:
         provisioning_profiles:
           - AD_HOC
         certificates:
-          - DISTRIBUTION_CERTIFICATE
+          - DISTRIBUTION_FIREBASE
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
