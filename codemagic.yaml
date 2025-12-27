@@ -141,4 +141,4 @@ workflows:
         ios:
           app_id: $FIREBASE_IOS_APP_ID
           groups:
-            - iOS Testers
+            - ios-testers
