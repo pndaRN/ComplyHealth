@@ -5,7 +5,7 @@ import 'timing_preset_buttons.dart';
 import 'time_picker_section.dart';
 
 /// Reusable form content for medication dialogs (add/edit)
-class MedicationFormContent extends StatelessWidget {
+class MedicationFormContent extends StatefulWidget {
   final TextEditingController nameController;
   final TextEditingController dosageController;
   final List<Disease> conditions;
@@ -32,50 +32,71 @@ class MedicationFormContent extends StatelessWidget {
   });
 
   @override
+  State<MedicationFormContent> createState() => _MedicationFormContentState();
+}
+
+class _MedicationFormContentState extends State<MedicationFormContent> {
+  bool _showScrollbar = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _showScrollbar = false;
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
+    return Scrollbar(
+      thumbVisibility: _showScrollbar,
+      child: SingleChildScrollView(
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
-            controller: nameController,
+            controller: widget.nameController,
             decoration: const InputDecoration(labelText: 'Medication Name'),
           ),
           const SizedBox(height: 12),
           TextField(
-            controller: dosageController,
+            controller: widget.dosageController,
             decoration: const InputDecoration(labelText: 'Dosage'),
           ),
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 16),
           TimingPresetButtons(
-            scheduledTimes: scheduledTimes,
-            isPRN: isPRN,
+            scheduledTimes: widget.scheduledTimes,
+            isPRN: widget.isPRN,
             onTimeAdded: (time) {
               // Add time if it doesn't exist
-              final exists = scheduledTimes.any(
+              final exists = widget.scheduledTimes.any(
                 (t) => t.hour == time.hour && t.minute == time.minute,
               );
               if (!exists) {
-                onTimesChanged([...scheduledTimes, time]);
+                widget.onTimesChanged([...widget.scheduledTimes, time]);
               }
             },
             onTimeRemoved: (time) {
               // Remove time
-              final updated = scheduledTimes
+              final updated = widget.scheduledTimes
                   .where(
                     (t) => !(t.hour == time.hour && t.minute == time.minute),
                   )
                   .toList();
-              onTimesChanged(updated);
+              widget.onTimesChanged(updated);
             },
-            onPRNChanged: onPRNChanged,
+            onPRNChanged: widget.onPRNChanged,
           ),
-          if (isPRN) ...[
+          if (widget.isPRN) ...[
             const SizedBox(height: 16),
             TextField(
-              controller: maxDosesController,
+              controller: widget.maxDosesController,
               decoration: const InputDecoration(
                 labelText: 'Maximum doses per day',
                 hintText: 'e.g., 4',
@@ -88,22 +109,22 @@ class MedicationFormContent extends StatelessWidget {
           ] else ...[
             const SizedBox(height: 16),
             TimePickerSection(
-              selectedTimes: scheduledTimes,
+              selectedTimes: widget.scheduledTimes,
               onAddTime: (time) {
-                final exists = scheduledTimes.any(
+                final exists = widget.scheduledTimes.any(
                   (t) => t.hour == time.hour && t.minute == time.minute,
                 );
                 if (!exists) {
-                  onTimesChanged([...scheduledTimes, time]);
+                  widget.onTimesChanged([...widget.scheduledTimes, time]);
                 }
               },
               onRemoveTime: (time) {
-                final updated = scheduledTimes
+                final updated = widget.scheduledTimes
                     .where(
                       (t) => !(t.hour == time.hour && t.minute == time.minute),
                     )
                     .toList();
-                onTimesChanged(updated);
+                widget.onTimesChanged(updated);
               },
             ),
           ],
@@ -120,15 +141,15 @@ class MedicationFormContent extends StatelessWidget {
               child: Wrap(
                 spacing: 8,
                 runSpacing: 4,
-                children: selectedConditions.isEmpty
+                children: widget.selectedConditions.isEmpty
                     ? [
                         const Text(
                           'Tap to select conditions',
                           style: TextStyle(color: Colors.grey),
                         ),
                       ]
-                    : selectedConditions.map((conditionName) {
-                        final condition = conditions.firstWhere(
+                    : widget.selectedConditions.map((conditionName) {
+                        final condition = widget.conditions.firstWhere(
                           (c) => c.name == conditionName,
                           orElse: () => Disease(
                             code: '',
@@ -149,9 +170,9 @@ class MedicationFormContent extends StatelessWidget {
                           deleteIcon: const Icon(Icons.close, size: 16),
                           onDeleted: () {
                             final updated = List<String>.from(
-                              selectedConditions,
+                              widget.selectedConditions,
                             )..remove(conditionName);
-                            onConditionsChanged(updated);
+                            widget.onConditionsChanged(updated);
                           },
                         );
                       }).toList(),
@@ -159,6 +180,7 @@ class MedicationFormContent extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -167,9 +189,9 @@ class MedicationFormContent extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => _ConditionSelectorDialog(
-        conditions: conditions,
-        selectedConditions: selectedConditions,
-        onConditionsChanged: onConditionsChanged,
+        conditions: widget.conditions,
+        selectedConditions: widget.selectedConditions,
+        onConditionsChanged: widget.onConditionsChanged,
       ),
     );
   }

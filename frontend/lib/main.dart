@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,9 +82,11 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
   int _index = 0;
   bool _hasCheckedPopup = false;
   bool _showOnboarding = true;
+  StreamSubscription<String>? _notificationSubscription;
+  int _dashboardRefreshKey = 0;
 
-  final List<Widget> _screens = [
-    DashboardScreen(),
+  List<Widget> get _screens => [
+    DashboardScreen(key: ValueKey('dashboard_$_dashboardRefreshKey')),
     HealthScreen(),
     MedicationsScreen(),
     ProfileScreen(),
@@ -102,10 +105,23 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
   @override
   void initState() {
     super.initState();
+    // Listen for notification taps to navigate to dashboard
+    _notificationSubscription = NotificationService.onNotificationTap.listen((payload) {
+      setState(() {
+        _index = 0; // Navigate to dashboard
+        _dashboardRefreshKey++; // Force dashboard to rebuild and refresh
+      });
+    });
     // Check and show XP popup after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkAndShowXpPopup();
     });
+  }
+
+  @override
+  void dispose() {
+    _notificationSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _checkAndShowXpPopup() async {
