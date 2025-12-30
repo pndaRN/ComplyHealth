@@ -111,7 +111,7 @@
             Who it's for?
           </h3>
           <p class="text-text-secondary">
-            This app is for people who:<br><br>
+            This app is for people who:<br>
             • Live with one or more chronic health conditions<br>
             • Take multiple medications<br>
             • Feel overwhelmed keeping track of health information<br>
@@ -145,7 +145,8 @@
           </h3>
           <p class="text-text-secondary">
             • Built by Nurses. Designed for real life.<br>
-            • Everything is designed to be simple and supportive
+            • Everything is designed to be simple and supportive.<br>
+            • You are the focus.
           </p>
         </div>
 
@@ -176,6 +177,7 @@
           <p class="text-text-secondary">
             • Your Health. Your Data.<br>
             • Your information stays on your device. You stay in control.<br>
+            • Encrypted for your safety.
           </p>
         </div>
       </div>
