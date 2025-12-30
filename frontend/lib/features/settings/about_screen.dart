@@ -174,6 +174,50 @@ class _AboutScreenState extends State<AboutScreen> {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Card(
+              color: theme.colorScheme.surfaceContainerHighest,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 20,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Firebase Testing',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '''This is a pre-release version of ComplyHealth on Firebase is intended for testing purposes. As a beta build, you may experience:
+
+- Crashes or unexpected behavior
+- Features that are incomplete or change without notice
+- Data that may need to be reset between updates
+
+This is expected and part of the testing process. Please report any issues using the Send Feedback feature.''',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          
         ],
       ),
     );
