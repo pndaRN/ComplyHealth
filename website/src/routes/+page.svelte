@@ -66,14 +66,13 @@
     <h1
       class="text-4xl md:text-5xl lg:text-6xl font-semibold text-text-primary mb-6"
     >
-      Medication management that actually works
+      Take control of your health with confidence
     </h1>
     <p
       class="text-lg md:text-xl text-text-secondary max-w-2xl mx-auto mb-10 leading-relaxed"
     >
-      You're juggling enough already. Built by a nurse who gets it, ComplyHealth
-      takes the mental load off medication management so you can focus on what
-      matters — your health and your life.
+      ComplyHealth is built by nurses to help adults stay organized, informed, and confident while managing their chronic health conditions. 
+      ComplyHealth provides the support you can trust as you take control of your health. 
     </p>
     <button
       onclick={scrollToSignup}
@@ -109,11 +108,14 @@
             </svg>
           </div>
           <h3 class="text-xl font-semibold text-text-primary mb-3">
-            Simple Tracking
+            Who it's for?
           </h3>
           <p class="text-text-secondary">
-            Add your medications, see your schedule at a glance. No complexity,
-            no confusion.
+            This app is for people who:<br><br>
+            • Live with one or more chronic health conditions<br>
+            • Take multiple medications<br>
+            • Feel overwhelmed keeping track of health information<br>
+            • Want clearer understanding and better organization
           </p>
         </div>
 
@@ -139,11 +141,11 @@
             </svg>
           </div>
           <h3 class="text-xl font-semibold text-text-primary mb-3">
-            Smart Reminders
+            What makes us different?
           </h3>
           <p class="text-text-secondary">
-            Get notified when it's time to take your meds. Never wonder "did I
-            take that?" again.
+            • Built by Nurses. Designed for real life.<br>
+            • Everything is designed to be simple and supportive
           </p>
         </div>
 
@@ -169,11 +171,11 @@
             </svg>
           </div>
           <h3 class="text-xl font-semibold text-text-primary mb-3">
-            Understand Your Health
+            Privacy & Trust
           </h3>
           <p class="text-text-secondary">
-            Learn about the conditions you're managing and how your medications
-            help. Knowledge is power.
+            • Your Health. Your Data.<br>
+            • Your information stays on your device. You stay in control.<br>
           </p>
         </div>
       </div>
@@ -189,8 +191,7 @@
         Join the Beta
       </h2>
       <p class="text-text-secondary text-center mb-10">
-        Be among the first to try ComplyHealth. We'll reach out with early
-        access.
+        Join for early access and help shape the future of patient-centered health tools.
       </p>
 
       {#if submitStatus === "success"}
@@ -303,7 +304,7 @@
               for="challenges"
               class="block text-sm font-medium text-text-primary mb-2"
             >
-              Tell us about your medication management challenges
+              What are the biggest challenges you face daily when it comes to managing your chronic health needs?
               <span class="text-text-secondary font-normal">(optional)</span>
             </label>
             <textarea
