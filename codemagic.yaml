@@ -146,8 +146,8 @@ workflows:
           failure: true
       firebase:
         firebase_service_account: $FIREBASE_SERVICE_ACCOUNT
+        release_notes_file: release_notes.txt
         ios:
           app_id: $FIREBASE_IOS_APP_ID
           groups:
             - ios-testers
-          release_notes_file: release_notes.txt
