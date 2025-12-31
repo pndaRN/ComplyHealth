@@ -5,6 +5,13 @@ All notable changes to ComplyHealth will be documented in this file.
 ## [Unreleased]
 - Changes for next release go here
 
+## [1.0.2] - 2025-12-31
+### Added
+- Firebase beta testing warning on about screen
+
+### Improved
+- Personalized app bar title with user's name
+
 ## [1.0.1] - 2024-12-26
 ### Added
 - Swipe-to-skip gesture for Due Now medications
