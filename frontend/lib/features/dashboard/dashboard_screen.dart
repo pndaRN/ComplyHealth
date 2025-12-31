@@ -4,9 +4,9 @@ import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../core/models/medication.dart';
-import 'widgets/rotating_welcome_message.dart';
 import 'widgets/todays_medications_widget.dart';
 import 'widgets/adherence_history_widget.dart';
+import '../../core/state/profile_provider.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -29,9 +29,9 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: profile.firstName.isNotEmpty 
-          ? Text('Good to see you, ${profile.firstName}') 
-          : const Text('Welcome'),
+        title: profile.firstName.isNotEmpty
+            ? Text('Good to see you, ${profile.firstName}')
+            : const Text('Welcome'),
         actions: [
           Consumer(
             builder: (context, ref, child) {
@@ -77,9 +77,9 @@ class DashboardScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
               child: Text(
                 'At A Glance',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
             if (conditions.isEmpty)

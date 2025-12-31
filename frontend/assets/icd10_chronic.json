@@ -530,5 +530,12 @@
     "category": "Musculoskeletal",
     "commonName": "Osteoporosis",
     "description": "Osteoporosis is a condition where bones become weak and brittle because they lose density over time. Think of it like a sponge that's been used so many times the holes get bigger and bigger—the structure is still there, but it's not as strong. This means bones can break more easily from minor falls or bumps. The good news is nothing has broken yet, so there's time to protect your bones."
+  },
+  {
+    "code": "General Health",
+    "name": "General Health",
+    "category": "General",
+    "commonName": "General Health",
+    "description": "Coming soon"
   }
 ]
