@@ -25,10 +25,13 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final conditions = ref.watch(conditionsProvider);
     final meds = ref.watch(medicationProvider);
+    final profile = ref.watch(profileProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ComplyHealth'),
+        title: profile.firstName.isNotEmpty 
+          ? Text('Good to see you, ${profile.firstName}') 
+          : const Text('Welcome'),
         actions: [
           Consumer(
             builder: (context, ref, child) {
@@ -67,8 +70,6 @@ class DashboardScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const RotatingWelcomeMessage(),
-            const Divider(height: 1),
             const TodaysMedicationsWidget(),
             const AdherenceHistoryWidget(),
             const Divider(height: 1),
