@@ -26,6 +26,7 @@ class _TodaysMedicationsWidgetState
   bool _laterExpanded = false;
   bool _prnExpanded = false;
   bool _isLoading = true;
+  bool _isExpanded = true;
 
   // Adherence tracking
   int _todayTotal = 0;
@@ -190,6 +191,60 @@ class _TodaysMedicationsWidgetState
     }
   }
 
+  Future<bool> _showSkipConfirmation(MedicationInstance instance) async {
+    final skipReasons = ['Forgot', 'Side effects', 'Unavailable', 'Not needed', 'Other'];
+
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Skip Medication'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Skip ${instance.medication.name}?'),
+            const SizedBox(height: 16),
+            const Text('Select a reason:', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            ...skipReasons.map((r) => ListTile(
+              dense: true,
+              title: Text(r),
+              onTap: () => Navigator.pop(context, r),
+            )),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+
+    if (reason != null) {
+      HapticFeedback.lightImpact();
+      try {
+        await ref.read(adherenceProvider.notifier).logDoseSkipped(
+          medicationId: instance.medication.id,
+          medicationName: instance.medication.name,
+          dosage: instance.medication.dosage,
+          scheduledTime: instance.scheduledTime,
+          skipReason: reason,
+        );
+        await _loadAndCategorizeInstances();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to skip dose: $e')),
+          );
+        }
+      }
+    }
+
+    return false; // Don't dismiss the widget, we handle removal via reload
+  }
+
   String _formatTime(DateTime time) {
     return DateFormat('h:mm a').format(time);
   }
@@ -246,48 +301,61 @@ class _TodaysMedicationsWidgetState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _buildHeader(),
-          const Divider(height: 1),
-          _buildAdherenceSummary(),
-          const Divider(height: 1),
-          _buildImmediateSection(),
-          if (_laterInstances.isNotEmpty) _buildLaterSection(),
-          if (_prnInstances.isNotEmpty) _buildPRNSection(),
+          if (_isExpanded) ...[
+            const Divider(height: 1),
+            _buildAdherenceSummary(),
+            const Divider(height: 1),
+            _buildImmediateSection(),
+            if (_laterInstances.isNotEmpty) _buildLaterSection(),
+            if (_prnInstances.isNotEmpty) _buildPRNSection(),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Today\'s Medications',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: _getAdherenceColor(_todayAdherence, Theme.of(context)),
-              shape: BoxShape.circle,
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: () => setState(() => _isExpanded = !_isExpanded),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(
+              _isExpanded ? Icons.expand_less : Icons.expand_more,
+              color: theme.textTheme.titleLarge?.color,
+              size: 28,
             ),
-            child: Center(
+            const SizedBox(width: 8),
+            Expanded(
               child: Text(
-                '$_todayTaken/$_todayTotal',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
+                'Today\'s Medications',
+                style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ),
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: _getAdherenceColor(_todayAdherence, theme),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  '$_todayTaken/$_todayTotal',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -398,10 +466,37 @@ class _TodaysMedicationsWidgetState
       instance.scheduledTime.add(const Duration(minutes: _graceWindowMinutes)),
     );
 
-    return Container(
-      key: key,
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
+    return Dismissible(
+      key: Key('dismiss_${instance.medication.id}_${instance.scheduledTime.millisecondsSinceEpoch}'),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) => _showSkipConfirmation(instance),
+      background: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.orange,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              'Skip',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(width: 8),
+            Icon(Icons.skip_next, color: Colors.white),
+          ],
+        ),
+      ),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
         border: Border(
           left: _getUrgencyBorder(instance, Theme.of(context)),
         ),
@@ -440,11 +535,15 @@ class _TodaysMedicationsWidgetState
                 children: [
                   Row(
                     children: [
-                      Text(
-                        instance.medication.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                      Flexible(
+                        child: Text(
+                          instance.medication.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                       if (isOverdue) ...[
@@ -498,6 +597,7 @@ class _TodaysMedicationsWidgetState
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -520,7 +620,11 @@ class _TodaysMedicationsWidgetState
               Icons.medication,
               color: Colors.grey[600],
             ),
-            title: Text(instance.medication.name),
+            title: Text(
+              instance.medication.name,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
             subtitle: Text(instance.medication.dosage),
             trailing: Text(
               _formatTime(instance.scheduledTime),
@@ -564,7 +668,11 @@ class _TodaysMedicationsWidgetState
               Icons.medication,
               color: theme.statusColors.prn,
             ),
-            title: Text(medication.name),
+            title: Text(
+              medication.name,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

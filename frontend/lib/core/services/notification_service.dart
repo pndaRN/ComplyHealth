@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -13,6 +14,11 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
+
+  // Stream controller for notification tap events
+  static final StreamController<String> _notificationTapController =
+      StreamController<String>.broadcast();
+  static Stream<String> get onNotificationTap => _notificationTapController.stream;
 
   /// Initialize the notification service
   Future<void> initialize() async {
@@ -78,9 +84,9 @@ class NotificationService {
 
   /// Handle notification tap
   void _onNotificationTapped(NotificationResponse response) {
-    // Handle notification tap - could navigate to specific screen
-    // This can be expanded to open the medication details or adherence screen
+    // Emit event for listeners (main.dart) to handle navigation
     // Payload contains: medicationId|scheduledTime
+    _notificationTapController.add(response.payload ?? '');
   }
 
   /// Schedule notifications for a medication
