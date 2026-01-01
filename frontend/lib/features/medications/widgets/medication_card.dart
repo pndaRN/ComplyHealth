@@ -44,6 +44,7 @@ class MedicationCard extends StatelessWidget {
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         if (medication.isPRN)
@@ -73,6 +74,7 @@ class MedicationCard extends StatelessWidget {
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
                     // Timing and conditions
@@ -84,11 +86,14 @@ class MedicationCard extends StatelessWidget {
                           color: doseColor ?? theme.colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          timingSummary,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: doseColor ?? theme.colorScheme.onSurfaceVariant,
-                            fontWeight: medication.isPRN ? FontWeight.bold : null,
+                        Expanded(
+                          child: Text(
+                            timingSummary,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: doseColor ?? theme.colorScheme.onSurfaceVariant,
+                              fontWeight: medication.isPRN ? FontWeight.bold : null,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],

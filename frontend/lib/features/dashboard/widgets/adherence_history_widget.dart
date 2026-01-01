@@ -16,6 +16,7 @@ class _AdherenceHistoryWidgetState
     extends ConsumerState<AdherenceHistoryWidget> {
   final Map<DateTime, List<MedicationLog>> _weekLogs = {};
   bool _isLoading = true;
+  bool _isExpanded = true;
 
   @override
   void initState() {
@@ -171,93 +172,117 @@ class _AdherenceHistoryWidgetState
 
     return Card(
       margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '7-Day Adherence History',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () => setState(() => _isExpanded = !_isExpanded),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Icon(
+                    _isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: Theme.of(context).textTheme.titleLarge?.color,
+                    size: 28,
                   ),
-            ),
-            const SizedBox(height: 16),
-            // Calendar grid
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: weekDays.map((date) {
-                final isToday = date.year == now.year &&
-                    date.month == now.month &&
-                    date.day == now.day;
-                final color = _getDayColor(date);
-                final adherence = _getDayAdherence(date);
-
-                return GestureDetector(
-                  onTap: () => _showDayDetails(date),
-                  child: Column(
-                    children: [
-                      Text(
-                        DateFormat('E').format(date),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                          fontWeight:
-                              isToday ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                          border: isToday
-                              ? Border.all(color: Colors.blue, width: 2)
-                              : null,
-                        ),
-                        child: Center(
-                          child: Text(
-                            DateFormat('d').format(date),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '7-Day Adherence History',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_isExpanded) ...[
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  // Calendar grid
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: weekDays.map((date) {
+                      final isToday = date.year == now.year &&
+                          date.month == now.month &&
+                          date.day == now.day;
+                      final color = _getDayColor(date);
+                      final adherence = _getDayAdherence(date);
+
+                      return GestureDetector(
+                        onTap: () => _showDayDetails(date),
+                        child: Column(
+                          children: [
+                            Text(
+                              DateFormat('E').format(date),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                                fontWeight:
+                                    isToday ? FontWeight.bold : FontWeight.normal,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                                border: isToday
+                                    ? Border.all(color: Colors.blue, width: 2)
+                                    : null,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  DateFormat('d').format(date),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${adherence.toStringAsFixed(0)}%',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey[700],
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${adherence.toStringAsFixed(0)}%',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey[700],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  // Legend
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildLegendItem(Colors.green, 'Perfect'),
+                      const SizedBox(width: 12),
+                      _buildLegendItem(Colors.lightGreen, 'Good'),
+                      const SizedBox(width: 12),
+                      _buildLegendItem(Colors.orange, 'Fair'),
+                      const SizedBox(width: 12),
+                      _buildLegendItem(Colors.red, 'Poor'),
                     ],
                   ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-            // Legend
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildLegendItem(Colors.green, 'Perfect'),
-                const SizedBox(width: 12),
-                _buildLegendItem(Colors.lightGreen, 'Good'),
-                const SizedBox(width: 12),
-                _buildLegendItem(Colors.orange, 'Fair'),
-                const SizedBox(width: 12),
-                _buildLegendItem(Colors.red, 'Poor'),
-              ],
+                ],
+              ),
             ),
           ],
-        ),
+        ],
       ),
     );
   }
