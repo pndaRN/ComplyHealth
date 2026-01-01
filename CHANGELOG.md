@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-01-01
+
 ### Added - 2025-12-30
 - Firebase beta testing warning on about screen
 - Additional text content to website
