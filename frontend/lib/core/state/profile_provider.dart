@@ -30,7 +30,12 @@ class ProfileNotifier extends Notifier<Profile> {
   }
 
   Future<void> _loadProfile() async {
-    final box = await Hive.openBox('profile');
+    final key = await EncryptionMigrationService.getEncryptionKey();
+
+    final box = await Hive.openBox(
+      'profile',
+      encryptionCipher: HiveAesCipher(key),
+      );
     final saved = box.get('user');
     if (saved != null && saved is Profile) {
       state = saved;

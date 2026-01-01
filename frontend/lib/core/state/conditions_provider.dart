@@ -20,7 +20,12 @@ class ConditionsNotifier extends Notifier<List<Disease>> {
     if (_box != null && _box!.isOpen) {
       return _box!;
     }
-    _box = await Hive.openBox('conditions');
+
+    final key = await EncryptionMigrationService.getEncryptionKey();
+    _box = await Hive.openBox(
+      'conditions',
+      encryptionCipher: HiveAesCipher(key)
+      );
     return _box!;
   }
 

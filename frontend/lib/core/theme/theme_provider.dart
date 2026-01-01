@@ -39,7 +39,12 @@ class ThemeNotifier extends Notifier<ThemeState> {
     if (_box != null && _box!.isOpen) {
       return _box!;
     }
-    _box = await Hive.openBox('theme');
+    final key = await EncryptionMigrationService.getEncryptionKey();
+
+    _box = await Hive.openBox(
+      'theme',
+      encryptionCipher: HiveAesCipher(key),
+      );
     return _box!;
   }
 

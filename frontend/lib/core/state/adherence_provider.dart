@@ -32,7 +32,13 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     if (_box != null && _box!.isOpen) {
       return _box!;
     }
-    _box = await Hive.openBox<MedicationLog>(boxName);
+
+    final key = await EncryptionMigrationService.getEncryptionKey();
+
+    _box = await Hive.openBox<MedicationLog>(
+      boxName,
+      encryptionCipher: HiveAesCipher(key),
+      );
     state = _box!.values.toList();
     return _box!;
   }

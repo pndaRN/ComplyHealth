@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../models/medication.dart';
 import '../services/notification_service.dart';
+import '../services/encryption_migration_service.dart';
 import '../../features/medications/utils/medication_sorter.dart';
 
 final medicationProvider =
@@ -36,7 +37,13 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     if (_box != null && _box!.isOpen) {
       return _box!;
     }
-    _box = await Hive.openBox('medications');
+
+    final key = await EncryptionMigrationService.getEncryptionKey();
+
+    _box = await Hive.openBox(
+      'medications',
+      encryptionCipher: HiveAesCipher(key),
+      );
     return _box!;
   }
 

@@ -45,7 +45,13 @@ class SettingsNotifier extends Notifier<SettingsState> {
     if (_box != null && _box!.isOpen) {
       return _box!;
     }
-    _box = await Hive.openBox('settings');
+    
+    final key = await EncryptionMigrationService.getEncryptionKey();
+
+    _box = await Hive.openBox(
+      'settings',
+      encryptionCipher: HiveAesCipher(key),
+      );
     return _box!;
   }
 
