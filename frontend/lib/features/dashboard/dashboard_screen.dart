@@ -3,32 +3,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/theme/theme_provider.dart';
-import '../../core/models/medication.dart';
 import 'widgets/todays_medications_widget.dart';
 import 'widgets/adherence_history_widget.dart';
+import 'widgets/at_a_glance_widget.dart';
 import '../../core/state/profile_provider.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
-
-  String _getTimingSummary(Medication medication) {
-    if (medication.isPRN) {
-      return 'PRN';
-    }
-    final count = medication.scheduledTimes.length;
-    if (count == 0) return 'No schedule';
-    if (count == 1) return 'Once daily';
-    return '${count}x daily';
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final conditions = ref.watch(conditionsProvider);
     final meds = ref.watch(medicationProvider);
     final profile = ref.watch(profileProvider);
+    final theme = Theme.of(context);
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 30,
+          fontWeight: FontWeight.w600,
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
         title: profile.firstName.isNotEmpty
             ? Text('Good to see you, ${profile.firstName}')
             : const Text('Welcome'),
@@ -66,69 +67,49 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const TodaysMedicationsWidget(),
-            const AdherenceHistoryWidget(),
-            const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-              child: Text(
-                'At A Glance',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+      body: Stack(
+        children: [
+          // Gradient background
+          Container(
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: const Alignment(0.985, -0.174),
+                end: const Alignment(-0.985, 0.174),
+                colors: [theme.colorScheme.tertiary, theme.colorScheme.primary],
               ),
             ),
-            if (conditions.isEmpty)
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Text(
-                  'No conditions tracked yet.\nAdd a condition to get started!',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
-                ),
-              )
-            else
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: conditions.length,
-                  itemBuilder: (context, index) {
-                    final condition = conditions[index];
-                    final related = meds
-                        .where(
-                          (medication) => medication.conditionNames.contains(
-                            condition.name,
-                          ),
-                        )
-                        .toList();
-                    return Card(
-                      child: ListTile(
-                        title: Text(condition.commonName),
-                        subtitle: related.isEmpty
-                            ? const Text('No medications yet')
-                            : Text(
-                                related
-                                    .map(
-                                      (medication) =>
-                                          '${medication.name} - ${medication.dosage} - ${_getTimingSummary(medication)}',
-                                    )
-                                    .join('\n'),
-                              ),
-                      ),
-                    );
-                  },
-                ),
+          ),
+          // Vertical fade to background
+          Container(
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, theme.scaffoldBackgroundColor],
+                stops: const [0.0, 0.8],
               ),
-          ],
-        ),
+            ),
+          ),
+          // Content
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).padding.top + kToolbarHeight,
+                ),
+                const TodaysMedicationsWidget(),
+                const AdherenceHistoryWidget(),
+                AtAGlanceWidget(
+                  conditions: conditions,
+                  medications: meds,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

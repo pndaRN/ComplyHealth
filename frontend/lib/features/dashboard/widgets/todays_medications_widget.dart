@@ -26,6 +26,7 @@ class _TodaysMedicationsWidgetState
   bool _laterExpanded = false;
   bool _prnExpanded = false;
   bool _isLoading = true;
+  bool _isExpanded = true;
 
   // Adherence tracking
   int _todayTotal = 0;
@@ -300,48 +301,61 @@ class _TodaysMedicationsWidgetState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _buildHeader(),
-          const Divider(height: 1),
-          _buildAdherenceSummary(),
-          const Divider(height: 1),
-          _buildImmediateSection(),
-          if (_laterInstances.isNotEmpty) _buildLaterSection(),
-          if (_prnInstances.isNotEmpty) _buildPRNSection(),
+          if (_isExpanded) ...[
+            const Divider(height: 1),
+            _buildAdherenceSummary(),
+            const Divider(height: 1),
+            _buildImmediateSection(),
+            if (_laterInstances.isNotEmpty) _buildLaterSection(),
+            if (_prnInstances.isNotEmpty) _buildPRNSection(),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Today\'s Medications',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: _getAdherenceColor(_todayAdherence, Theme.of(context)),
-              shape: BoxShape.circle,
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: () => setState(() => _isExpanded = !_isExpanded),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(
+              _isExpanded ? Icons.expand_less : Icons.expand_more,
+              color: theme.textTheme.titleLarge?.color,
+              size: 28,
             ),
-            child: Center(
+            const SizedBox(width: 8),
+            Expanded(
               child: Text(
-                '$_todayTaken/$_todayTotal',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
+                'Today\'s Medications',
+                style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ),
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: _getAdherenceColor(_todayAdherence, theme),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  '$_todayTaken/$_todayTotal',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
