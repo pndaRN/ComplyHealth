@@ -26,10 +26,10 @@ class StatusColors {
       : const Color(0xFFF87171);
 
   /// Info color (Blue - informational, scheduled medications)
-  /// Light: blue-600, Dark: blue-400
+  /// Matches primary brand blue
   Color get info => brightness == Brightness.light
-      ? const Color(0xFF2563EB)
-      : const Color(0xFF60A5FA);
+      ? const Color(0xFF0000CC)
+      : const Color(0xFF668CFF);
 
   /// Streak color (Amber - achievements, XP, streaks)
   /// Light: amber-500, Dark: amber-300
@@ -38,10 +38,10 @@ class StatusColors {
       : const Color(0xFFFCD34D);
 
   /// PRN/Special color (Purple - as-needed medications, special features)
-  /// Light: violet-600, Dark: violet-400
+  /// Matches secondary purple
   Color get prn => brightness == Brightness.light
-      ? const Color(0xFF7C3AED)
-      : const Color(0xFFA78BFA);
+      ? const Color(0xFF6600CC)
+      : const Color(0xFFA366FF);
 }
 
 /// Extension to easily access StatusColors from ThemeData

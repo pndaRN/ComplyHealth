@@ -12,23 +12,23 @@ class AppTheme {
     final ColorScheme colorScheme = ColorScheme.light(
       primary: AppColors.primaryLight,
       onPrimary: Colors.white,
-      primaryContainer: const Color(0xFFDEEAFF), // blue-100 equivalent
-      onPrimaryContainer: const Color(0xFF001D36),
+      primaryContainer: const Color(0xFFCCCCFF), // light blue tint
+      onPrimaryContainer: const Color(0xFF000066), // dark blue
 
       secondary: AppColors.secondaryLight,
       onSecondary: Colors.white,
-      secondaryContainer: const Color(0xFFEDE9FE), // violet-100 equivalent
-      onSecondaryContainer: const Color(0xFF2E1065),
+      secondaryContainer: const Color(0xFFE6CCFF), // light purple tint
+      onSecondaryContainer: const Color(0xFF330066), // dark purple
 
       tertiary: AppColors.tertiaryLight,
       onTertiary: Colors.white,
-      tertiaryContainer: const Color(0xFFD1FAE5), // emerald-100 equivalent
-      onTertiaryContainer: const Color(0xFF064E3B),
+      tertiaryContainer: const Color(0xFFD1FAE5), // emerald-100
+      onTertiaryContainer: const Color(0xFF065F46), // emerald-800
 
       error: AppColors.errorLight,
       onError: Colors.white,
-      errorContainer: const Color(0xFFFEE2E2), // red-100 equivalent
-      onErrorContainer: const Color(0xFF7F1D1D),
+      errorContainer: const Color(0xFFFEE2E2), // red-100
+      onErrorContainer: const Color(0xFF991B1B), // red-800
 
       surface: AppColors.surfaceLight,
       onSurface: AppColors.textPrimaryLight,
@@ -37,7 +37,7 @@ class AppTheme {
       onSurfaceVariant: AppColors.textSecondaryLight,
 
       outline: AppColors.outlineLight,
-      outlineVariant: const Color(0xFFF1F5F9), // slate-100
+      outlineVariant: const Color(0xFFE2E8F0), // slate-200 (visible dividers)
 
       shadow: Colors.black,
       scrim: Colors.black,
@@ -59,20 +59,24 @@ class AppTheme {
       appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
-        scrolledUnderElevation: 1,
-        backgroundColor: AppColors.surfaceLight,
+        scrolledUnderElevation: 2,
+        backgroundColor: AppColors.backgroundLight,
         foregroundColor: AppColors.textPrimaryLight,
-        surfaceTintColor: AppColors.primaryLight,
+        surfaceTintColor: Colors.transparent,
         iconTheme: IconThemeData(color: AppColors.textPrimaryLight),
         titleTextStyle: AppTextTheme.lightTextTheme.titleLarge,
       ),
 
-      // Card Theme
+      // Card Theme - stronger shadow for better separation
       cardTheme: CardThemeData(
-        elevation: 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 2,
+        shadowColor: Colors.black.withValues(alpha: 0.1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: AppColors.outlineLight.withValues(alpha: 0.5), width: 1),
+        ),
         color: AppColors.surfaceLight,
-        surfaceTintColor: AppColors.primaryLight,
+        surfaceTintColor: Colors.transparent,
       ),
 
       // Bottom Navigation Bar Theme
@@ -91,17 +95,17 @@ class AppTheme {
         elevation: 4,
       ),
 
-      // Input Decoration Theme
+      // Input Decoration Theme - stronger borders for visibility
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceLight,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.outlineLight),
+          borderSide: BorderSide(color: AppColors.outlineLight, width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.outlineLight),
+          borderSide: BorderSide(color: AppColors.outlineLight, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -109,8 +113,14 @@ class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.errorLight),
+          borderSide: BorderSide(color: AppColors.errorLight, width: 1.5),
         ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.errorLight, width: 2),
+        ),
+        hintStyle: TextStyle(color: AppColors.textSecondaryLight),
+        labelStyle: TextStyle(color: AppColors.textSecondaryLight),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
 
@@ -133,20 +143,24 @@ class AppTheme {
         ),
       ),
 
-      // Chip Theme
+      // Chip Theme - more visible chips
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surfaceVariantLight,
-        selectedColor: AppColors.primaryLight.withValues(alpha: 0.2),
-        labelStyle: AppTextTheme.lightTextTheme.labelMedium!,
+        selectedColor: AppColors.primaryLight.withValues(alpha: 0.25),
+        labelStyle: AppTextTheme.lightTextTheme.labelMedium!.copyWith(
+          color: AppColors.textPrimaryLight,
+        ),
+        side: BorderSide(color: AppColors.outlineLight),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
 
-      // Dialog Theme
+      // Dialog Theme - cleaner dialogs
       dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.backgroundLight,
-        surfaceTintColor: AppColors.primaryLight,
-        elevation: 3,
+        backgroundColor: AppColors.surfaceLight,
+        surfaceTintColor: Colors.transparent,
+        elevation: 8,
+        shadowColor: Colors.black.withValues(alpha: 0.15),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
 
@@ -159,6 +173,20 @@ class AppTheme {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
+
+      // Divider Theme - more visible dividers
+      dividerTheme: DividerThemeData(
+        color: AppColors.outlineLight,
+        thickness: 1,
+        space: 1,
+      ),
+
+      // List Tile Theme
+      listTileTheme: ListTileThemeData(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        tileColor: Colors.transparent,
+        selectedTileColor: AppColors.primaryLight.withValues(alpha: 0.1),
+      ),
     );
   }
 
@@ -166,14 +194,14 @@ class AppTheme {
   static ThemeData darkTheme() {
     final ColorScheme colorScheme = ColorScheme.dark(
       primary: AppColors.primaryDark,
-      onPrimary: const Color(0xFF001D36),
-      primaryContainer: const Color(0xFF1E3A8A), // blue-800 equivalent
-      onPrimaryContainer: const Color(0xFFDEEAFF),
+      onPrimary: const Color(0xFF000033),
+      primaryContainer: const Color(0xFF000066), // dark blue
+      onPrimaryContainer: const Color(0xFFCCCCFF), // light blue
 
       secondary: AppColors.secondaryDark,
-      onSecondary: const Color(0xFF2E1065),
-      secondaryContainer: const Color(0xFF5B21B6), // violet-800 equivalent
-      onSecondaryContainer: const Color(0xFFEDE9FE),
+      onSecondary: const Color(0xFF1A0033),
+      secondaryContainer: const Color(0xFF330066), // dark purple
+      onSecondaryContainer: const Color(0xFFE6CCFF), // light purple
 
       tertiary: AppColors.tertiaryDark,
       onTertiary: const Color(0xFF064E3B),
