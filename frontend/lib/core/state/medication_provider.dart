@@ -43,7 +43,7 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     _box = await Hive.openBox(
       'medications',
       encryptionCipher: HiveAesCipher(key),
-      );
+    );
     return _box!;
   }
 
@@ -70,7 +70,9 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     if (_sortOption == MedicationSortOption.groupedByCondition) {
       // Just sort alphabetically for grouped view - UI will create condition groups
       final sorted = List<Medication>.from(meds);
-      sorted.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      sorted.sort(
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+      );
       return sorted;
     } else {
       return MedicationSorter.sort(meds, _sortOption);

@@ -2,7 +2,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:complyhealth/core/models/feedback.dart' as local_feedback;
 import 'package:uuid/uuid.dart';
-import "encryption_migration_service.dart"
+import "encryption_migration_service.dart";
 
 class FeedbackService {
   static final FeedbackService _instance = FeedbackService._internal();
