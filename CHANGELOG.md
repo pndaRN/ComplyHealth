@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-01-04
+
+### Added
+- Local encryption for all Hive data boxes using AES-256
+- Encryption migration service for seamless upgrade from unencrypted data
+- Secure key storage using flutter_secure_storage
+- Comprehensive encryption tests (40 unit tests)
+
+### Changed
+- Updated color scheme to match logo primary color (#0000CC)
+- New complementary purple secondary color (#6600CC)
+- Improved light mode contrast for better visibility
+- Stronger borders, darker secondary text, and better surface distinction
+- Updated status colors to match new brand palette
+
+### Fixed
+- Condition card text overflow - long medical names now truncate with ellipsis
+
 ## [1.1.0] - 2026-01-01
 
 ### Added - 2025-12-30
