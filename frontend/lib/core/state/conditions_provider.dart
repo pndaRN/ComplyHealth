@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import "../models/disease.dart";
+import '../../core/services/encryption_migration_service.dart';
 
 final conditionsProvider = NotifierProvider<ConditionsNotifier, List<Disease>>(
   ConditionsNotifier.new,
@@ -20,7 +21,12 @@ class ConditionsNotifier extends Notifier<List<Disease>> {
     if (_box != null && _box!.isOpen) {
       return _box!;
     }
-    _box = await Hive.openBox('conditions');
+
+    final key = await EncryptionMigrationService.getEncryptionKey();
+    _box = await Hive.openBox(
+      'conditions',
+      encryptionCipher: HiveAesCipher(key),
+    );
     return _box!;
   }
 

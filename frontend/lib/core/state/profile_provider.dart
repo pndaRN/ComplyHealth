@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../models/profile.dart';
 import 'adherence_provider.dart';
+import '../../core/services/encryption_migration_service.dart';
 
 final profileProvider = NotifierProvider<ProfileNotifier, Profile>(
   ProfileNotifier.new,
@@ -30,7 +31,12 @@ class ProfileNotifier extends Notifier<Profile> {
   }
 
   Future<void> _loadProfile() async {
-    final box = await Hive.openBox('profile');
+    final key = await EncryptionMigrationService.getEncryptionKey();
+
+    final box = await Hive.openBox(
+      'profile',
+      encryptionCipher: HiveAesCipher(key),
+    );
     final saved = box.get('user');
     if (saved != null && saved is Profile) {
       state = saved;

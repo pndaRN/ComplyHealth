@@ -9,6 +9,7 @@ import 'core/models/medication_log.dart';
 import 'core/models/education_content.dart';
 import 'core/models/feedback.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/encryption_migration_service.dart';
 import 'core/state/profile_provider.dart';
 import 'core/state/conditions_provider.dart';
 import 'core/state/medication_provider.dart';
@@ -44,6 +45,12 @@ void main() async {
 
   // Init Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  try{
+    await EncryptionMigrationService.migrateAllBoxes();
+    } catch (e) { 
+      print('Migration error: $e');
+    }
 
   // Set up Crashlytics error handlers
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
+import '../../core/services/encryption_migration_service.dart';
 
 /// Settings state class
 class SettingsState {
@@ -17,7 +18,8 @@ class SettingsState {
   }) {
     return SettingsState(
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-      hasCompletedOnboarding: hasCompletedOnboarding ?? this.hasCompletedOnboarding,
+      hasCompletedOnboarding:
+          hasCompletedOnboarding ?? this.hasCompletedOnboarding,
     );
   }
 }
@@ -45,14 +47,19 @@ class SettingsNotifier extends Notifier<SettingsState> {
     if (_box != null && _box!.isOpen) {
       return _box!;
     }
-    _box = await Hive.openBox('settings');
+
+    final key = await EncryptionMigrationService.getEncryptionKey();
+
+    _box = await Hive.openBox('settings', encryptionCipher: HiveAesCipher(key));
     return _box!;
   }
 
   Future<void> _loadSettings() async {
     final box = await _getBox();
-    final notificationsEnabled = box.get('notificationsEnabled', defaultValue: true) as bool;
-    final hasCompletedOnboarding = box.get('hasCompletedOnboarding', defaultValue: false) as bool;
+    final notificationsEnabled =
+        box.get('notificationsEnabled', defaultValue: true) as bool;
+    final hasCompletedOnboarding =
+        box.get('hasCompletedOnboarding', defaultValue: false) as bool;
     state = SettingsState(
       notificationsEnabled: notificationsEnabled,
       hasCompletedOnboarding: hasCompletedOnboarding,
@@ -73,7 +80,15 @@ class SettingsNotifier extends Notifier<SettingsState> {
 
   Future<void> clearAllData() async {
     // Clear all Hive boxes
-    final boxNames = ['conditions', 'medications', 'profile', 'medication_logs', 'feedback', 'settings', 'theme'];
+    final boxNames = [
+      'conditions',
+      'medications',
+      'profile',
+      'medication_logs',
+      'feedback',
+      'settings',
+      'theme',
+    ];
     for (final name in boxNames) {
       try {
         final box = await Hive.openBox(name);

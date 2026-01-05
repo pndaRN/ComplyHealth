@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
+import '../../core/services/encryption_migration_service.dart';
 
 /// Theme state class
 class ThemeState {
@@ -39,7 +40,9 @@ class ThemeNotifier extends Notifier<ThemeState> {
     if (_box != null && _box!.isOpen) {
       return _box!;
     }
-    _box = await Hive.openBox('theme');
+    final key = await EncryptionMigrationService.getEncryptionKey();
+
+    _box = await Hive.openBox('theme', encryptionCipher: HiveAesCipher(key));
     return _box!;
   }
 

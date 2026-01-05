@@ -2,6 +2,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:complyhealth/core/models/feedback.dart' as local_feedback;
 import 'package:uuid/uuid.dart';
+import "encryption_migration_service.dart";
 
 class FeedbackService {
   static final FeedbackService _instance = FeedbackService._internal();
@@ -61,7 +62,12 @@ class FeedbackService {
 
   /// Save feedback to local Hive storage
   Future<void> _saveToHive(local_feedback.Feedback feedback) async {
-    final box = await Hive.openBox<local_feedback.Feedback>(_boxName);
+    final key = await EncryptionMigrationService.getEncryptionKey();
+
+    final box = await Hive.openBox<local_feedback.Feedback>(
+      _boxName,
+      encryptionCipher: HiveAesCipher(key),
+    );
     await box.put(feedback.id, feedback);
   }
 
@@ -73,7 +79,11 @@ class FeedbackService {
 
   /// Mark feedback as synced in local storage
   Future<void> _markAsSynced(String feedbackId) async {
-    final box = await Hive.openBox<local_feedback.Feedback>(_boxName);
+    final key = await EncryptionMigrationService.getEncryptionKey();
+    final box = await Hive.openBox<local_feedback.Feedback>(
+      _boxName,
+      encryptionCipher: HiveAesCipher(key),
+    );
     final feedback = box.get(feedbackId);
     if (feedback != null) {
       await box.put(feedbackId, feedback.copyWith(synced: true));
@@ -82,7 +92,11 @@ class FeedbackService {
 
   /// Sync all pending (unsynced) feedback to Firestore
   Future<int> syncPendingFeedback() async {
-    final box = await Hive.openBox<local_feedback.Feedback>(_boxName);
+    final key = await EncryptionMigrationService.getEncryptionKey();
+    final box = await Hive.openBox<local_feedback.Feedback>(
+      _boxName,
+      encryptionCipher: HiveAesCipher(key),
+    );
     int syncedCount = 0;
 
     for (final key in box.keys) {
@@ -103,7 +117,11 @@ class FeedbackService {
 
   /// Get count of pending (unsynced) feedback
   Future<int> getPendingCount() async {
-    final box = await Hive.openBox<local_feedback.Feedback>(_boxName);
+    final key = await EncryptionMigrationService.getEncryptionKey();
+    final box = await Hive.openBox<local_feedback.Feedback>(
+      _boxName,
+      encryptionCipher: HiveAesCipher(key),
+    );
     int count = 0;
     for (final key in box.keys) {
       final feedback = box.get(key);
@@ -116,7 +134,11 @@ class FeedbackService {
 
   /// Clear all synced feedback from local storage (optional cleanup)
   Future<void> clearSyncedFeedback() async {
-    final box = await Hive.openBox<local_feedback.Feedback>(_boxName);
+    final key = await EncryptionMigrationService.getEncryptionKey();
+    final box = await Hive.openBox<local_feedback.Feedback>(
+      _boxName,
+      encryptionCipher: HiveAesCipher(key),
+    );
     final keysToDelete = <dynamic>[];
 
     for (final key in box.keys) {

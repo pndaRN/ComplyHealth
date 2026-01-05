@@ -3,12 +3,13 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:complyhealth/core/models/medication.dart';
 import 'package:complyhealth/core/models/medication_log.dart';
 import 'package:complyhealth/core/state/medication_provider.dart';
+import '../../core/services/encryption_migration_service.dart';
 
 /// Provider for medication adherence tracking
 final adherenceProvider =
     NotifierProvider<AdherenceNotifier, List<MedicationLog>>(
-  AdherenceNotifier.new,
-);
+      AdherenceNotifier.new,
+    );
 
 class AdherenceNotifier extends Notifier<List<MedicationLog>> {
   static const String boxName = 'medication_logs';
@@ -32,7 +33,13 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     if (_box != null && _box!.isOpen) {
       return _box!;
     }
-    _box = await Hive.openBox<MedicationLog>(boxName);
+
+    final key = await EncryptionMigrationService.getEncryptionKey();
+
+    _box = await Hive.openBox<MedicationLog>(
+      boxName,
+      encryptionCipher: HiveAesCipher(key),
+    );
     state = _box!.values.toList();
     return _box!;
   }
@@ -48,11 +55,13 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     for (final med in medications) {
       if (med.isPRN) {
         // For PRN medications, create a single instance
-        instances.add(MedicationInstance(
-          medication: med,
-          scheduledTime: today,
-          isPRN: true,
-        ));
+        instances.add(
+          MedicationInstance(
+            medication: med,
+            scheduledTime: today,
+            isPRN: true,
+          ),
+        );
       } else {
         // For scheduled medications, create an instance for each time
         for (final timeStr in med.scheduledTimes) {
@@ -67,11 +76,13 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
             minute,
           );
 
-          instances.add(MedicationInstance(
-            medication: med,
-            scheduledTime: scheduledTime,
-            isPRN: false,
-          ));
+          instances.add(
+            MedicationInstance(
+              medication: med,
+              scheduledTime: scheduledTime,
+              isPRN: false,
+            ),
+          );
         }
       }
     }
@@ -230,7 +241,9 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     final endOfDay = startOfDay.add(const Duration(days: 1));
 
     return state.where((log) {
-      return log.scheduledTime.isAfter(startOfDay.subtract(const Duration(seconds: 1))) &&
+      return log.scheduledTime.isAfter(
+            startOfDay.subtract(const Duration(seconds: 1)),
+          ) &&
           log.scheduledTime.isBefore(endOfDay);
     }).toList();
   }
@@ -244,7 +257,9 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
 
     return state.where((log) {
-      return log.scheduledTime.isAfter(start.subtract(const Duration(seconds: 1))) &&
+      return log.scheduledTime.isAfter(
+            start.subtract(const Duration(seconds: 1)),
+          ) &&
           log.scheduledTime.isBefore(end.add(const Duration(seconds: 1)));
     }).toList();
   }
@@ -257,7 +272,9 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     final logs = await getLogsForDateRange(sevenDaysAgo, now);
     if (logs.isEmpty) return 0.0;
 
-    final takenCount = logs.where((log) => log.status == DoseStatus.taken).length;
+    final takenCount = logs
+        .where((log) => log.status == DoseStatus.taken)
+        .length;
     return (takenCount / logs.length) * 100;
   }
 
@@ -285,7 +302,9 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     final logs = await getLogsForDate(date);
     if (logs.isEmpty) return 0.0;
 
-    final takenCount = logs.where((log) => log.status == DoseStatus.taken).length;
+    final takenCount = logs
+        .where((log) => log.status == DoseStatus.taken)
+        .length;
     return (takenCount / logs.length) * 100;
   }
 
@@ -298,9 +317,15 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     final sevenDaysAgo = now.subtract(const Duration(days: 7));
     final logs = await getLogsForDateRange(sevenDaysAgo, now);
 
-    final takenCount = logs.where((log) => log.status == DoseStatus.taken).length;
-    final missedCount = logs.where((log) => log.status == DoseStatus.missed).length;
-    final skippedCount = logs.where((log) => log.status == DoseStatus.skipped).length;
+    final takenCount = logs
+        .where((log) => log.status == DoseStatus.taken)
+        .length;
+    final missedCount = logs
+        .where((log) => log.status == DoseStatus.missed)
+        .length;
+    final skippedCount = logs
+        .where((log) => log.status == DoseStatus.skipped)
+        .length;
 
     return AdherenceMetrics(
       weeklyAdherence: weeklyAdherence,
