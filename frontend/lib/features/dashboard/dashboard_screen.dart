@@ -76,7 +76,7 @@ class DashboardScreen extends ConsumerWidget {
               gradient: LinearGradient(
                 begin: const Alignment(0.985, -0.174),
                 end: const Alignment(-0.985, 0.174),
-                colors: [theme.colorScheme.tertiary, theme.colorScheme.primary],
+                colors: [theme.colorScheme.secondary, theme.colorScheme.primary],
               ),
             ),
           ),
