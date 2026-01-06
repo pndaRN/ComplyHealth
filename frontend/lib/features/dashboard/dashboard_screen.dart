@@ -20,53 +20,6 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 30,
-          fontWeight: FontWeight.w600,
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-        elevation: 0,
-        title: profile.firstName.isNotEmpty
-            ? Text('Good to see you, ${profile.firstName}')
-            : const Text('Welcome'),
-        actions: [
-          Consumer(
-            builder: (context, ref, child) {
-              final themeState = ref.watch(themeProvider);
-              final isDark =
-                  themeState.themeMode == ThemeMode.dark ||
-                  (themeState.themeMode == ThemeMode.system &&
-                      MediaQuery.of(context).platformBrightness ==
-                          Brightness.dark);
-
-              return PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert),
-                onSelected: (value) {
-                  if (value == 'theme') {
-                    ref.read(themeProvider.notifier).toggleTheme();
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'theme',
-                    child: Row(
-                      children: [
-                        Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                        const SizedBox(width: 12),
-                        Text(isDark ? 'Light mode' : 'Dark mode'),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
       body: Stack(
         children: [
           // Gradient background
@@ -92,22 +45,71 @@ class DashboardScreen extends ConsumerWidget {
               ),
             ),
           ),
-          // Content
-          SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  height: MediaQuery.of(context).padding.top + kToolbarHeight,
+          // Content with scrollable app bar
+          CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                floating: true,
+                snap: true,
+                backgroundColor: Colors.transparent,
+                foregroundColor: Colors.white,
+                titleTextStyle: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 30,
+                  fontWeight: FontWeight.w600,
                 ),
-                const TodaysMedicationsWidget(),
-                const AdherenceHistoryWidget(),
-                AtAGlanceWidget(
+                iconTheme: const IconThemeData(color: Colors.white),
+                elevation: 0,
+                title: profile.firstName.isNotEmpty
+                    ? Text('Good to see you, ${profile.firstName}')
+                    : const Text('Welcome'),
+                actions: [
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final themeState = ref.watch(themeProvider);
+                      final isDark =
+                          themeState.themeMode == ThemeMode.dark ||
+                          (themeState.themeMode == ThemeMode.system &&
+                              MediaQuery.of(context).platformBrightness ==
+                                  Brightness.dark);
+
+                      return PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert),
+                        onSelected: (value) {
+                          if (value == 'theme') {
+                            ref.read(themeProvider.notifier).toggleTheme();
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'theme',
+                            child: Row(
+                              children: [
+                                Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                                const SizedBox(width: 12),
+                                Text(isDark ? 'Light mode' : 'Dark mode'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SliverToBoxAdapter(
+                child: TodaysMedicationsWidget(),
+              ),
+              const SliverToBoxAdapter(
+                child: AdherenceHistoryWidget(),
+              ),
+              SliverToBoxAdapter(
+                child: AtAGlanceWidget(
                   conditions: conditions,
                   medications: meds,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
