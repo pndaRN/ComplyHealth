@@ -58,6 +58,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     setState(() => _isEditing = false);
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime initialDate = DateTime.now().subtract(const Duration(days: 365 * 30));
+    if (_dobCtrl.text.isNotEmpty) {
+      final parts = _dobCtrl.text.split('/');
+      if (parts.length == 3) {
+        initialDate = DateTime(
+          int.tryParse(parts[2]) ?? 1990,
+          int.tryParse(parts[0]) ?? 1,
+          int.tryParse(parts[1]) ?? 1,
+        );
+      }
+    }
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _dobCtrl.text = '${picked.month.toString().padLeft(2, '0')}/${picked.day.toString().padLeft(2, '0')}/${picked.year}';
+      });
+    }
+  }
+
   void _saveProfile() {
     final profile = ref.read(profileProvider);
     final notifier = ref.read(profileProvider.notifier);
@@ -200,13 +227,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    TextField(
-                      controller: _dobCtrl,
-                      decoration: InputDecoration(
-                        labelText: 'Date of Birth',
-                        prefixIcon: const Icon(Icons.cake),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    GestureDetector(
+                      onTap: () => _selectDate(context),
+                      child: AbsorbPointer(
+                        child: TextField(
+                          controller: _dobCtrl,
+                          decoration: InputDecoration(
+                            labelText: 'Date of Birth',
+                            prefixIcon: const Icon(Icons.cake),
+                            suffixIcon: const Icon(Icons.calendar_today),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
                       ),
                     ),
