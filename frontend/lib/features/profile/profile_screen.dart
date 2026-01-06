@@ -234,6 +234,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           controller: _dobCtrl,
                           decoration: InputDecoration(
                             labelText: 'Date of Birth',
+                            hintText: 'Tap to select date',
                             prefixIcon: const Icon(Icons.cake),
                             suffixIcon: const Icon(Icons.calendar_today),
                             border: OutlineInputBorder(

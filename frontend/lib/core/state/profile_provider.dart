@@ -40,22 +40,6 @@ class ProfileNotifier extends Notifier<Profile> {
     final saved = box.get('user');
     if (saved != null && saved is Profile) {
       state = saved;
-    } else {
-      // Create a default profile if none exists
-      final defaultProfile = Profile(
-        firstName: 'John',
-        lastName: 'Smith',
-        dob: '04/19/1985',
-        allergies: 'None',
-        xp: 0,
-        streak: 0,
-        levelProgress: 0.0,
-        lastXpAwardDate: null,
-        lastPopupShownDate: null,
-        lastXpGained: 0,
-      );
-      await box.put('user', defaultProfile);
-      state = defaultProfile;
     }
     // Check and award XP for yesterday when profile loads
     await checkAndAwardDailyXp();
