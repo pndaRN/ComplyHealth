@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed pre-filled default profile so new users start with empty fields
 
 ### Added
+- CI/CD & Deployment documentation in CLAUDE.md (branch strategy, Codemagic workflows)
 - Changelog requirements section in CLAUDE.md
 
 ## [1.2.1] - 2026-01-06
