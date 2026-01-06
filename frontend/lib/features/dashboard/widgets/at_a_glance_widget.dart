@@ -83,8 +83,8 @@ class _AtAGlanceWidgetState extends State<AtAGlanceWidget> {
                       ? const Text('No medications yet')
                       : Text(
                           related
-                              .map((m) => '${m.name} ${m.dosage}')
-                              .join(', '),
+                              .map((m) => '▸ ${m.name} - ${m.dosage}')
+                              .join('\n'),
                         ),
                 );
               }),

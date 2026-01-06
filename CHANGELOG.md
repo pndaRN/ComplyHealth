@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.2.0] - 2026-01-04
+## [1.2.1] - 2026-01-06
+
+### Changed
+- Updated dashboard gradient colors
+- Improved "At A Glance" widget formatting
 
 ### Added
 - Local encryption for all Hive data boxes using AES-256
@@ -25,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Condition card text overflow - long medical names now truncate with ellipsis
 
-## [1.1.0] - 2026-01-01
+## [1.1.1] - 2026-01-01
 
 ### Added - 2025-12-30
 - Firebase beta testing warning on about screen
