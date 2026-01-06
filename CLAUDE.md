@@ -155,3 +155,14 @@ deactivate
 2. **New Features**: Create feature directory with screen/dialogs/widgets as needed
 3. **State Management**: Create provider in `core/state/` if shared across features
 4. **Testing**: Write widget tests for UI, unit tests for business logic
+
+## Changelog Requirements
+
+**All committed changes must be documented in `CHANGELOG.md`.**
+
+- Location: `/CHANGELOG.md` (project root)
+- Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+- Add entries under `## [Unreleased]` section
+- Categories: `### Added`, `### Changed`, `### Fixed`, `### Removed`
+- Write clear, user-facing descriptions (not commit messages)
+- Update changelog in the same commit or immediately after feature commits

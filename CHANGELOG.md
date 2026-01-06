@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Removed pre-filled default profile so new users start with empty fields
 
+### Added
+- Changelog requirements section in CLAUDE.md
+
 ## [1.2.1] - 2026-01-06
 
 ### Changed
