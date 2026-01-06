@@ -283,7 +283,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       icon: Icons.badge,
                       label: 'Full Name',
                       value: (profile.firstName.isEmpty && profile.lastName.isEmpty)
-                          ? 'Not set'
+                          ? 'Tap Edit to add your name'
                           : '${profile.firstName} ${profile.lastName}'.trim(),
                       isEmpty: profile.firstName.isEmpty && profile.lastName.isEmpty,
                     ),
@@ -292,7 +292,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       context,
                       icon: Icons.cake,
                       label: 'Date of Birth',
-                      value: profile.dob.isEmpty ? 'Not set' : profile.dob,
+                      value: profile.dob.isEmpty ? 'Tap Edit to add your birthday' : profile.dob,
                       isEmpty: profile.dob.isEmpty,
                     ),
                     const SizedBox(height: 12),
