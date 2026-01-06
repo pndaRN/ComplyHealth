@@ -188,11 +188,16 @@ class _AdherenceHistoryWidgetState
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      '7-Day Adherence History',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '7-Day Adherence History',
+                        maxLines: 1,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
                     ),
                   ),
                 ],

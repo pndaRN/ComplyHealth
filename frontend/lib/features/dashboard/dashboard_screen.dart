@@ -60,9 +60,12 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 iconTheme: const IconThemeData(color: Colors.white),
                 elevation: 0,
-                title: profile.firstName.isNotEmpty
-                    ? Text('Good to see you, ${profile.firstName}')
-                    : const Text('Welcome'),
+                title: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: profile.firstName.isNotEmpty
+                      ? Text('Good to see you, ${profile.firstName}')
+                      : const Text('Welcome'),
+                ),
                 actions: [
                   Consumer(
                     builder: (context, ref, child) {

@@ -329,11 +329,16 @@ class _TodaysMedicationsWidgetState
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                'Today\'s Medications',
-                style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Today\'s Medications',
+                  maxLines: 1,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
               ),
             ),
             Container(

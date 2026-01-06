@@ -41,10 +41,15 @@ class _AtAGlanceWidgetState extends State<AtAGlanceWidget> {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      'At A Glance',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'At A Glance',
+                        maxLines: 1,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
