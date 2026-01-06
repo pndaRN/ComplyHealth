@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Dashboard app bar now scrolls with content (SliverAppBar with floating/snap)
+- Dashboard titles adapt to screen size using FittedBox
+- Date of birth input now uses date picker instead of text input
+
+### Fixed
+- Removed pre-filled default profile so new users start with empty fields
+
 ## [1.2.1] - 2026-01-06
 
 ### Changed
