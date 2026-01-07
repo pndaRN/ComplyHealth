@@ -7,46 +7,35 @@ import '../../core/services/encryption_migration_service.dart';
 
 /// Provider for medication adherence tracking
 final adherenceProvider =
-    NotifierProvider<AdherenceNotifier, List<MedicationLog>>(
-      AdherenceNotifier.new,
-    );
+    AsyncNotifierProvider<AdherenceNotifier, List<MedicationLog>>(
+  AdherenceNotifier.new,
+);
 
-class AdherenceNotifier extends Notifier<List<MedicationLog>> {
+class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
   static const String boxName = 'medication_logs';
   Box<MedicationLog>? _box;
 
-  @override
-  List<MedicationLog> build() {
-    _initBox();
-    return [];
-  }
-
-  Future<void> _initBox() async {
-    if (_box == null || !_box!.isOpen) {
-      _box = await Hive.openBox<MedicationLog>(boxName);
-      state = _box!.values.toList();
-    }
-  }
-
-  /// Get or open the Hive box (cached)
   Future<Box<MedicationLog>> _getBox() async {
     if (_box != null && _box!.isOpen) {
       return _box!;
     }
-
     final key = await EncryptionMigrationService.getEncryptionKey();
-
     _box = await Hive.openBox<MedicationLog>(
       boxName,
       encryptionCipher: HiveAesCipher(key),
     );
-    state = _box!.values.toList();
     return _box!;
+  }
+
+  @override
+  Future<List<MedicationLog>> build() async {
+    final box = await _getBox();
+    return box.values.toList();
   }
 
   /// Get all medication instances scheduled for today
   Future<List<MedicationInstance>> getTodayInstances() async {
-    final medications = ref.read(medicationProvider);
+    final medications = await ref.read(medicationProvider.future); // Access data from AsyncValue
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
@@ -54,7 +43,6 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
 
     for (final med in medications) {
       if (med.isPRN) {
-        // For PRN medications, create a single instance
         instances.add(
           MedicationInstance(
             medication: med,
@@ -63,7 +51,6 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
           ),
         );
       } else {
-        // For scheduled medications, create an instance for each time
         for (final timeStr in med.scheduledTimes) {
           final parts = timeStr.split(':');
           final hour = int.parse(parts[0]);
@@ -87,16 +74,13 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
       }
     }
 
-    // Get existing logs for today
     final todayLogs = await getLogsForDate(today);
 
-    // Match logs to instances
     for (final instance in instances) {
       final matchingLogs = todayLogs.where((log) {
         if (log.medicationId != instance.medication.id) return false;
         if (instance.isPRN) return true;
 
-        // For scheduled meds, match by time (within 5 minutes)
         final diff = log.scheduledTime.difference(instance.scheduledTime);
         return diff.abs().inMinutes < 5;
       }).toList();
@@ -104,7 +88,6 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
       instance.log = matchingLogs.isNotEmpty ? matchingLogs.first : null;
     }
 
-    // Sort by scheduled time
     instances.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
 
     return instances;
@@ -119,7 +102,7 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     DateTime? actualTakenTime,
     String? notes,
   }) async {
-    try {
+    state = await AsyncValue.guard(() async {
       final log = MedicationLog(
         medicationId: medicationId,
         medicationName: medicationName,
@@ -132,10 +115,8 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
 
       final box = await _getBox();
       await box.put(log.id, log);
-      state = box.values.toList();
-    } catch (_) {
-      rethrow;
-    }
+      return box.values.toList();
+    });
   }
 
   /// Log a dose as skipped
@@ -147,7 +128,7 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     String? skipReason,
     String? notes,
   }) async {
-    try {
+    state = await AsyncValue.guard(() async {
       final log = MedicationLog(
         medicationId: medicationId,
         medicationName: medicationName,
@@ -160,10 +141,8 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
 
       final box = await _getBox();
       await box.put(log.id, log);
-      state = box.values.toList();
-    } catch (_) {
-      rethrow;
-    }
+      return box.values.toList();
+    });
   }
 
   /// Auto-mark doses as missed if past grace period
@@ -196,7 +175,7 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     required String dosage,
     required DateTime scheduledTime,
   }) async {
-    try {
+    state = await AsyncValue.guard(() async {
       final log = MedicationLog(
         medicationId: medicationId,
         medicationName: medicationName,
@@ -207,40 +186,35 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
 
       final box = await _getBox();
       await box.put(log.id, log);
-      state = box.values.toList();
-    } catch (_) {
-      rethrow;
-    }
+      return box.values.toList();
+    });
   }
 
   /// Delete a log entry
   Future<void> deleteLog(String logId) async {
-    try {
+    state = await AsyncValue.guard(() async {
       final box = await _getBox();
       await box.delete(logId);
-      state = box.values.toList();
-    } catch (_) {
-      rethrow;
-    }
+      return box.values.toList();
+    });
   }
 
   /// Update an existing log
   Future<void> updateLog(MedicationLog log) async {
-    try {
+    state = await AsyncValue.guard(() async {
       final box = await _getBox();
       await box.put(log.id, log);
-      state = box.values.toList();
-    } catch (_) {
-      rethrow;
-    }
+      return box.values.toList();
+    });
   }
 
   /// Get logs for a specific date
   Future<List<MedicationLog>> getLogsForDate(DateTime date) async {
+    final logs = state.value ?? []; // Access current state data
     final startOfDay = DateTime(date.year, date.month, date.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
 
-    return state.where((log) {
+    return logs.where((log) {
       return log.scheduledTime.isAfter(
             startOfDay.subtract(const Duration(seconds: 1)),
           ) &&
@@ -253,10 +227,11 @@ class AdherenceNotifier extends Notifier<List<MedicationLog>> {
     DateTime startDate,
     DateTime endDate,
   ) async {
+    final logs = state.value ?? []; // Access current state data
     final start = DateTime(startDate.year, startDate.month, startDate.day);
     final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
 
-    return state.where((log) {
+    return logs.where((log) {
       return log.scheduledTime.isAfter(
             start.subtract(const Duration(seconds: 1)),
           ) &&

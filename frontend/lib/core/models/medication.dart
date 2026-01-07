@@ -35,6 +35,30 @@ class Medication {
     this.lastDoseCountReset,
   });
 
+  Medication copyWith({
+    String? id,
+    String? name,
+    String? dosage,
+    List<String>? conditionNames,
+    bool? isPRN,
+    List<String>? scheduledTimes,
+    int? maxDailyDoses,
+    int? currentDoseCount,
+    DateTime? lastDoseCountReset,
+  }) {
+    return Medication(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      dosage: dosage ?? this.dosage,
+      conditionNames: conditionNames ?? this.conditionNames,
+      isPRN: isPRN ?? this.isPRN,
+      scheduledTimes: scheduledTimes ?? this.scheduledTimes,
+      maxDailyDoses: maxDailyDoses ?? this.maxDailyDoses,
+      currentDoseCount: currentDoseCount ?? this.currentDoseCount,
+      lastDoseCountReset: lastDoseCountReset ?? this.lastDoseCountReset,
+    );
+  }
+
   factory Medication.fromJson(Map<String, dynamic> json) => Medication(
     id: json['id'] ?? '',
     name: json['name'] ?? '',

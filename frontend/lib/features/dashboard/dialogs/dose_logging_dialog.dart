@@ -40,8 +40,8 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
     // For PRN medications, increment count first to ensure atomicity
     if (widget.instance.isPRN) {
       // Get the latest medication state from provider
-      final medications = ref.read(medicationProvider);
-      final latestMed = medications.firstWhere(
+      final medicationsAsync = ref.read(medicationProvider);
+      final latestMed = (medicationsAsync.value ?? []).firstWhere(
         (m) => m.id == widget.instance.medication.id,
         orElse: () => widget.instance.medication,
       );
@@ -114,17 +114,16 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
         // Delete the log first
         await ref.read(adherenceProvider.notifier).deleteLog(log.id);
 
-        // Decrement dose count for PRN medications if the log was for a taken dose
-        if (widget.instance.isPRN && log.status == DoseStatus.taken) {
-          // Get the latest medication state from provider
-          final medications = ref.read(medicationProvider);
-          final latestMed = medications.firstWhere(
-            (m) => m.id == widget.instance.medication.id,
-            orElse: () => widget.instance.medication,
-          );
-          await ref.read(medicationProvider.notifier).decrementDoseCount(latestMed);
-        }
-
+                  // Decrement dose count for PRN medications if the log was for a taken dose
+                  if (widget.instance.isPRN && log.status == DoseStatus.taken) {
+                    // Get the latest medication state from provider
+                    final medicationsAsync = ref.read(medicationProvider);
+                    final latestMed = (medicationsAsync.value ?? []).firstWhere(
+                      (m) => m.id == widget.instance.medication.id,
+                      orElse: () => widget.instance.medication,
+                    );
+                    await ref.read(medicationProvider.notifier).decrementDoseCount(latestMed);
+                  }
         if (mounted) Navigator.of(context).pop(true);
       } catch (e) {
         if (mounted) {

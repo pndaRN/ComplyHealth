@@ -11,8 +11,6 @@ import 'core/models/feedback.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/encryption_migration_service.dart';
 import 'core/state/profile_provider.dart';
-import 'core/state/conditions_provider.dart';
-import 'core/state/medication_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/state/settings_provider.dart';
@@ -46,11 +44,11 @@ void main() async {
   // Init Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  try{
+  try {
     await EncryptionMigrationService.migrateAllBoxes();
-    } catch (e) { 
-      print('Migration error: $e');
-    }
+  } catch (e) {
+    print('Migration error: $e');
+  }
 
   // Set up Crashlytics error handlers
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
@@ -59,22 +57,8 @@ void main() async {
     return true;
   };
 
-  // Create ProviderScope to initialize all providers early
-  final container = ProviderContainer();
-
-  // Initialize providers to ensure data is loaded before UI appears
-  container.read(profileProvider);
-  container.read(conditionsProvider);
-  container.read(medicationProvider);
-  container.read(themeProvider);
-  container.read(settingsProvider);
-
-  // Give providers time to load from Hive
-  await Future.delayed(const Duration(milliseconds: 200));
-
-  runApp(UncontrolledProviderScope(
-    container: container,
-    child: const ComplyHealthApp(),
+  runApp(const ProviderScope(
+    child: ComplyHealthApp(),
   ));
 }
 
@@ -87,41 +71,37 @@ class ComplyHealthApp extends ConsumerStatefulWidget {
 
 class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
   int _index = 0;
-  bool _hasCheckedPopup = false;
   bool _showOnboarding = true;
   StreamSubscription<String>? _notificationSubscription;
   int _dashboardRefreshKey = 0;
 
   List<Widget> get _screens => [
-    DashboardScreen(key: ValueKey('dashboard_$_dashboardRefreshKey')),
-    HealthScreen(),
-    MedicationsScreen(),
-    ProfileScreen(),
-  ];
+        DashboardScreen(key: ValueKey('dashboard_$_dashboardRefreshKey')),
+        const HealthScreen(),
+        const MedicationsScreen(),
+        const ProfileScreen(),
+      ];
 
   final List<BottomNavigationBarItem> _bottomNavigationBarItems = [
-    BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-    BottomNavigationBarItem(
+    const BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+    const BottomNavigationBarItem(
       icon: Icon(Icons.health_and_safety),
       label: 'Health',
     ),
-    BottomNavigationBarItem(icon: Icon(Icons.medication), label: 'Medications'),
-    BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+    const BottomNavigationBarItem(icon: Icon(Icons.medication), label: 'Medications'),
+    const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
   ];
 
   @override
   void initState() {
     super.initState();
     // Listen for notification taps to navigate to dashboard
-    _notificationSubscription = NotificationService.onNotificationTap.listen((payload) {
+    _notificationSubscription =
+        NotificationService.onNotificationTap.listen((payload) {
       setState(() {
         _index = 0; // Navigate to dashboard
         _dashboardRefreshKey++; // Force dashboard to rebuild and refresh
       });
-    });
-    // Check and show XP popup after first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAndShowXpPopup();
     });
   }
 
@@ -131,15 +111,8 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
     super.dispose();
   }
 
-  Future<void> _checkAndShowXpPopup() async {
-    if (_hasCheckedPopup) return;
-    _hasCheckedPopup = true;
-
+  Future<void> _checkAndShowXpPopup(Profile profile) async {
     final profileNotifier = ref.read(profileProvider.notifier);
-    final profile = ref.read(profileProvider);
-
-    // Wait a bit for profile to load
-    await Future.delayed(const Duration(milliseconds: 500));
 
     if (!mounted) return;
 
@@ -172,6 +145,18 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
   Widget build(BuildContext context) {
     final themeState = ref.watch(themeProvider);
     final settings = ref.watch(settingsProvider);
+
+    // Listen to profile provider changes to show XP popup
+    ref.listen(profileProvider, (previous, next) {
+      if (previous is AsyncLoading && next is AsyncData<Profile>) {
+        // Use a post-frame callback to ensure the widget tree is built
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _checkAndShowXpPopup(next.value);
+          }
+        });
+      }
+    });
 
     // Determine if we should show onboarding
     final showOnboarding = _showOnboarding && !settings.hasCompletedOnboarding;

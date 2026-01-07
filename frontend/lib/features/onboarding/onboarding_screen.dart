@@ -48,8 +48,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isLastPage = _currentPage == 3;
-    final conditions = ref.watch(conditionsProvider);
-    final medications = ref.watch(medicationProvider);
+    final conditionsAsync = ref.watch(conditionsProvider);
+    final medicationsAsync = ref.watch(medicationProvider);
+
+    final conditions = conditionsAsync.value ?? [];
+    final medications = medicationsAsync.value ?? [];
 
     return Scaffold(
       body: SafeArea(
@@ -335,7 +338,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _removeMedication(String id) {
-    final medications = ref.read(medicationProvider);
+    final medications = ref.read(medicationProvider).value ?? [];
     final med = medications.firstWhere((m) => m.id == id);
     ref.read(medicationProvider.notifier).deleteMeds(med);
   }
@@ -375,7 +378,7 @@ class _ConditionPickerDialogState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final userConditions = ref.watch(conditionsProvider);
+    final userConditions = ref.watch(conditionsProvider).value ?? [];
     final grouped = _groupByCategory(_filteredConditions);
     final sortedCategories = grouped.keys.toList()..sort();
 

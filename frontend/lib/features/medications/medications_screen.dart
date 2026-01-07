@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/medication.dart';
+import '../../core/models/disease.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/theme/theme_provider.dart';
@@ -55,27 +56,10 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final meds = ref.watch(medicationProvider);
+    final medsAsync = ref.watch(medicationProvider);
+    final conditionsAsync = ref.watch(conditionsProvider);
     final notifier = ref.read(medicationProvider.notifier);
     final currentSortOption = notifier.sortOption;
-
-    // Filter medications by search query
-    final filteredMeds = _searchQuery.isEmpty
-        ? meds
-        : meds.where((medication) {
-            final searchLower = _searchQuery.toLowerCase();
-            final conditions = ref.read(conditionsProvider);
-
-            // Get display names for conditions
-            final conditionDisplayNames = ConditionHelper.getDisplayNames(
-              conditionNames: medication.conditionNames,
-              conditions: conditions,
-            );
-
-            return medication.name.toLowerCase().contains(searchLower) ||
-                medication.dosage.toLowerCase().contains(searchLower) ||
-                conditionDisplayNames.any((name) => name.toLowerCase().contains(searchLower));
-          }).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -152,7 +136,6 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
                       }
                       break;
                     case 'sort':
-                      // Show sort submenu
                       final RenderBox button = context.findRenderObject() as RenderBox;
                       final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
                       final RelativeRect position = RelativeRect.fromRect(
@@ -182,7 +165,7 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
                         }).toList(),
                       );
                       if (selected != null) {
-                        notifier.setSortOption(selected);
+                        await notifier.setSortOption(selected);
                       }
                       break;
                   }
@@ -225,20 +208,44 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
           ),
         ],
       ),
-      body: meds.isEmpty
-          ? EmptyStateWidget(
+      body: medsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+        data: (meds) {
+          final conditions = conditionsAsync.asData?.value ?? [];
+
+          final filteredMeds = _searchQuery.isEmpty
+              ? meds
+              : meds.where((medication) {
+                  final searchLower = _searchQuery.toLowerCase();
+                  final conditionDisplayNames = ConditionHelper.getDisplayNames(
+                    conditionNames: medication.conditionNames,
+                    conditions: conditions,
+                  );
+
+                  return medication.name.toLowerCase().contains(searchLower) ||
+                      medication.dosage.toLowerCase().contains(searchLower) ||
+                      conditionDisplayNames.any((name) => name.toLowerCase().contains(searchLower));
+                }).toList();
+
+          if (meds.isEmpty) {
+            return EmptyStateWidget(
               icon: Icons.medication_outlined,
               title: 'No medications yet',
               subtitle: 'Tap + to add your first medication',
-            )
-          : filteredMeds.isEmpty
-              ? EmptyStateWidget(
-                  icon: Icons.search_off,
-                  title: 'No medications found',
-                )
-              : _buildMedicationsList(context, filteredMeds, currentSortOption),
+            );
+          }
+          if (filteredMeds.isEmpty) {
+            return EmptyStateWidget(
+              icon: Icons.search_off,
+              title: 'No medications found',
+            );
+          }
+          return _buildMedicationsList(context, filteredMeds, currentSortOption, conditions);
+        },
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddDialog(context),
+        onPressed: () => _showAddDialog(context, conditionsAsync.asData?.value ?? []),
         child: const Icon(Icons.add),
       ),
     );
@@ -248,24 +255,22 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
     BuildContext context,
     List<Medication> meds,
     MedicationSortOption sortOption,
+    List<Disease> conditions,
   ) {
     if (sortOption == MedicationSortOption.groupedByCondition) {
-      return _buildGroupedList(context, meds);
+      return _buildGroupedList(context, meds, conditions);
     } else if (sortOption == MedicationSortOption.dueTime) {
-      return _buildDueTimeGroupedList(context, meds);
+      return _buildDueTimeGroupedList(context, meds, conditions);
     } else {
-      return _buildSimpleList(context, meds);
+      return _buildSimpleList(context, meds, conditions);
     }
   }
 
-  Widget _buildSimpleList(BuildContext context, List<Medication> meds) {
+  Widget _buildSimpleList(BuildContext context, List<Medication> meds, List<Disease> conditions) {
     return ListView.builder(
       itemCount: meds.length,
       itemBuilder: (context, index) {
         final medication = meds[index];
-        final conditions = ref.watch(conditionsProvider);
-
-        // Get display names for conditions
         final conditionDisplayNames = ConditionHelper.getDisplayNames(
           conditionNames: medication.conditionNames,
           conditions: conditions,
@@ -295,18 +300,12 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
     );
   }
 
-  Widget _buildGroupedList(BuildContext context, List<Medication> meds) {
-    final conditions = ref.watch(conditionsProvider);
-
-    // Transform the sorted list into condition-grouped entries
+  Widget _buildGroupedList(BuildContext context, List<Medication> meds, List<Disease> conditions) {
     final conditionGroupedMeds = _createConditionGroupedMedications(meds);
-
-    // Sort by condition name alphabetically
     conditionGroupedMeds.sort((a, b) =>
       a.key.toLowerCase().compareTo(b.key.toLowerCase())
     );
 
-    // Build a list of widgets with section headers
     final List<Widget> items = [];
     String? currentCondition;
 
@@ -314,11 +313,8 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
       final conditionName = entry.key;
       final medication = entry.value;
 
-      // Add section header if this is a new condition group
       if (currentCondition != conditionName) {
         currentCondition = conditionName;
-
-        // Get display name for condition
         final displayName = ConditionHelper.getDisplayNameByConditionName(
           conditionName: conditionName,
           conditions: conditions,
@@ -338,13 +334,11 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
         );
       }
 
-      // Get display names for all conditions
       final conditionDisplayNames = ConditionHelper.getDisplayNames(
         conditionNames: medication.conditionNames,
         conditions: conditions,
       );
 
-      // Add medication card
       final timingSummary = _getTimingSummary(medication);
       final doseColor = medication.isPRN
           ? _getDoseCountColor(medication.currentDoseCount, medication.maxDailyDoses ?? 0, Theme.of(context))
@@ -364,7 +358,6 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
     return ListView(children: items);
   }
 
-  /// Formats a time in minutes since midnight to a display string with optional "Tomorrow" suffix
   String _formatTimeGroup(int timeInMinutes, int currentTime) {
     final isNextDay = timeInMinutes <= currentTime;
     final hours = timeInMinutes ~/ TimeFormattingUtils.minutesPerHour;
@@ -379,15 +372,12 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
         : '$displayHour:$displayMinute $period';
   }
 
-  /// Compares two time group keys for sorting (PRN and No Schedule go last, others chronologically)
   int _compareTimeGroups(String keyA, String keyB) {
-    // PRN and No Schedule go last
     if (keyA == 'As Needed (PRN)' && keyB != 'As Needed (PRN)') return 1;
     if (keyA != 'As Needed (PRN)' && keyB == 'As Needed (PRN)') return -1;
     if (keyA == 'No Schedule' && keyB != 'No Schedule' && keyB != 'As Needed (PRN)') return 1;
     if (keyA != 'No Schedule' && keyA != 'As Needed (PRN)' && keyB == 'No Schedule') return -1;
 
-    // Parse times and sort chronologically
     final timeA = TimeFormattingUtils.parseTimeGroupToMinutes(keyA);
     final timeB = TimeFormattingUtils.parseTimeGroupToMinutes(keyB);
 
@@ -398,41 +388,33 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
     return timeA.compareTo(timeB);
   }
 
-  /// Creates condition-grouped medication entries
-  /// Medications with multiple conditions will have multiple entries
   List<MapEntry<String, Medication>> _createConditionGroupedMedications(
     List<Medication> meds,
   ) {
     final List<MapEntry<String, Medication>> conditionGroupedMeds = [];
-
     for (final medication in meds) {
       if (medication.conditionNames.isEmpty) {
         conditionGroupedMeds.add(MapEntry('Unknown', medication));
       } else {
-        // Add an entry for each condition (intentional duplication)
         for (final conditionName in medication.conditionNames) {
           conditionGroupedMeds.add(MapEntry(conditionName, medication));
         }
       }
     }
-
     return conditionGroupedMeds;
   }
 
-  /// Creates time-grouped medication entries
   List<MapEntry<String, Medication>> _createTimeGroupedMedications(
     List<Medication> meds,
     int currentTime,
   ) {
     final List<MapEntry<String, Medication>> timeGroupedMeds = [];
-
     for (final medication in meds) {
       if (medication.isPRN) {
         timeGroupedMeds.add(MapEntry('As Needed (PRN)', medication));
       } else if (medication.scheduledTimes.isEmpty) {
         timeGroupedMeds.add(MapEntry('No Schedule', medication));
       } else {
-        // Add an entry for each scheduled time
         for (final timeStr in medication.scheduledTimes) {
           final timeInMinutes = TimeFormattingUtils.parseTimeToMinutes(timeStr);
           if (timeInMinutes != null) {
@@ -442,21 +424,16 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
         }
       }
     }
-
     return timeGroupedMeds;
   }
 
-  Widget _buildDueTimeGroupedList(BuildContext context, List<Medication> meds) {
-    final conditions = ref.watch(conditionsProvider);
-
+  Widget _buildDueTimeGroupedList(BuildContext context, List<Medication> meds, List<Disease> conditions) {
     final now = DateTime.now();
     final currentTime = now.hour * TimeFormattingUtils.minutesPerHour + now.minute;
 
-    // Create and sort time-grouped medications
     final timeGroupedMeds = _createTimeGroupedMedications(meds, currentTime);
     timeGroupedMeds.sort((a, b) => _compareTimeGroups(a.key, b.key));
 
-    // Build a list of widgets with time headers
     final List<Widget> items = [];
     String? currentTimeGroup;
 
@@ -464,7 +441,6 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
       final timeGroup = entry.key;
       final medication = entry.value;
 
-      // Add time header if this is a new time group
       if (currentTimeGroup != timeGroup) {
         currentTimeGroup = timeGroup;
 
@@ -482,13 +458,11 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
         );
       }
 
-      // Get display names for all conditions
       final conditionDisplayNames = ConditionHelper.getDisplayNames(
         conditionNames: medication.conditionNames,
         conditions: conditions,
       );
 
-      // Add medication card
       final timingSummary = _getTimingSummary(medication);
       final doseColor = medication.isPRN
           ? _getDoseCountColor(medication.currentDoseCount, medication.maxDailyDoses ?? 0, Theme.of(context))
@@ -504,15 +478,11 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
         ),
       );
     }
-
     return ListView(children: items);
   }
 
-  void _showAddDialog(BuildContext context) async {
-    final conditions = ref.read(conditionsProvider);
-
+  void _showAddDialog(BuildContext context, List<Disease> conditions) async {
     if (conditions.isEmpty) {
-      // Show dialog to prompt user to add condition from Health tab
       await showDialog<void>(
         context: context,
         builder: (dialogContext) {
@@ -541,7 +511,6 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
       return;
     }
 
-    // Normal flow when conditions exist
     showDialog(
       context: context,
       builder: (context) => const MedicationAddDialog(),

@@ -46,47 +46,51 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final conditions = ref.watch(conditionsProvider);
+    final conditionsAsync = ref.watch(conditionsProvider);
     final notifier = ref.read(medicationProvider.notifier);
 
     return AlertDialog(
       title: const Text('Add Medication'),
-      content: MedicationFormContent(
-        nameController: nameCtrl,
-        dosageController: doseCtrl,
-        conditions: conditions,
-        selectedConditions: selectedConditions,
-        onConditionsChanged: (value) {
-          setState(() {
-            selectedConditions = value;
-          });
-        },
-        isPRN: isPRN,
-        onPRNChanged: (value) {
-          setState(() {
-            if (value) {
-              // Switching to PRN - save and clear times
-              _savedScheduledTimes = List.from(scheduledTimes);
-              scheduledTimes = [];
-              isPRN = true;
-            } else {
-              // Switching from PRN - restore times
-              if (_savedScheduledTimes != null) {
-                scheduledTimes = _savedScheduledTimes!;
-                _savedScheduledTimes = null;
+      content: conditionsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error loading conditions: $err')),
+        data: (conditions) => MedicationFormContent(
+          nameController: nameCtrl,
+          dosageController: doseCtrl,
+          conditions: conditions,
+          selectedConditions: selectedConditions,
+          onConditionsChanged: (value) {
+            setState(() {
+              selectedConditions = value;
+            });
+          },
+          isPRN: isPRN,
+          onPRNChanged: (value) {
+            setState(() {
+              if (value) {
+                // Switching to PRN - save and clear times
+                _savedScheduledTimes = List.from(scheduledTimes);
+                scheduledTimes = [];
+                isPRN = true;
+              } else {
+                // Switching from PRN - restore times
+                if (_savedScheduledTimes != null) {
+                  scheduledTimes = _savedScheduledTimes!;
+                  _savedScheduledTimes = null;
+                }
+                isPRN = false;
+                maxDosesCtrl.clear();
               }
-              isPRN = false;
-              maxDosesCtrl.clear();
-            }
-          });
-        },
-        scheduledTimes: scheduledTimes,
-        onTimesChanged: (value) {
-          setState(() {
-            scheduledTimes = value;
-          });
-        },
-        maxDosesController: maxDosesCtrl,
+            });
+          },
+          scheduledTimes: scheduledTimes,
+          onTimesChanged: (value) {
+            setState(() {
+              scheduledTimes = value;
+            });
+          },
+          maxDosesController: maxDosesCtrl,
+        ),
       ),
       actions: [
         TextButton(
@@ -94,31 +98,33 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
           child: const Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed: () {
-            if (!MedicationValidator.validateForm(
-              context: context,
-              name: nameCtrl.text,
-              dosage: doseCtrl.text,
-              conditions: selectedConditions,
-              isPRN: isPRN,
-              scheduledTimes: scheduledTimes,
-              maxDailyDoses: maxDosesCtrl.text.isEmpty ? null : int.tryParse(maxDosesCtrl.text),
-            )) {
-              return;
-            }
+          onPressed: conditionsAsync.isLoading
+              ? null // Disable button while loading conditions
+              : () {
+                  if (!MedicationValidator.validateForm(
+                    context: context,
+                    name: nameCtrl.text,
+                    dosage: doseCtrl.text,
+                    conditions: selectedConditions,
+                    isPRN: isPRN,
+                    scheduledTimes: scheduledTimes,
+                    maxDailyDoses: maxDosesCtrl.text.isEmpty ? null : int.tryParse(maxDosesCtrl.text),
+                  )) {
+                    return;
+                  }
 
-            final newMedication = Medication(
-              id: const Uuid().v4(),
-              name: nameCtrl.text.trim(),
-              dosage: doseCtrl.text.trim(),
-              conditionNames: selectedConditions,
-              isPRN: isPRN,
-              scheduledTimes: scheduledTimes.map(_timeToString).toList(),
-              maxDailyDoses: maxDosesCtrl.text.isEmpty ? null : int.tryParse(maxDosesCtrl.text),
-            );
-            notifier.addMeds(newMedication);
-            Navigator.pop(context);
-          },
+                  final newMedication = Medication(
+                    id: const Uuid().v4(),
+                    name: nameCtrl.text.trim(),
+                    dosage: doseCtrl.text.trim(),
+                    conditionNames: selectedConditions,
+                    isPRN: isPRN,
+                    scheduledTimes: scheduledTimes.map(_timeToString).toList(),
+                    maxDailyDoses: maxDosesCtrl.text.isEmpty ? null : int.tryParse(maxDosesCtrl.text),
+                  );
+                  notifier.addMeds(newMedication);
+                  Navigator.pop(context);
+                },
           child: const Text('Add Medication'),
         ),
       ],

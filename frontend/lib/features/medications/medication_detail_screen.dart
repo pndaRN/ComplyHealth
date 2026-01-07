@@ -24,8 +24,11 @@ class _MedicationDetailScreenState
     extends ConsumerState<MedicationDetailScreen> {
   @override
   Widget build(BuildContext context) {
-    final medications = ref.watch(medicationProvider);
-    final conditions = ref.watch(conditionsProvider);
+    final medicationsAsync = ref.watch(medicationProvider);
+    final conditionsAsync = ref.watch(conditionsProvider);
+
+    final medications = medicationsAsync.value ?? [];
+    final conditions = conditionsAsync.value ?? [];
 
     // Get the current medication state (might have been updated)
     final currentMed = medications.firstWhere(

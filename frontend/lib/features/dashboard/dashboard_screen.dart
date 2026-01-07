@@ -13,108 +13,121 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final conditions = ref.watch(conditionsProvider);
-    final meds = ref.watch(medicationProvider);
-    final profile = ref.watch(profileProvider);
+    final conditionsAsync = ref.watch(conditionsProvider);
+    final medsAsync = ref.watch(medicationProvider);
+    final profileAsync = ref.watch(profileProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          // Gradient background
-          Container(
-            height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: const Alignment(0.985, -0.174),
-                end: const Alignment(-0.985, 0.174),
-                colors: [theme.colorScheme.secondary, theme.colorScheme.primary],
-              ),
-            ),
-          ),
-          // Vertical fade to background
-          Container(
-            height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.transparent, theme.scaffoldBackgroundColor],
-                stops: const [0.0, 0.8],
-              ),
-            ),
-          ),
-          // Content with scrollable app bar
-          CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                floating: true,
-                snap: true,
-                backgroundColor: Colors.transparent,
-                foregroundColor: Colors.white,
-                titleTextStyle: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
-                  fontWeight: FontWeight.w600,
-                ),
-                iconTheme: const IconThemeData(color: Colors.white),
-                elevation: 0,
-                title: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: profile.firstName.isNotEmpty
-                      ? Text('Good to see you, ${profile.firstName}')
-                      : const Text('Welcome'),
-                ),
-                actions: [
-                  Consumer(
-                    builder: (context, ref, child) {
-                      final themeState = ref.watch(themeProvider);
-                      final isDark =
-                          themeState.themeMode == ThemeMode.dark ||
-                          (themeState.themeMode == ThemeMode.system &&
-                              MediaQuery.of(context).platformBrightness ==
-                                  Brightness.dark);
+      body: profileAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+        data: (profile) {
+          return conditionsAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, stack) => Center(child: Text('Error: $err')),
+            data: (conditions) {
+              return medsAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, stack) => Center(child: Text('Error: $err')),
+                data: (meds) {
+                  return Stack(
+                    children: [
+                      Container(
+                        height: MediaQuery.of(context).size.height,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: const Alignment(0.985, -0.174),
+                            end: const Alignment(-0.985, 0.174),
+                            colors: [theme.colorScheme.secondary, theme.colorScheme.primary],
+                          ),
+                        ),
+                      ),
+                      Container(
+                        height: MediaQuery.of(context).size.height,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Colors.transparent, theme.scaffoldBackgroundColor],
+                            stops: const [0.0, 0.8],
+                          ),
+                        ),
+                      ),
+                      CustomScrollView(
+                        slivers: [
+                          SliverAppBar(
+                            floating: true,
+                            snap: true,
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            titleTextStyle: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 30,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            iconTheme: const IconThemeData(color: Colors.white),
+                            elevation: 0,
+                            title: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: profile.firstName.isNotEmpty
+                                  ? Text('Good to see you, ${profile.firstName}')
+                                  : const Text('Welcome'),
+                            ),
+                            actions: [
+                              Consumer(
+                                builder: (context, ref, child) {
+                                  final themeState = ref.watch(themeProvider);
+                                  final isDark = themeState.themeMode == ThemeMode.dark ||
+                                      (themeState.themeMode == ThemeMode.system &&
+                                          MediaQuery.of(context).platformBrightness == Brightness.dark);
 
-                      return PopupMenuButton<String>(
-                        icon: const Icon(Icons.more_vert),
-                        onSelected: (value) {
-                          if (value == 'theme') {
-                            ref.read(themeProvider.notifier).toggleTheme();
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            value: 'theme',
-                            child: Row(
-                              children: [
-                                Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                                const SizedBox(width: 12),
-                                Text(isDark ? 'Light mode' : 'Dark mode'),
-                              ],
+                                  return PopupMenuButton<String>(
+                                    icon: const Icon(Icons.more_vert),
+                                    onSelected: (value) {
+                                      if (value == 'theme') {
+                                        ref.read(themeProvider.notifier).toggleTheme();
+                                      }
+                                    },
+                                    itemBuilder: (context) => [
+                                      PopupMenuItem(
+                                        value: 'theme',
+                                        child: Row(
+                                          children: [
+                                            Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                                            const SizedBox(width: 12),
+                                            Text(isDark ? 'Light mode' : 'Dark mode'),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          const SliverToBoxAdapter(
+                            child: TodaysMedicationsWidget(),
+                          ),
+                          const SliverToBoxAdapter(
+                            child: AdherenceHistoryWidget(),
+                          ),
+                          SliverToBoxAdapter(
+                            child: AtAGlanceWidget(
+                              conditions: conditions,
+                              medications: meds,
                             ),
                           ),
                         ],
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SliverToBoxAdapter(
-                child: TodaysMedicationsWidget(),
-              ),
-              const SliverToBoxAdapter(
-                child: AdherenceHistoryWidget(),
-              ),
-              SliverToBoxAdapter(
-                child: AtAGlanceWidget(
-                  conditions: conditions,
-                  medications: meds,
-                ),
-              ),
-            ],
-          ),
-        ],
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          );
+        },
       ),
     );
   }
