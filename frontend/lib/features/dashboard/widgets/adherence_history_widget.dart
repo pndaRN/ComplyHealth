@@ -16,7 +16,7 @@ class _AdherenceHistoryWidgetState
     extends ConsumerState<AdherenceHistoryWidget> {
   final Map<DateTime, List<MedicationLog>> _weekLogs = {};
   bool _isLoading = true;
-  bool _isExpanded = true;
+  bool _isExpanded = false;
 
   @override
   void initState() {
@@ -33,7 +33,9 @@ class _AdherenceHistoryWidgetState
     for (int i = 0; i < 7; i++) {
       final date = now.subtract(Duration(days: i));
       final normalizedDate = DateTime(date.year, date.month, date.day);
-      final logs = await ref.read(adherenceProvider.notifier).getLogsForDate(date);
+      final logs = await ref
+          .read(adherenceProvider.notifier)
+          .getLogsForDate(date);
       _weekLogs[normalizedDate] = logs;
     }
 
@@ -44,7 +46,9 @@ class _AdherenceHistoryWidgetState
     final logs = _weekLogs[date] ?? [];
     if (logs.isEmpty) return Colors.grey.shade300;
 
-    final takenCount = logs.where((log) => log.status == DoseStatus.taken).length;
+    final takenCount = logs
+        .where((log) => log.status == DoseStatus.taken)
+        .length;
     final totalCount = logs.length;
     final percentage = (takenCount / totalCount) * 100;
 
@@ -59,7 +63,9 @@ class _AdherenceHistoryWidgetState
     final logs = _weekLogs[date] ?? [];
     if (logs.isEmpty) return 0.0;
 
-    final takenCount = logs.where((log) => log.status == DoseStatus.taken).length;
+    final takenCount = logs
+        .where((log) => log.status == DoseStatus.taken)
+        .length;
     return (takenCount / logs.length) * 100;
   }
 
@@ -77,17 +83,14 @@ class _AdherenceHistoryWidgetState
             children: [
               Text(
                 DateFormat('EEEE, MMM d').format(date),
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 'Adherence: ${_getDayAdherence(date).toStringAsFixed(1)}%',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 16,
-                ),
+                style: TextStyle(color: Colors.grey[600], fontSize: 16),
               ),
               const Divider(height: 24),
               if (logs.isEmpty)
@@ -106,13 +109,13 @@ class _AdherenceHistoryWidgetState
                           log.status == DoseStatus.taken
                               ? Icons.check_circle
                               : log.status == DoseStatus.skipped
-                                  ? Icons.cancel
-                                  : Icons.error,
+                              ? Icons.cancel
+                              : Icons.error,
                           color: log.status == DoseStatus.taken
                               ? Colors.green
                               : log.status == DoseStatus.skipped
-                                  ? Colors.orange
-                                  : Colors.red,
+                              ? Colors.orange
+                              : Colors.red,
                         ),
                         title: Text(log.medicationName),
                         subtitle: Text(
@@ -122,14 +125,14 @@ class _AdherenceHistoryWidgetState
                           log.status == DoseStatus.taken
                               ? 'Taken'
                               : log.status == DoseStatus.skipped
-                                  ? 'Skipped'
-                                  : 'Missed',
+                              ? 'Skipped'
+                              : 'Missed',
                           style: TextStyle(
                             color: log.status == DoseStatus.taken
                                 ? Colors.green
                                 : log.status == DoseStatus.skipped
-                                    ? Colors.orange
-                                    : Colors.red,
+                                ? Colors.orange
+                                : Colors.red,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -195,8 +198,8 @@ class _AdherenceHistoryWidgetState
                         '7-Day Adherence History',
                         maxLines: 1,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -220,7 +223,8 @@ class _AdherenceHistoryWidgetState
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: weekDays.map((date) {
-                          final isToday = date.year == now.year &&
+                          final isToday =
+                              date.year == now.year &&
                               date.month == now.month &&
                               date.day == now.day;
                           final color = _getDayColor(date);
@@ -235,8 +239,9 @@ class _AdherenceHistoryWidgetState
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[600],
-                                    fontWeight:
-                                        isToday ? FontWeight.bold : FontWeight.normal,
+                                    fontWeight: isToday
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
@@ -247,7 +252,10 @@ class _AdherenceHistoryWidgetState
                                     color: color,
                                     shape: BoxShape.circle,
                                     border: isToday
-                                        ? Border.all(color: Colors.blue, width: 2)
+                                        ? Border.all(
+                                            color: Colors.blue,
+                                            width: 2,
+                                          )
                                         : null,
                                   ),
                                   child: Center(
@@ -307,19 +315,10 @@ class _AdherenceHistoryWidgetState
         Container(
           width: 12,
           height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: Colors.grey[600],
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
       ],
     );
   }

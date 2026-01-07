@@ -26,7 +26,7 @@ class _TodaysMedicationsWidgetState
   bool _laterExpanded = false;
   bool _prnExpanded = false;
   bool _isLoading = true;
-  bool _isExpanded = true;
+  bool _isExpanded = false;
 
   // Adherence tracking
   int _todayTotal = 0;

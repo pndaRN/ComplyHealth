@@ -17,7 +17,7 @@ class AtAGlanceWidget extends StatefulWidget {
 }
 
 class _AtAGlanceWidgetState extends State<AtAGlanceWidget> {
-  bool _isExpanded = true;
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -81,8 +81,9 @@ class _AtAGlanceWidgetState extends State<AtAGlanceWidget> {
                   ...widget.conditions.map((condition) {
                     final related = widget.medications
                         .where(
-                          (medication) =>
-                              medication.conditionNames.contains(condition.name),
+                          (medication) => medication.conditionNames.contains(
+                            condition.name,
+                          ),
                         )
                         .toList();
                     return ListTile(

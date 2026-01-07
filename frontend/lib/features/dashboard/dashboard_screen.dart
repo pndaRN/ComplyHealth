@@ -40,7 +40,10 @@ class DashboardScreen extends ConsumerWidget {
                           gradient: LinearGradient(
                             begin: const Alignment(0.985, -0.174),
                             end: const Alignment(-0.985, 0.174),
-                            colors: [theme.colorScheme.secondary, theme.colorScheme.primary],
+                            colors: [
+                              theme.colorScheme.secondary,
+                              theme.colorScheme.primary,
+                            ],
                           ),
                         ),
                       ),
@@ -50,7 +53,10 @@ class DashboardScreen extends ConsumerWidget {
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [Colors.transparent, theme.scaffoldBackgroundColor],
+                            colors: [
+                              Colors.transparent,
+                              theme.scaffoldBackgroundColor,
+                            ],
                             stops: const [0.0, 0.8],
                           ),
                         ),
@@ -72,22 +78,31 @@ class DashboardScreen extends ConsumerWidget {
                             title: FittedBox(
                               fit: BoxFit.scaleDown,
                               child: profile.firstName.isNotEmpty
-                                  ? Text('Good to see you, ${profile.firstName}')
+                                  ? Text(
+                                      'Good to see you, ${profile.firstName}',
+                                    )
                                   : const Text('Welcome'),
                             ),
                             actions: [
                               Consumer(
                                 builder: (context, ref, child) {
                                   final themeState = ref.watch(themeProvider);
-                                  final isDark = themeState.themeMode == ThemeMode.dark ||
-                                      (themeState.themeMode == ThemeMode.system &&
-                                          MediaQuery.of(context).platformBrightness == Brightness.dark);
+                                  final isDark =
+                                      themeState.themeMode == ThemeMode.dark ||
+                                      (themeState.themeMode ==
+                                              ThemeMode.system &&
+                                          MediaQuery.of(
+                                                context,
+                                              ).platformBrightness ==
+                                              Brightness.dark);
 
                                   return PopupMenuButton<String>(
                                     icon: const Icon(Icons.more_vert),
                                     onSelected: (value) {
                                       if (value == 'theme') {
-                                        ref.read(themeProvider.notifier).toggleTheme();
+                                        ref
+                                            .read(themeProvider.notifier)
+                                            .toggleTheme();
                                       }
                                     },
                                     itemBuilder: (context) => [
@@ -95,9 +110,17 @@ class DashboardScreen extends ConsumerWidget {
                                         value: 'theme',
                                         child: Row(
                                           children: [
-                                            Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                                            Icon(
+                                              isDark
+                                                  ? Icons.light_mode
+                                                  : Icons.dark_mode,
+                                            ),
                                             const SizedBox(width: 12),
-                                            Text(isDark ? 'Light mode' : 'Dark mode'),
+                                            Text(
+                                              isDark
+                                                  ? 'Light mode'
+                                                  : 'Dark mode',
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -108,10 +131,10 @@ class DashboardScreen extends ConsumerWidget {
                             ],
                           ),
                           const SliverToBoxAdapter(
-                            child: TodaysMedicationsWidget(),
+                            child: AdherenceHistoryWidget(),
                           ),
                           const SliverToBoxAdapter(
-                            child: AdherenceHistoryWidget(),
+                            child: TodaysMedicationsWidget(),
                           ),
                           SliverToBoxAdapter(
                             child: AtAGlanceWidget(
