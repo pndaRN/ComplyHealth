@@ -105,8 +105,11 @@ class NotificationService {
     for (int i = 0; i < medication.scheduledTimes.length; i++) {
       final timeStr = medication.scheduledTimes[i];
       final parts = timeStr.split(':');
-      final hour = int.parse(parts[0]);
-      final minute = int.parse(parts[1]);
+      if (parts.length < 2) continue; // Skip invalid time format
+
+      final hour = int.tryParse(parts[0]);
+      final minute = int.tryParse(parts[1]);
+      if (hour == null || minute == null) continue; // Skip invalid time values
 
       // Create a unique notification ID for each medication time
       final notificationId = _generateNotificationId(medication.id, i);
@@ -207,9 +210,11 @@ class NotificationService {
 
   /// Generate a unique notification ID from medication ID and time index
   int _generateNotificationId(String medicationId, int timeIndex) {
-    // Create a hash from the medication ID and add the time index
-    final hash = medicationId.hashCode;
-    return (hash.abs() % 100000) * 10 + timeIndex;
+    // Use a larger range to reduce collision risk
+    // Combine hash with timeIndex in a way that supports more scheduled times
+    final hash = medicationId.hashCode.abs();
+    // Use modulo with larger number and shift for time index
+    return (hash % 10000000) + (timeIndex * 10000000);
   }
 
   /// Format time for display

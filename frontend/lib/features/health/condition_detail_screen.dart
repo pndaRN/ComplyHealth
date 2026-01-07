@@ -12,18 +12,14 @@ import 'widgets/video_section.dart';
 class ConditionDetailScreen extends ConsumerStatefulWidget {
   final Disease condition;
 
-  const ConditionDetailScreen({
-    super.key,
-    required this.condition,
-  });
+  const ConditionDetailScreen({super.key, required this.condition});
 
   @override
   ConsumerState<ConditionDetailScreen> createState() =>
       _ConditionDetailScreenState();
 }
 
-class _ConditionDetailScreenState
-    extends ConsumerState<ConditionDetailScreen> {
+class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final conditionsAsync = ref.watch(conditionsProvider);
@@ -40,14 +36,14 @@ class _ConditionDetailScreenState
             tabs: [
               Tab(text: 'Overview'),
               Tab(text: 'Medications'),
-              Tab(text: 'Learn More'),
             ],
           ),
         ),
         body: conditionsAsync.when(
           data: (conditions) {
-            final isAdded =
-                conditions.any((c) => c.code == widget.condition.code);
+            final isAdded = conditions.any(
+              (c) => c.code == widget.condition.code,
+            );
             return _buildBodyWithData(isAdded);
           },
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -55,8 +51,9 @@ class _ConditionDetailScreenState
         ),
         floatingActionButton: conditionsAsync.when(
           data: (conditions) {
-            final isAdded =
-                conditions.any((c) => c.code == widget.condition.code);
+            final isAdded = conditions.any(
+              (c) => c.code == widget.condition.code,
+            );
             return FloatingActionButton.extended(
               onPressed: () => _toggleCondition(isAdded),
               icon: Icon(isAdded ? Icons.remove_circle : Icons.add_circle),
@@ -79,13 +76,7 @@ class _ConditionDetailScreenState
   }
 
   Widget _buildBodyWithData(bool isAdded) {
-    return TabBarView(
-      children: [
-        _buildOverviewTab(),
-        _buildMedicationsTab(),
-        _buildLearnMoreTab(),
-      ],
-    );
+    return TabBarView(children: [_buildOverviewTab(), _buildMedicationsTab()]);
   }
 
   Widget _buildOverviewTab() {
@@ -343,9 +334,12 @@ class _ConditionDetailScreenState
                         const SizedBox(height: 8),
                         Text(
                           'Educational resources for ${widget.condition.commonName.isNotEmpty ? widget.condition.commonName : widget.condition.name} will be available here.',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -386,7 +380,9 @@ class _ConditionDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Removed ${widget.condition.commonName.isNotEmpty ? widget.condition.commonName : widget.condition.name}'),
+            content: Text(
+              'Removed ${widget.condition.commonName.isNotEmpty ? widget.condition.commonName : widget.condition.name}',
+            ),
           ),
         );
       }
@@ -395,7 +391,9 @@ class _ConditionDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Added ${widget.condition.commonName.isNotEmpty ? widget.condition.commonName : widget.condition.name}'),
+            content: Text(
+              'Added ${widget.condition.commonName.isNotEmpty ? widget.condition.commonName : widget.condition.name}',
+            ),
           ),
         );
       }

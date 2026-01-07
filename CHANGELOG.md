@@ -14,15 +14,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Profile placeholders now show helpful prompts ("Tap Edit to add...")
 - Migrated state providers to AsyncNotifierProvider pattern for better async handling
 - Replaced deprecated withOpacity() with withValues() for color transparency
+- Optimized streak calculation from O(n×365) to O(n) using date grouping
+- Optimized medication daily count reset from O(n²) to O(n) using Map lookup
 
 ### Fixed
 - Removed pre-filled default profile so new users start with empty fields
 - Fixed AsyncValue handling across multiple screens preventing runtime errors
+- Fixed compliance showing 100% when evening doses were missed (now auto-marks unlogged past doses)
+- Fixed JSON typo in Medication.fromJson that caused dosage data loss on import
+- Fixed clearAllData() not working with encrypted Hive boxes
+- Fixed incorrect AsyncValue.loading() pattern in conditions provider
+- Fixed unhandled exceptions in profile XP award background task
+- Fixed potential index out of bounds crash in rotating welcome message
+- Fixed missing error handling when skipping medication doses
+- Fixed unsafe Navigator calls after async operations in medication deletion
+- Fixed DateTime.parse crash on invalid date formats in disease/medication import
+- Fixed notification time parsing crash on invalid scheduled time format
+- Fixed notification ID collisions when medications have many scheduled times
+- Fixed dashboard widgets not refreshing when adherence data changes
+- Fixed hardcoded colors breaking dark mode in adherence history widget
 
 ### Added
 - CI/CD & Deployment documentation in CLAUDE.md (branch strategy, Codemagic workflows)
 - Changelog requirements section in CLAUDE.md
 - Smooth animated expand/collapse transitions on dashboard widgets
+- Auto-mark untaken medications as "missed" on app startup for accurate compliance tracking
 
 ## [1.2.1] - 2026-01-06
 

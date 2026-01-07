@@ -40,9 +40,11 @@ class ProfileNotifier extends AsyncNotifier<Profile> {
       await box.put('user', profile);
     }
 
-    // Don't await this here, let it run in the background after initial load
-    checkAndAwardDailyXp();
-    
+    // Run XP check in background after initial load with error handling
+    checkAndAwardDailyXp().catchError((e) {
+      // Silently handle errors - XP award is not critical for app function
+    });
+
     return profile;
   }
 

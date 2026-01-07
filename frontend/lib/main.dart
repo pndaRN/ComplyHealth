@@ -11,6 +11,7 @@ import 'core/models/feedback.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/encryption_migration_service.dart';
 import 'core/state/profile_provider.dart';
+import 'core/state/adherence_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/state/settings_provider.dart';
@@ -102,6 +103,11 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
         _index = 0; // Navigate to dashboard
         _dashboardRefreshKey++; // Force dashboard to rebuild and refresh
       });
+    });
+
+    // Check for missed doses on app startup
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(adherenceProvider.notifier).checkAndMarkMissedDoses();
     });
   }
 

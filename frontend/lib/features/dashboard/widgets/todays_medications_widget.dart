@@ -45,6 +45,14 @@ class _TodaysMedicationsWidgetState
   void initState() {
     super.initState();
     _loadAndCategorizeInstances();
+
+    // Listen for medication and adherence state changes to refresh list
+    ref.listenManual(medicationProvider, (previous, next) {
+      _loadAndCategorizeInstances();
+    });
+    ref.listenManual(adherenceProvider, (previous, next) {
+      _loadAndCategorizeInstances();
+    });
   }
 
   Future<void> _loadAndCategorizeInstances() async {

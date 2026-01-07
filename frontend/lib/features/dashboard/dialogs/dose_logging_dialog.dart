@@ -95,15 +95,23 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
   }
 
   Future<void> _markAsSkipped() async {
-    await ref.read(adherenceProvider.notifier).logDoseSkipped(
-          medicationId: widget.instance.medication.id,
-          medicationName: widget.instance.medication.name,
-          dosage: widget.instance.medication.dosage,
-          scheduledTime: widget.instance.scheduledTime,
-          skipReason: _selectedSkipReason,
-          notes: _notesController.text.isEmpty ? null : _notesController.text,
+    try {
+      await ref.read(adherenceProvider.notifier).logDoseSkipped(
+            medicationId: widget.instance.medication.id,
+            medicationName: widget.instance.medication.name,
+            dosage: widget.instance.medication.dosage,
+            scheduledTime: widget.instance.scheduledTime,
+            skipReason: _selectedSkipReason,
+            notes: _notesController.text.isEmpty ? null : _notesController.text,
+          );
+      if (mounted) Navigator.of(context).pop(true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to skip dose: $e')),
         );
-    if (mounted) Navigator.of(context).pop(true);
+      }
+    }
   }
 
   Future<void> _deleteLog() async {

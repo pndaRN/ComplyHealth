@@ -79,7 +79,8 @@ class SettingsNotifier extends Notifier<SettingsState> {
   }
 
   Future<void> clearAllData() async {
-    // Clear all Hive boxes
+    // Clear all Hive boxes (using encryption cipher since boxes are encrypted)
+    final key = await EncryptionMigrationService.getEncryptionKey();
     final boxNames = [
       'conditions',
       'medications',
@@ -91,10 +92,23 @@ class SettingsNotifier extends Notifier<SettingsState> {
     ];
     for (final name in boxNames) {
       try {
-        final box = await Hive.openBox(name);
+        final box = await Hive.openBox(
+          name,
+          encryptionCipher: HiveAesCipher(key),
+        );
         await box.clear();
-      } catch (_) {
-        // Box might not exist
+      } catch (e) {
+        // Box might not exist or have different encryption - try without cipher
+        try {
+          final box = await Hive.openBox(name);
+          await box.clear();
+        } catch (innerError) {
+          // Box doesn't exist or can't be opened - log for debugging
+          assert(() {
+            print('clearAllData: Could not clear box "$name": $innerError');
+            return true;
+          }());
+        }
       }
     }
     state = const SettingsState();

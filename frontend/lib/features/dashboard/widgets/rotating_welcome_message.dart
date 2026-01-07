@@ -82,7 +82,7 @@ class _RotatingWelcomeMessageState
         key: ValueKey<int>(currentIndex),
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 20.0),
         child: Text(
-          messages[currentIndex],
+          messages[currentIndex.clamp(0, messages.length - 1)],
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,

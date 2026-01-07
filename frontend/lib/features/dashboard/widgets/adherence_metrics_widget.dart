@@ -20,6 +20,11 @@ class _AdherenceMetricsWidgetState
   void initState() {
     super.initState();
     _loadMetrics();
+
+    // Listen for adherence state changes to refresh metrics
+    ref.listenManual(adherenceProvider, (previous, next) {
+      _loadMetrics();
+    });
   }
 
   Future<void> _loadMetrics() async {

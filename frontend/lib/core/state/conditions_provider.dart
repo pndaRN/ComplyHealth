@@ -23,7 +23,6 @@ class ConditionsNotifier extends AsyncNotifier<List<Disease>> {
 
   @override
   Future<List<Disease>> build() async {
-    state = const AsyncValue.loading();
     final box = await _getBox();
     return box.values.toList();
   }

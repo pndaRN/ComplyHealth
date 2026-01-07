@@ -514,10 +514,13 @@ class _MedicationDetailScreenState
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () {
-              ref.read(medicationProvider.notifier).deleteMeds(medication);
+            onPressed: () async {
+              await ref.read(medicationProvider.notifier).deleteMeds(medication);
+              if (!context.mounted) return;
               Navigator.of(context).pop(); // Close dialog
+              if (!context.mounted) return;
               Navigator.of(context).pop(); // Go back to list
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('${medication.name} deleted')),
               );

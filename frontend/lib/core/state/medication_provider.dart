@@ -153,6 +153,11 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
     final today = DateTime.now();
     bool hasUpdates = false;
 
+    // Build a map for O(1) lookup of original dose counts
+    final originalCounts = <String, int>{
+      for (final med in initialMeds) med.id: med.currentDoseCount
+    };
+
     final updatedMeds = initialMeds.map((med) {
       if (med.isPRN && (med.lastDoseCountReset == null || !_isSameDay(med.lastDoseCountReset!, today))) {
         hasUpdates = true;
@@ -164,8 +169,9 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
     if (hasUpdates) {
       final box = await _getBox();
       for (final med in updatedMeds) {
-        if (initialMeds.firstWhere((m) => m.id == med.id).currentDoseCount != med.currentDoseCount) {
-            await box.put(med.id, med);
+        // O(1) lookup instead of O(n) firstWhere
+        if (originalCounts[med.id] != med.currentDoseCount) {
+          await box.put(med.id, med);
         }
       }
       return updatedMeds;

@@ -49,7 +49,7 @@ class Disease {
       isCustom: json['isCustom'] ?? false,
       personalNotes: json['personalNotes'],
       createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
+          ? DateTime.tryParse(json['createdAt'])
           : null,
     );
 

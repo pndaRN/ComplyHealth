@@ -145,7 +145,7 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     });
   }
 
-  /// Auto-mark doses as missed if past grace period
+  /// Auto-mark doses as missed if past grace period (today only)
   Future<void> autoMarkMissedDoses({int graceMinutes = 30}) async {
     final instances = await getTodayInstances();
     final now = DateTime.now();
@@ -166,6 +166,57 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
         }
       }
     }
+  }
+
+  /// Auto-mark doses as missed for past days that were never logged
+  Future<void> autoMarkMissedDosesForPastDays({int daysToCheck = 7}) async {
+    final medications = await ref.read(medicationProvider.future);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    for (int i = 1; i <= daysToCheck; i++) {
+      final date = today.subtract(Duration(days: i));
+      final existingLogs = await getLogsForDate(date);
+
+      for (final med in medications) {
+        // Skip PRN medications - they don't have mandatory schedules
+        if (med.isPRN) continue;
+
+        for (final timeStr in med.scheduledTimes) {
+          final parts = timeStr.split(':');
+          final hour = int.parse(parts[0]);
+          final minute = int.parse(parts[1]);
+          final scheduledTime = DateTime(
+            date.year,
+            date.month,
+            date.day,
+            hour,
+            minute,
+          );
+
+          // Check if log exists for this dose (within 5-minute tolerance)
+          final hasLog = existingLogs.any((log) =>
+              log.medicationId == med.id &&
+              (log.scheduledTime.difference(scheduledTime)).abs().inMinutes < 5);
+
+          if (!hasLog) {
+            await logDoseMissed(
+              medicationId: med.id,
+              medicationName: med.name,
+              dosage: med.dosage,
+              scheduledTime: scheduledTime,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  /// Check and mark missed doses - call on app startup
+  /// Handles both past days and today's overdue doses
+  Future<void> checkAndMarkMissedDoses() async {
+    await autoMarkMissedDosesForPastDays();
+    await autoMarkMissedDoses();
   }
 
   /// Log a dose as missed
@@ -256,13 +307,37 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
   /// Calculate current streak (consecutive days with 100% adherence)
   Future<int> getCurrentStreak() async {
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // Pre-fetch all logs once (up to 1 year)
+    final yearAgo = today.subtract(const Duration(days: 365));
+    final allLogs = await getLogsForDateRange(yearAgo, now);
+
+    // Group logs by date for O(1) lookup
+    final logsByDate = <DateTime, List<MedicationLog>>{};
+    for (final log in allLogs) {
+      final logDate = DateTime(
+        log.scheduledTime.year,
+        log.scheduledTime.month,
+        log.scheduledTime.day,
+      );
+      logsByDate.putIfAbsent(logDate, () => []).add(log);
+    }
+
+    // Calculate streak using grouped data
     int streak = 0;
-
     for (int i = 0; i < 365; i++) {
-      final date = now.subtract(Duration(days: i));
-      final dailyAdherence = await getDailyAdherence(date);
+      final date = today.subtract(Duration(days: i));
+      final dayLogs = logsByDate[date] ?? [];
 
-      if (dailyAdherence >= 100.0) {
+      if (dayLogs.isEmpty) {
+        break; // No logs for this day means streak breaks
+      }
+
+      final takenCount = dayLogs.where((log) => log.status == DoseStatus.taken).length;
+      final adherence = (takenCount / dayLogs.length) * 100;
+
+      if (adherence >= 100.0) {
         streak++;
       } else {
         break;
