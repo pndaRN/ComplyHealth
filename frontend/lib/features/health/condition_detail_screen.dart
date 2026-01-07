@@ -12,22 +12,17 @@ import 'widgets/video_section.dart';
 class ConditionDetailScreen extends ConsumerStatefulWidget {
   final Disease condition;
 
-  const ConditionDetailScreen({
-    super.key,
-    required this.condition,
-  });
+  const ConditionDetailScreen({super.key, required this.condition});
 
   @override
   ConsumerState<ConditionDetailScreen> createState() =>
       _ConditionDetailScreenState();
 }
 
-class _ConditionDetailScreenState
-    extends ConsumerState<ConditionDetailScreen> {
+class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
   @override
   Widget build(BuildContext context) {
-    final conditions = ref.watch(conditionsProvider);
-    final isAdded = conditions.any((c) => c.code == widget.condition.code);
+    final conditionsAsync = ref.watch(conditionsProvider);
     final displayName = widget.condition.commonName.isNotEmpty
         ? widget.condition.commonName
         : widget.condition.name;
@@ -41,24 +36,47 @@ class _ConditionDetailScreenState
             tabs: [
               Tab(text: 'Overview'),
               Tab(text: 'Medications'),
-              Tab(text: 'Learn More'),
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            _buildOverviewTab(),
-            _buildMedicationsTab(),
-            _buildLearnMoreTab(),
-          ],
+        body: conditionsAsync.when(
+          data: (conditions) {
+            final isAdded = conditions.any(
+              (c) => c.code == widget.condition.code,
+            );
+            return _buildBodyWithData(isAdded);
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(child: Text('Error: $err')),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => _toggleCondition(isAdded),
-          icon: Icon(isAdded ? Icons.remove_circle : Icons.add_circle),
-          label: Text(isAdded ? 'Remove' : 'Add to My Conditions'),
+        floatingActionButton: conditionsAsync.when(
+          data: (conditions) {
+            final isAdded = conditions.any(
+              (c) => c.code == widget.condition.code,
+            );
+            return FloatingActionButton.extended(
+              onPressed: () => _toggleCondition(isAdded),
+              icon: Icon(isAdded ? Icons.remove_circle : Icons.add_circle),
+              label: Text(isAdded ? 'Remove' : 'Add to My Conditions'),
+            );
+          },
+          loading: () => FloatingActionButton.extended(
+            onPressed: null,
+            icon: const CircularProgressIndicator(strokeWidth: 2),
+            label: const Text('Loading...'),
+          ),
+          error: (err, stack) => FloatingActionButton.extended(
+            onPressed: null,
+            icon: const Icon(Icons.error),
+            label: const Text('Error'),
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildBodyWithData(bool isAdded) {
+    return TabBarView(children: [_buildOverviewTab(), _buildMedicationsTab()]);
   }
 
   Widget _buildOverviewTab() {
@@ -160,113 +178,121 @@ class _ConditionDetailScreenState
 
   Widget _buildMedicationsTab() {
     final theme = Theme.of(context);
-    final medications = ref.watch(medicationProvider);
-    final linkedMedications =
-        medications.where((m) => m.conditionNames.contains(widget.condition.name)).toList();
+    final medicationsAsync = ref.watch(medicationProvider);
 
-    if (linkedMedications.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.medication_outlined,
-              size: 64,
-              color: theme.colorScheme.outline,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No medications for this condition',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Add medications from the Medications tab',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    return medicationsAsync.when(
+      data: (medications) {
+        final linkedMedications = medications
+            .where((m) => m.conditionNames.contains(widget.condition.name))
+            .toList();
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: linkedMedications.length,
-      itemBuilder: (context, index) {
-        final med = linkedMedications[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+        if (linkedMedications.isEmpty) {
+          return Center(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        med.name,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    if (med.isPRN)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.secondaryContainer,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'PRN',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSecondaryContainer,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                  ],
+                Icon(
+                  Icons.medication_outlined,
+                  size: 64,
+                  color: theme.colorScheme.outline,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No medications for this condition',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Dosage: ${med.dosage}',
-                  style: theme.textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  med.isPRN
-                      ? 'Take as needed (max ${med.maxDailyDoses} times/day)'
-                      : 'Scheduled: ${med.scheduledTimes.length}x daily',
+                  'Add medications from the Medications tab',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                if (!med.isPRN && med.scheduledTimes.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: med.scheduledTimes.map((time) {
-                      return Chip(
-                        label: Text(time),
-                        visualDensity: VisualDensity.compact,
-                      );
-                    }).toList(),
-                  ),
-                ],
               ],
             ),
-          ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: linkedMedications.length,
+          itemBuilder: (context, index) {
+            final med = linkedMedications[index];
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            med.name,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        if (med.isPRN)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.secondaryContainer,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'PRN',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSecondaryContainer,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Dosage: ${med.dosage}',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      med.isPRN
+                          ? 'Take as needed (max ${med.maxDailyDoses} times/day)'
+                          : 'Scheduled: ${med.scheduledTimes.length}x daily',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    if (!med.isPRN && med.scheduledTimes.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: med.scheduledTimes.map((time) {
+                          return Chip(
+                            label: Text(time),
+                            visualDensity: VisualDensity.compact,
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('Error: $err')),
     );
   }
 
@@ -308,9 +334,12 @@ class _ConditionDetailScreenState
                         const SizedBox(height: 8),
                         Text(
                           'Educational resources for ${widget.condition.commonName.isNotEmpty ? widget.condition.commonName : widget.condition.name} will be available here.',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -351,7 +380,9 @@ class _ConditionDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Removed ${widget.condition.commonName.isNotEmpty ? widget.condition.commonName : widget.condition.name}'),
+            content: Text(
+              'Removed ${widget.condition.commonName.isNotEmpty ? widget.condition.commonName : widget.condition.name}',
+            ),
           ),
         );
       }
@@ -360,7 +391,9 @@ class _ConditionDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Added ${widget.condition.commonName.isNotEmpty ? widget.condition.commonName : widget.condition.name}'),
+            content: Text(
+              'Added ${widget.condition.commonName.isNotEmpty ? widget.condition.commonName : widget.condition.name}',
+            ),
           ),
         );
       }

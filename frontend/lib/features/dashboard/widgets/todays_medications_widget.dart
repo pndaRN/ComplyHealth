@@ -26,7 +26,7 @@ class _TodaysMedicationsWidgetState
   bool _laterExpanded = false;
   bool _prnExpanded = false;
   bool _isLoading = true;
-  bool _isExpanded = true;
+  bool _isExpanded = false;
 
   // Adherence tracking
   int _todayTotal = 0;
@@ -45,14 +45,26 @@ class _TodaysMedicationsWidgetState
   void initState() {
     super.initState();
     _loadAndCategorizeInstances();
+
+    // Listen for medication and adherence state changes to refresh list
+    ref.listenManual(medicationProvider, (previous, next) {
+      _loadAndCategorizeInstances();
+    });
+    ref.listenManual(adherenceProvider, (previous, next) {
+      _loadAndCategorizeInstances();
+    });
   }
 
   Future<void> _loadAndCategorizeInstances() async {
     setState(() => _isLoading = true);
 
-    final instances = await ref.read(adherenceProvider.notifier).getTodayInstances();
+    final instances = await ref
+        .read(adherenceProvider.notifier)
+        .getTodayInstances();
     final now = DateTime.now();
-    final immediateThreshold = now.add(const Duration(hours: _immediateWindowHours));
+    final immediateThreshold = now.add(
+      const Duration(hours: _immediateWindowHours),
+    );
 
     // Reset categorized lists
     final immediate = <MedicationInstance>[];
@@ -130,48 +142,56 @@ class _TodaysMedicationsWidgetState
     // For PRN medications, increment count first to ensure atomicity
     if (instance.isPRN) {
       // Get the latest medication state from provider
-      final medications = ref.read(medicationProvider);
-      final latestMed = medications.firstWhere(
+      final medicationsAsync = ref.read(medicationProvider);
+      final latestMed = (medicationsAsync.value ?? []).firstWhere(
         (m) => m.id == instance.medication.id,
         orElse: () => instance.medication,
       );
 
       try {
         // Increment dose count first
-        await ref.read(medicationProvider.notifier).incrementDoseCount(latestMed);
+        await ref
+            .read(medicationProvider.notifier)
+            .incrementDoseCount(latestMed);
 
         // Then log the dose
-        await ref.read(adherenceProvider.notifier).logDoseTaken(
-          medicationId: latestMed.id,
-          medicationName: latestMed.name,
-          dosage: latestMed.dosage,
-          scheduledTime: instance.scheduledTime,
-        );
+        await ref
+            .read(adherenceProvider.notifier)
+            .logDoseTaken(
+              medicationId: latestMed.id,
+              medicationName: latestMed.name,
+              dosage: latestMed.dosage,
+              scheduledTime: instance.scheduledTime,
+            );
       } catch (e) {
         // Rollback dose count on error
-        await ref.read(medicationProvider.notifier).decrementDoseCount(latestMed);
+        await ref
+            .read(medicationProvider.notifier)
+            .decrementDoseCount(latestMed);
         // Show error to user
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to log dose: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to log dose: $e')));
         }
         rethrow;
       }
     } else {
       // For scheduled medications, just log the dose
       try {
-        await ref.read(adherenceProvider.notifier).logDoseTaken(
-          medicationId: instance.medication.id,
-          medicationName: instance.medication.name,
-          dosage: instance.medication.dosage,
-          scheduledTime: instance.scheduledTime,
-        );
+        await ref
+            .read(adherenceProvider.notifier)
+            .logDoseTaken(
+              medicationId: instance.medication.id,
+              medicationName: instance.medication.name,
+              dosage: instance.medication.dosage,
+              scheduledTime: instance.scheduledTime,
+            );
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to log dose: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to log dose: $e')));
         }
         rethrow;
       }
@@ -192,7 +212,13 @@ class _TodaysMedicationsWidgetState
   }
 
   Future<bool> _showSkipConfirmation(MedicationInstance instance) async {
-    final skipReasons = ['Forgot', 'Side effects', 'Unavailable', 'Not needed', 'Other'];
+    final skipReasons = [
+      'Forgot',
+      'Side effects',
+      'Unavailable',
+      'Not needed',
+      'Other',
+    ];
 
     final reason = await showDialog<String>(
       context: context,
@@ -204,13 +230,18 @@ class _TodaysMedicationsWidgetState
           children: [
             Text('Skip ${instance.medication.name}?'),
             const SizedBox(height: 16),
-            const Text('Select a reason:', style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text(
+              'Select a reason:',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 8),
-            ...skipReasons.map((r) => ListTile(
-              dense: true,
-              title: Text(r),
-              onTap: () => Navigator.pop(context, r),
-            )),
+            ...skipReasons.map(
+              (r) => ListTile(
+                dense: true,
+                title: Text(r),
+                onTap: () => Navigator.pop(context, r),
+              ),
+            ),
           ],
         ),
         actions: [
@@ -225,19 +256,21 @@ class _TodaysMedicationsWidgetState
     if (reason != null) {
       HapticFeedback.lightImpact();
       try {
-        await ref.read(adherenceProvider.notifier).logDoseSkipped(
-          medicationId: instance.medication.id,
-          medicationName: instance.medication.name,
-          dosage: instance.medication.dosage,
-          scheduledTime: instance.scheduledTime,
-          skipReason: reason,
-        );
+        await ref
+            .read(adherenceProvider.notifier)
+            .logDoseSkipped(
+              medicationId: instance.medication.id,
+              medicationName: instance.medication.name,
+              dosage: instance.medication.dosage,
+              scheduledTime: instance.scheduledTime,
+              skipReason: reason,
+            );
         await _loadAndCategorizeInstances();
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to skip dose: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to skip dose: $e')));
         }
       }
     }
@@ -269,7 +302,9 @@ class _TodaysMedicationsWidgetState
     final scheduledTime = instance.scheduledTime;
 
     // Overdue (past grace period)
-    if (now.isAfter(scheduledTime.add(const Duration(minutes: _graceWindowMinutes)))) {
+    if (now.isAfter(
+      scheduledTime.add(const Duration(minutes: _graceWindowMinutes)),
+    )) {
       return BorderSide(color: theme.statusColors.error, width: 6);
     }
 
@@ -301,14 +336,25 @@ class _TodaysMedicationsWidgetState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _buildHeader(),
-          if (_isExpanded) ...[
-            const Divider(height: 1),
-            _buildAdherenceSummary(),
-            const Divider(height: 1),
-            _buildImmediateSection(),
-            if (_laterInstances.isNotEmpty) _buildLaterSection(),
-            if (_prnInstances.isNotEmpty) _buildPRNSection(),
-          ],
+          // Use AnimatedCrossFade to switch between hidden (Container) and shown (Column)
+          AnimatedCrossFade(
+            firstChild: Container(height: 0.0), // Empty state
+            secondChild: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Divider(height: 1),
+                _buildAdherenceSummary(),
+                _buildImmediateSection(),
+                if (_laterInstances.isNotEmpty) _buildLaterSection(),
+                if (_prnInstances.isNotEmpty) _buildPRNSection(),
+              ],
+            ),
+            crossFadeState: _isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 200),
+            sizeCurve: Curves.easeInOut,
+          ),
         ],
       ),
     );
@@ -329,11 +375,16 @@ class _TodaysMedicationsWidgetState
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                'Today\'s Medications',
-                style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Today\'s Medications',
+                  maxLines: 1,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
             Container(
@@ -371,9 +422,9 @@ class _TodaysMedicationsWidgetState
             children: [
               Text(
                 'Today: ${_todayAdherence.toStringAsFixed(0)}%',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
               if (_todayAdherence >= 100)
                 const Text(
@@ -392,7 +443,9 @@ class _TodaysMedicationsWidgetState
             child: LinearProgressIndicator(
               value: _todayTotal > 0 ? _todayTaken / _todayTotal : 0.0,
               minHeight: 8,
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(
                 _getAdherenceColor(_todayAdherence, Theme.of(context)),
               ),
@@ -417,19 +470,13 @@ class _TodaysMedicationsWidgetState
             const SizedBox(height: 8),
             const Text(
               'All caught up!',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             if (_laterInstances.isNotEmpty)
               Text(
                 'Next dose at ${_formatTime(_laterInstances.first.scheduledTime)}',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
               ),
           ],
         ),
@@ -444,18 +491,29 @@ class _TodaysMedicationsWidgetState
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
           child: Text(
-            _immediateInstances.any((i) => now.isAfter(
-              i.scheduledTime.add(const Duration(minutes: _graceWindowMinutes)),
-            ))
+            _immediateInstances.any(
+                  (i) => now.isAfter(
+                    i.scheduledTime.add(
+                      const Duration(minutes: _graceWindowMinutes),
+                    ),
+                  ),
+                )
                 ? 'Overdue & Due Now'
                 : 'Due Now',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red[700],
-                ),
+              fontWeight: FontWeight.bold,
+              color: Colors.red[700],
+            ),
           ),
         ),
-        ..._immediateInstances.map((instance) => _buildImmediateItem(instance, key: Key('${instance.medication.id}_${instance.scheduledTime.millisecondsSinceEpoch}'))),
+        ..._immediateInstances.map(
+          (instance) => _buildImmediateItem(
+            instance,
+            key: Key(
+              '${instance.medication.id}_${instance.scheduledTime.millisecondsSinceEpoch}',
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -467,7 +525,9 @@ class _TodaysMedicationsWidgetState
     );
 
     return Dismissible(
-      key: Key('dismiss_${instance.medication.id}_${instance.scheduledTime.millisecondsSinceEpoch}'),
+      key: Key(
+        'dismiss_${instance.medication.id}_${instance.scheduledTime.millisecondsSinceEpoch}',
+      ),
       direction: DismissDirection.endToStart,
       confirmDismiss: (direction) => _showSkipConfirmation(instance),
       background: Container(
@@ -497,106 +557,94 @@ class _TodaysMedicationsWidgetState
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-        border: Border(
-          left: _getUrgencyBorder(instance, Theme.of(context)),
-        ),
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            // Medication icon
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.medication,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Medication info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          instance.medication.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                      if (isOverdue) ...[
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.warning,
-                          size: 16,
-                          color: Colors.red[700],
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    instance.medication.dosage,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    _formatTime(instance.scheduledTime),
-                    style: TextStyle(
-                      color: Colors.grey[700],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Action button
-            ElevatedButton(
-              onPressed: () => _quickMarkAsTaken(instance),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const Text(
-                'Mark Taken',
-                style: TextStyle(fontSize: 13),
-              ),
+          border: Border(left: _getUrgencyBorder(instance, Theme.of(context))),
+          color: Theme.of(context).colorScheme.surface,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
           ],
+          borderRadius: BorderRadius.circular(8),
         ),
-      ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              // Medication icon
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.medication,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Medication info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            instance.medication.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                        if (isOverdue) ...[
+                          const SizedBox(width: 8),
+                          Icon(Icons.warning, size: 16, color: Colors.red[700]),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      instance.medication.dosage,
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _formatTime(instance.scheduledTime),
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Action button
+              ElevatedButton(
+                onPressed: () => _quickMarkAsTaken(instance),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text('Mark Taken', style: TextStyle(fontSize: 13)),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -613,13 +661,12 @@ class _TodaysMedicationsWidgetState
       },
       children: _laterInstances.map((instance) {
         return Opacity(
-          key: Key('later_${instance.medication.id}_${instance.scheduledTime.millisecondsSinceEpoch}'),
+          key: Key(
+            'later_${instance.medication.id}_${instance.scheduledTime.millisecondsSinceEpoch}',
+          ),
           opacity: 0.6,
           child: ListTile(
-            leading: Icon(
-              Icons.medication,
-              color: Colors.grey[600],
-            ),
+            leading: Icon(Icons.medication, color: Colors.grey[600]),
             title: Text(
               instance.medication.name,
               overflow: TextOverflow.ellipsis,
@@ -628,10 +675,7 @@ class _TodaysMedicationsWidgetState
             subtitle: Text(instance.medication.dosage),
             trailing: Text(
               _formatTime(instance.scheduledTime),
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
             ),
             onTap: () => _openDetailedDialog(instance),
           ),
@@ -664,10 +708,7 @@ class _TodaysMedicationsWidgetState
             color: theme.statusColors.prn.withValues(alpha: 0.05),
           ),
           child: ListTile(
-            leading: Icon(
-              Icons.medication,
-              color: theme.statusColors.prn,
-            ),
+            leading: Icon(Icons.medication, color: theme.statusColors.prn),
             title: Text(
               medication.name,
               overflow: TextOverflow.ellipsis,
@@ -694,10 +735,7 @@ class _TodaysMedicationsWidgetState
                     onPressed: () => _quickMarkAsTaken(instance),
                     tooltip: 'Log dose',
                   )
-                : Icon(
-                    Icons.block,
-                    color: Colors.red[400],
-                  ),
+                : Icon(Icons.block, color: Colors.red[400]),
             onTap: () => _openDetailedDialog(instance),
           ),
         );

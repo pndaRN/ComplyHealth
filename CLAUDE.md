@@ -155,3 +155,37 @@ deactivate
 2. **New Features**: Create feature directory with screen/dialogs/widgets as needed
 3. **State Management**: Create provider in `core/state/` if shared across features
 4. **Testing**: Write widget tests for UI, unit tests for business logic
+
+## CI/CD & Deployment (Codemagic)
+
+### Branch Strategy
+- **`main`** → iOS TestFlight (App Store Connect)
+- **`develop`** → iOS Firebase App Distribution (beta testers)
+- **`localtest`** → Local development/testing (no auto-deploy)
+
+### Auto-Build Triggers
+Pushes to `main` or `develop` automatically trigger Codemagic builds:
+- Build number auto-incremented by Codemagic (`$BUILD_NUMBER`)
+- Release notes extracted from `CHANGELOG.md` for Firebase builds
+
+### Key Files
+- `/codemagic.yaml` - CI/CD workflow configuration
+- `/frontend/pubspec.yaml` - App version (`version: major.minor.patch+build`)
+- `/CHANGELOG.md` - Release notes source
+
+### Important Rules
+- **Never modify** credential references in codemagic.yaml (`$FIREBASE_SERVICE_ACCOUNT`, etc.)
+- **Version bumps**: Update `version` in `frontend/pubspec.yaml` for releases
+- **Merge to develop** for beta testing, **merge to main** for production release
+
+## Changelog Requirements
+
+**All committed changes must be documented in `CHANGELOG.md`.**
+
+- Location: `/CHANGELOG.md` (project root)
+- Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+- Add entries under `## [Unreleased]` section
+- Categories: `### Added`, `### Changed`, `### Fixed`, `### Removed`
+- Write clear, user-facing descriptions (not commit messages)
+- Update changelog in the same commit or immediately after feature commits
+- **Release notes are auto-extracted** from CHANGELOG.md for Firebase builds

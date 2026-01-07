@@ -24,8 +24,11 @@ class _MedicationDetailScreenState
     extends ConsumerState<MedicationDetailScreen> {
   @override
   Widget build(BuildContext context) {
-    final medications = ref.watch(medicationProvider);
-    final conditions = ref.watch(conditionsProvider);
+    final medicationsAsync = ref.watch(medicationProvider);
+    final conditionsAsync = ref.watch(conditionsProvider);
+
+    final medications = medicationsAsync.value ?? [];
+    final conditions = conditionsAsync.value ?? [];
 
     // Get the current medication state (might have been updated)
     final currentMed = medications.firstWhere(
@@ -511,10 +514,13 @@ class _MedicationDetailScreenState
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () {
-              ref.read(medicationProvider.notifier).deleteMeds(medication);
+            onPressed: () async {
+              await ref.read(medicationProvider.notifier).deleteMeds(medication);
+              if (!context.mounted) return;
               Navigator.of(context).pop(); // Close dialog
+              if (!context.mounted) return;
               Navigator.of(context).pop(); // Go back to list
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('${medication.name} deleted')),
               );

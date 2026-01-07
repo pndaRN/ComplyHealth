@@ -43,10 +43,11 @@ class _RotatingWelcomeMessageState
   }
 
   List<String> _getMessages() {
-    final profile = ref.read(profileProvider);
+    final profileAsync = ref.read(profileProvider);
+    final profile = profileAsync.value;
 
     // If user has a name, show personalized welcome message first
-    if (profile.firstName.isNotEmpty) {
+    if (profile != null && profile.firstName.isNotEmpty) {
       return ["Welcome Back ${profile.firstName}!", ..._defaultMessages];
     }
 
@@ -81,7 +82,7 @@ class _RotatingWelcomeMessageState
         key: ValueKey<int>(currentIndex),
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 20.0),
         child: Text(
-          messages[currentIndex],
+          messages[currentIndex.clamp(0, messages.length - 1)],
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,

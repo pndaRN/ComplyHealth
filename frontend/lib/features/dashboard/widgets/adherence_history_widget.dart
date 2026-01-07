@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:complyhealth/core/state/adherence_provider.dart';
 import 'package:complyhealth/core/models/medication_log.dart';
+import 'package:complyhealth/core/theme/status_colors.dart';
 
 class AdherenceHistoryWidget extends ConsumerStatefulWidget {
   const AdherenceHistoryWidget({super.key});
@@ -16,12 +17,17 @@ class _AdherenceHistoryWidgetState
     extends ConsumerState<AdherenceHistoryWidget> {
   final Map<DateTime, List<MedicationLog>> _weekLogs = {};
   bool _isLoading = true;
-  bool _isExpanded = true;
+  bool _isExpanded = false;
 
   @override
   void initState() {
     super.initState();
     _loadWeekData();
+
+    // Listen for adherence state changes to refresh history
+    ref.listenManual(adherenceProvider, (previous, next) {
+      _loadWeekData();
+    });
   }
 
   Future<void> _loadWeekData() async {
@@ -33,33 +39,39 @@ class _AdherenceHistoryWidgetState
     for (int i = 0; i < 7; i++) {
       final date = now.subtract(Duration(days: i));
       final normalizedDate = DateTime(date.year, date.month, date.day);
-      final logs = await ref.read(adherenceProvider.notifier).getLogsForDate(date);
+      final logs = await ref
+          .read(adherenceProvider.notifier)
+          .getLogsForDate(date);
       _weekLogs[normalizedDate] = logs;
     }
 
     setState(() => _isLoading = false);
   }
 
-  Color _getDayColor(DateTime date) {
+  Color _getDayColor(DateTime date, ThemeData theme) {
     final logs = _weekLogs[date] ?? [];
-    if (logs.isEmpty) return Colors.grey.shade300;
+    if (logs.isEmpty) return theme.colorScheme.outlineVariant;
 
-    final takenCount = logs.where((log) => log.status == DoseStatus.taken).length;
+    final takenCount = logs
+        .where((log) => log.status == DoseStatus.taken)
+        .length;
     final totalCount = logs.length;
     final percentage = (takenCount / totalCount) * 100;
 
-    if (percentage == 100) return Colors.green;
-    if (percentage >= 75) return Colors.lightGreen;
-    if (percentage >= 50) return Colors.orange;
-    if (percentage >= 25) return Colors.deepOrange;
-    return Colors.red;
+    if (percentage == 100) return theme.statusColors.success;
+    if (percentage >= 75) return theme.statusColors.success.withValues(alpha: 0.7);
+    if (percentage >= 50) return theme.statusColors.warning;
+    if (percentage >= 25) return theme.statusColors.warning.withValues(alpha: 0.8);
+    return theme.statusColors.error;
   }
 
   double _getDayAdherence(DateTime date) {
     final logs = _weekLogs[date] ?? [];
     if (logs.isEmpty) return 0.0;
 
-    final takenCount = logs.where((log) => log.status == DoseStatus.taken).length;
+    final takenCount = logs
+        .where((log) => log.status == DoseStatus.taken)
+        .length;
     return (takenCount / logs.length) * 100;
   }
 
@@ -77,17 +89,14 @@ class _AdherenceHistoryWidgetState
             children: [
               Text(
                 DateFormat('EEEE, MMM d').format(date),
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 'Adherence: ${_getDayAdherence(date).toStringAsFixed(1)}%',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 16,
-                ),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 16),
               ),
               const Divider(height: 24),
               if (logs.isEmpty)
@@ -102,36 +111,46 @@ class _AdherenceHistoryWidgetState
                     itemBuilder: (context, index) {
                       final log = logs[index];
                       return ListTile(
-                        leading: Icon(
-                          log.status == DoseStatus.taken
-                              ? Icons.check_circle
-                              : log.status == DoseStatus.skipped
+                        leading: Builder(
+                          builder: (context) {
+                            final theme = Theme.of(context);
+                            return Icon(
+                              log.status == DoseStatus.taken
+                                  ? Icons.check_circle
+                                  : log.status == DoseStatus.skipped
                                   ? Icons.cancel
                                   : Icons.error,
-                          color: log.status == DoseStatus.taken
-                              ? Colors.green
-                              : log.status == DoseStatus.skipped
-                                  ? Colors.orange
-                                  : Colors.red,
+                              color: log.status == DoseStatus.taken
+                                  ? theme.statusColors.success
+                                  : log.status == DoseStatus.skipped
+                                  ? theme.statusColors.warning
+                                  : theme.statusColors.error,
+                            );
+                          },
                         ),
                         title: Text(log.medicationName),
                         subtitle: Text(
                           '${log.dosage} - ${DateFormat('h:mm a').format(log.scheduledTime)}',
                         ),
-                        trailing: Text(
-                          log.status == DoseStatus.taken
-                              ? 'Taken'
-                              : log.status == DoseStatus.skipped
+                        trailing: Builder(
+                          builder: (context) {
+                            final theme = Theme.of(context);
+                            return Text(
+                              log.status == DoseStatus.taken
+                                  ? 'Taken'
+                                  : log.status == DoseStatus.skipped
                                   ? 'Skipped'
                                   : 'Missed',
-                          style: TextStyle(
-                            color: log.status == DoseStatus.taken
-                                ? Colors.green
-                                : log.status == DoseStatus.skipped
-                                    ? Colors.orange
-                                    : Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
+                              style: TextStyle(
+                                color: log.status == DoseStatus.taken
+                                    ? theme.statusColors.success
+                                    : log.status == DoseStatus.skipped
+                                    ? theme.statusColors.warning
+                                    : theme.statusColors.error,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
                         ),
                       );
                     },
@@ -188,124 +207,144 @@ class _AdherenceHistoryWidgetState
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      '7-Day Adherence History',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '7-Day Adherence History',
+                        maxLines: 1,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          if (_isExpanded) ...[
-            const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // Calendar grid
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: weekDays.map((date) {
-                      final isToday = date.year == now.year &&
-                          date.month == now.month &&
-                          date.day == now.day;
-                      final color = _getDayColor(date);
-                      final adherence = _getDayAdherence(date);
-
-                      return GestureDetector(
-                        onTap: () => _showDayDetails(date),
-                        child: Column(
-                          children: [
-                            Text(
-                              DateFormat('E').format(date),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                                fontWeight:
-                                    isToday ? FontWeight.bold : FontWeight.normal,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: color,
-                                shape: BoxShape.circle,
-                                border: isToday
-                                    ? Border.all(color: Colors.blue, width: 2)
-                                    : null,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  DateFormat('d').format(date),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${adherence.toStringAsFixed(0)}%',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey[700],
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16),
-                  // Legend
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: _isExpanded
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond,
+            firstChild: Column(
+              children: [
+                const Divider(height: 1),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
                     children: [
-                      _buildLegendItem(Colors.green, 'Perfect'),
-                      const SizedBox(width: 12),
-                      _buildLegendItem(Colors.lightGreen, 'Good'),
-                      const SizedBox(width: 12),
-                      _buildLegendItem(Colors.orange, 'Fair'),
-                      const SizedBox(width: 12),
-                      _buildLegendItem(Colors.red, 'Poor'),
+                      // Calendar grid
+                      Builder(
+                        builder: (context) {
+                          final theme = Theme.of(context);
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: weekDays.map((date) {
+                              final isToday =
+                                  date.year == now.year &&
+                                  date.month == now.month &&
+                                  date.day == now.day;
+                              final color = _getDayColor(date, theme);
+                              final adherence = _getDayAdherence(date);
+
+                              return GestureDetector(
+                                onTap: () => _showDayDetails(date),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      DateFormat('E').format(date),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                        fontWeight: isToday
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: color,
+                                        shape: BoxShape.circle,
+                                        border: isToday
+                                            ? Border.all(
+                                                color: theme.statusColors.info,
+                                                width: 2,
+                                              )
+                                            : null,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          DateFormat('d').format(date),
+                                          style: TextStyle(
+                                            color: theme.colorScheme.onPrimary,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${adherence.toStringAsFixed(0)}%',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      // Legend
+                      Builder(
+                        builder: (context) {
+                          final theme = Theme.of(context);
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildLegendItem(theme.statusColors.success, 'Perfect', theme),
+                              const SizedBox(width: 12),
+                              _buildLegendItem(theme.statusColors.success.withValues(alpha: 0.7), 'Good', theme),
+                              const SizedBox(width: 12),
+                              _buildLegendItem(theme.statusColors.warning, 'Fair', theme),
+                              const SizedBox(width: 12),
+                              _buildLegendItem(theme.statusColors.error, 'Poor', theme),
+                            ],
+                          );
+                        },
+                      ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+            secondChild: const SizedBox.shrink(),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildLegendItem(Color color, String label) {
+  Widget _buildLegendItem(Color color, String label, ThemeData theme) {
     return Row(
       children: [
         Container(
           width: 12,
           height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: Colors.grey[600],
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant)),
       ],
     );
   }

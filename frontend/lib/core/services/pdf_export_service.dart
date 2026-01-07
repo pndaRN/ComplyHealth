@@ -58,13 +58,13 @@ class PdfExportService {
   /// Aggregate all necessary data from providers
   Future<_PdfData> _aggregateData(WidgetRef ref) async {
     // Get profile data
-    final profile = ref.read(profileProvider);
+    final profile = await ref.read(profileProvider.future);
 
     // Get all medications
-    final medications = ref.read(medicationProvider);
+    final medications = await ref.read(medicationProvider.future);
 
     // Get conditions for display name mapping
-    final conditions = ref.read(conditionsProvider);
+    final conditions = await ref.read(conditionsProvider.future);
 
     // Get adherence data
     final adherenceNotifier = ref.read(adherenceProvider.notifier);

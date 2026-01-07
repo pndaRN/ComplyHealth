@@ -24,11 +24,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    final profile = ref.read(profileProvider);
-    _firstNameCtrl = TextEditingController(text: profile.firstName);
-    _lastNameCtrl = TextEditingController(text: profile.lastName);
-    _dobCtrl = TextEditingController(text: profile.dob);
-    _allergyCtrl = TextEditingController(text: profile.allergies);
+    _firstNameCtrl = TextEditingController();
+    _lastNameCtrl = TextEditingController();
+    _dobCtrl = TextEditingController();
+    _allergyCtrl = TextEditingController();
   }
 
   @override
@@ -40,8 +39,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.dispose();
   }
 
-  void _enterEditMode() {
-    final profile = ref.read(profileProvider);
+  void _enterEditMode(Profile profile) {
     _firstNameCtrl.text = profile.firstName;
     _lastNameCtrl.text = profile.lastName;
     _dobCtrl.text = profile.dob;
@@ -49,8 +47,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     setState(() => _isEditing = true);
   }
 
-  void _cancelEdit() {
-    final profile = ref.read(profileProvider);
+  void _cancelEdit(Profile profile) {
     _firstNameCtrl.text = profile.firstName;
     _lastNameCtrl.text = profile.lastName;
     _dobCtrl.text = profile.dob;
@@ -58,17 +55,40 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     setState(() => _isEditing = false);
   }
 
-  void _saveProfile() {
-    final profile = ref.read(profileProvider);
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime initialDate = DateTime.now().subtract(const Duration(days: 365 * 30));
+    if (_dobCtrl.text.isNotEmpty) {
+      final parts = _dobCtrl.text.split('/');
+      if (parts.length == 3) {
+        initialDate = DateTime(
+          int.tryParse(parts[2]) ?? 1990,
+          int.tryParse(parts[0]) ?? 1,
+          int.tryParse(parts[1]) ?? 1,
+        );
+      }
+    }
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _dobCtrl.text = '${picked.month.toString().padLeft(2, '0')}/${picked.day.toString().padLeft(2, '0')}/${picked.year}';
+      });
+    }
+  }
+
+  void _saveProfile(Profile currentProfile) {
     final notifier = ref.read(profileProvider.notifier);
-    final p = Profile(
+    final p = currentProfile.copyWith(
       firstName: _firstNameCtrl.text,
       lastName: _lastNameCtrl.text,
       dob: _dobCtrl.text,
       allergies: _allergyCtrl.text,
-      xp: profile.xp,
-      streak: profile.streak,
-      levelProgress: profile.levelProgress,
     );
     notifier.save(p);
     setState(() => _isEditing = false);
@@ -79,79 +99,91 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final profile = ref.watch(profileProvider);
+    final profileAsync = ref.watch(profileProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
         actions: [
-          Consumer(
-            builder: (context, ref, child) {
-              final themeState = ref.watch(themeProvider);
-              final isDark = themeState.themeMode == ThemeMode.dark ||
-                  (themeState.themeMode == ThemeMode.system &&
-                      MediaQuery.of(context).platformBrightness == Brightness.dark);
+          profileAsync.when(
+            data: (profile) => Consumer(
+              builder: (context, ref, child) {
+                final themeState = ref.watch(themeProvider);
+                final isDark = themeState.themeMode == ThemeMode.dark ||
+                    (themeState.themeMode == ThemeMode.system &&
+                        MediaQuery.of(context).platformBrightness == Brightness.dark);
 
-              return PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert),
-                onSelected: (value) {
-                  switch (value) {
-                    case 'edit':
-                      _enterEditMode();
-                      break;
-                    case 'theme':
-                      ref.read(themeProvider.notifier).toggleTheme();
-                      break;
-                    case 'settings':
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => const SettingsScreen()),
-                      );
-                      break;
-                  }
-                },
-                itemBuilder: (context) => [
-                  if (!_isEditing)
-                    const PopupMenuItem(
-                      value: 'edit',
+                return PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert),
+                  onSelected: (value) {
+                    switch (value) {
+                      case 'edit':
+                        _enterEditMode(profile);
+                        break;
+                      case 'theme':
+                        ref.read(themeProvider.notifier).toggleTheme();
+                        break;
+                      case 'settings':
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                        );
+                        break;
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    if (!_isEditing)
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit_outlined),
+                            SizedBox(width: 12),
+                            Text('Edit profile'),
+                          ],
+                        ),
+                      ),
+                    PopupMenuItem(
+                      value: 'theme',
                       child: Row(
                         children: [
-                          Icon(Icons.edit_outlined),
-                          SizedBox(width: 12),
-                          Text('Edit profile'),
+                          Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                          const SizedBox(width: 12),
+                          Text(isDark ? 'Light mode' : 'Dark mode'),
                         ],
                       ),
                     ),
-                  PopupMenuItem(
-                    value: 'theme',
-                    child: Row(
-                      children: [
-                        Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                        const SizedBox(width: 12),
-                        Text(isDark ? 'Light mode' : 'Dark mode'),
-                      ],
+                    const PopupMenuItem(
+                      value: 'settings',
+                      child: Row(
+                        children: [
+                          Icon(Icons.settings_outlined),
+                          SizedBox(width: 12),
+                          Text('Settings'),
+                        ],
+                      ),
                     ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'settings',
-                    child: Row(
-                      children: [
-                        Icon(Icons.settings_outlined),
-                        SizedBox(width: 12),
-                        Text('Settings'),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
+            loading: () => const SizedBox.shrink(),
+            error: (e, s) => const SizedBox.shrink(),
           ),
         ],
       ),
-      body: ListView(
+      body: profileAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+        data: (profile) => _buildProfileView(context, profile),
+      ),
+    );
+  }
+
+  Widget _buildProfileView(BuildContext context, Profile profile) {
+    final theme = Theme.of(context);
+    return ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
-          // Personal Information Card
           Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: Padding(
@@ -177,7 +209,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                   const SizedBox(height: 16),
                   if (_isEditing) ...[
-                    // Edit Mode - Show text fields
                     TextField(
                       controller: _firstNameCtrl,
                       decoration: InputDecoration(
@@ -200,13 +231,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    TextField(
-                      controller: _dobCtrl,
-                      decoration: InputDecoration(
-                        labelText: 'Date of Birth',
-                        prefixIcon: const Icon(Icons.cake),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    GestureDetector(
+                      onTap: () => _selectDate(context),
+                      child: AbsorbPointer(
+                        child: TextField(
+                          controller: _dobCtrl,
+                          decoration: InputDecoration(
+                            labelText: 'Date of Birth',
+                            hintText: 'Tap to select date',
+                            prefixIcon: const Icon(Icons.cake),
+                            suffixIcon: const Icon(Icons.calendar_today),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -227,7 +265,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: _cancelEdit,
+                            onPressed: () => _cancelEdit(profile),
                             icon: const Icon(Icons.close),
                             label: const Text('Cancel'),
                           ),
@@ -235,7 +273,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: FilledButton.icon(
-                            onPressed: _saveProfile,
+                            onPressed: () => _saveProfile(profile),
                             icon: const Icon(Icons.save),
                             label: const Text('Save'),
                           ),
@@ -243,13 +281,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ],
                     ),
                   ] else ...[
-                    // View Mode - Show information boxes
                     _buildInfoRow(
                       context,
                       icon: Icons.badge,
                       label: 'Full Name',
                       value: (profile.firstName.isEmpty && profile.lastName.isEmpty)
-                          ? 'Not set'
+                          ? 'Tap Edit to add your name'
                           : '${profile.firstName} ${profile.lastName}'.trim(),
                       isEmpty: profile.firstName.isEmpty && profile.lastName.isEmpty,
                     ),
@@ -258,7 +295,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       context,
                       icon: Icons.cake,
                       label: 'Date of Birth',
-                      value: profile.dob.isEmpty ? 'Not set' : profile.dob,
+                      value: profile.dob.isEmpty ? 'Tap Edit to add your birthday' : profile.dob,
                       isEmpty: profile.dob.isEmpty,
                     ),
                     const SizedBox(height: 12),
@@ -274,244 +311,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ),
           ),
-
-          // Adherence Metrics
           const AdherenceMetricsWidget(),
-
-          // Gamification Card - Hidden for now, will be enabled in future release
-          /* Card(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.stars,
-                        size: 24,
-                        color: theme.colorScheme.primary,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Your Progress',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Level section
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.military_tech,
-                          size: 28,
-                          color: theme.colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Level',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${notifier.getCurrentLevel(profile.xp)}',
-                              style: theme.textTheme.headlineMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // XP section
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(Icons.emoji_events, size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Total Experience',
-                              style: theme.textTheme.labelSmall,
-                            ),
-                            Text(
-                              '${profile.xp} XP',
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Streak section
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(Icons.local_fire_department, size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Current Streak',
-                              style: theme.textTheme.labelSmall,
-                            ),
-                            Text(
-                              '${profile.streak} days',
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 16),
-
-                  // Progress section
-                  Row(
-                    children: [
-                      const Icon(Icons.trending_up, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Progress to Level ${notifier.getCurrentLevel(profile.xp) + 1}',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 28.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '${(profile.levelProgress * 100).toInt()}% complete',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            Text(
-                              '${notifier.getXpForNextLevel(notifier.getCurrentLevel(profile.xp))} XP needed',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: LinearProgressIndicator(
-                            value: profile.levelProgress,
-                            minHeight: 12,
-                            backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ), */
-
-          // Achievements Card - Hidden for now, will be enabled in future release
-          /* Card(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.workspace_premium,
-                        size: 24,
-                        color: theme.colorScheme.primary,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Badges & Achievements',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.emoji_events,
-                          size: 64,
-                          color: theme.colorScheme.outline,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Coming Soon',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Unlock achievements as you track your health',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ), */
-
-          // Feedback & Support Card
           Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: Padding(
@@ -566,8 +366,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ),
         ],
-      ),
-    );
+      );
   }
 
   Widget _buildInfoRow(

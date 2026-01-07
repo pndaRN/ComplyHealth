@@ -6,57 +6,42 @@ import '../services/encryption_migration_service.dart';
 import '../../features/medications/utils/medication_sorter.dart';
 
 final medicationProvider =
-    NotifierProvider<MedicationNotifier, List<Medication>>(
-      MedicationNotifier.new,
-    );
+    AsyncNotifierProvider<MedicationNotifier, List<Medication>>(
+  MedicationNotifier.new,
+);
 
-class MedicationNotifier extends Notifier<List<Medication>> {
-  Box? _box;
-  Box? _settingsBox;
+class MedicationNotifier extends AsyncNotifier<List<Medication>> {
   MedicationSortOption _sortOption = MedicationSortOption.alphabetical;
 
-  @override
-  List<Medication> build() {
-    _initializeAndLoad();
-    return [];
-  }
-
-  /// Initialize and load medications from Hive
-  Future<void> _initializeAndLoad() async {
-    await _loadMeds();
-    await checkAndResetDailyCounts();
-  }
-
-  /// Check if two DateTime objects are on the same day
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
-
-  /// Get or open the Hive box (cached)
-  Future<Box> _getBox() async {
-    if (_box != null && _box!.isOpen) {
-      return _box!;
-    }
-
+  Future<Box<Medication>> _getBox() async {
+    if (Hive.isBoxOpen('medications')) return Hive.box('medications');
     final key = await EncryptionMigrationService.getEncryptionKey();
-
-    _box = await Hive.openBox(
+    return await Hive.openBox<Medication>(
       'medications',
       encryptionCipher: HiveAesCipher(key),
     );
-    return _box!;
   }
 
-  /// Get or open the settings box (cached)
   Future<Box> _getSettingsBox() async {
-    if (_settingsBox != null && _settingsBox!.isOpen) {
-      return _settingsBox!;
+    if (Hive.isBoxOpen('medication_settings')) {
+      return Hive.box('medication_settings');
     }
-    _settingsBox = await Hive.openBox('medication_settings');
-    return _settingsBox!;
+    return await Hive.openBox('medication_settings');
   }
 
-  /// Load sort preference from settings
+  @override
+  Future<List<Medication>> build() async {
+    await _loadSortPreference();
+    final box = await _getBox();
+    List<Medication> meds = await _checkAndResetDailyCounts(box.values.toList());
+
+    if (meds.isNotEmpty) {
+      await NotificationService().scheduleAllMedications(meds);
+    }
+    
+    return _applySorting(meds);
+  }
+
   Future<void> _loadSortPreference() async {
     final settingsBox = await _getSettingsBox();
     final savedSort = settingsBox.get('sortOption');
@@ -65,10 +50,8 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     }
   }
 
-  /// Apply sorting to medications, handling grouped view specially
   List<Medication> _applySorting(List<Medication> meds) {
     if (_sortOption == MedicationSortOption.groupedByCondition) {
-      // Just sort alphabetically for grouped view - UI will create condition groups
       final sorted = List<Medication>.from(meds);
       sorted.sort(
         (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
@@ -79,83 +62,53 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     }
   }
 
-  Future<void> _loadMeds() async {
-    await _loadSortPreference();
-    final box = await _getBox();
-    final meds = box.values.cast<Medication>().toList();
-
-    // Only update state if we have data or state is empty
-    if (meds.isNotEmpty || state.isEmpty) {
-      state = _applySorting(meds);
-    }
-
-    // Schedule notifications for all medications
-    if (meds.isNotEmpty) {
-      await NotificationService().scheduleAllMedications(meds);
-    }
-  }
-
   Future<void> addMeds(Medication med) async {
-    final box = await _getBox();
-    await box.put(med.id, med);
-
-    // Get all unique medications from Hive to avoid duplicates
-    final uniqueMeds = box.values.cast<Medication>().toList();
-    state = _applySorting(uniqueMeds);
-
-    // Schedule notifications for the new medication
-    await NotificationService().scheduleMedicationNotifications(med);
+    state = await AsyncValue.guard(() async {
+      final box = await _getBox();
+      await box.put(med.id, med);
+      await NotificationService().scheduleMedicationNotifications(med);
+      return _applySorting(box.values.toList());
+    });
   }
 
   Future<void> deleteMeds(Medication med) async {
-    final box = await _getBox();
-    await box.delete(med.id);
-
-    // Get all unique medications from Hive to avoid duplicates
-    final uniqueMeds = box.values.cast<Medication>().toList();
-    state = _applySorting(uniqueMeds);
-
-    // Cancel notifications for the deleted medication
-    await NotificationService().cancelMedicationNotifications(med.id);
+    state = await AsyncValue.guard(() async {
+      final box = await _getBox();
+      await box.delete(med.id);
+      await NotificationService().cancelMedicationNotifications(med.id);
+      return _applySorting(box.values.toList());
+    });
   }
 
   Future<void> updateMeds(Medication med) async {
-    final box = await _getBox();
-    await box.put(med.id, med);
-
-    // Get all unique medications from Hive to avoid duplicates
-    final uniqueMeds = box.values.cast<Medication>().toList();
-    state = _applySorting(uniqueMeds);
-
-    // Re-schedule notifications for the updated medication
-    await NotificationService().scheduleMedicationNotifications(med);
+    state = await AsyncValue.guard(() async {
+      final box = await _getBox();
+      await box.put(med.id, med);
+      await NotificationService().scheduleMedicationNotifications(med);
+      return _applySorting(box.values.toList());
+    });
   }
 
-  /// Change the sort option and re-sort medications
   Future<void> setSortOption(MedicationSortOption option) async {
-    _sortOption = option;
-    final settingsBox = await _getSettingsBox();
-    await settingsBox.put('sortOption', option.index);
-
-    // Always sort from the unique medications in Hive, not from state
-    // This prevents duplication when switching between sort options
-    final box = await _getBox();
-    final uniqueMeds = box.values.cast<Medication>().toList();
-    state = _applySorting(uniqueMeds);
+    state = await AsyncValue.guard(() async {
+      _sortOption = option;
+      final settingsBox = await _getSettingsBox();
+      await settingsBox.put('sortOption', option.index);
+      
+      final box = await _getBox();
+      return _applySorting(box.values.toList());
+    });
   }
 
-  /// Get current sort option
   MedicationSortOption get sortOption => _sortOption;
 
-  List<Medication> forCondition(String name) =>
-      state.where((m) => m.conditionNames.contains(name)).toList();
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
 
-  /// Increment dose count for a PRN medication
   Future<void> incrementDoseCount(Medication med) async {
     if (!med.isPRN) return;
-
-    // Verify medication still exists in state
-    if (!state.any((m) => m.id == med.id)) {
+    if (!(state.value ?? []).any((m) => m.id == med.id)) {
       throw StateError('Medication not found in provider state');
     }
 
@@ -163,7 +116,6 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     int newCount = med.currentDoseCount;
     DateTime? resetDate = med.lastDoseCountReset;
 
-    // Reset if it's a new day
     if (resetDate == null || !_isSameDay(resetDate, today)) {
       newCount = 1;
       resetDate = today;
@@ -171,101 +123,59 @@ class MedicationNotifier extends Notifier<List<Medication>> {
       newCount = med.currentDoseCount + 1;
     }
 
-    // Validate against max doses
     if (med.maxDailyDoses != null && newCount > med.maxDailyDoses!) {
       throw StateError('Dose count would exceed maximum daily doses');
     }
 
-    final updatedMed = Medication(
-      id: med.id,
-      name: med.name,
-      dosage: med.dosage,
-      conditionNames: med.conditionNames,
-      isPRN: med.isPRN,
-      scheduledTimes: med.scheduledTimes,
-      maxDailyDoses: med.maxDailyDoses,
+    final updatedMed = med.copyWith(
       currentDoseCount: newCount,
       lastDoseCountReset: resetDate,
     );
-
     await updateMeds(updatedMed);
   }
 
-  /// Decrement dose count for a PRN medication (minimum 0)
   Future<void> decrementDoseCount(Medication med) async {
     if (!med.isPRN || med.currentDoseCount <= 0) return;
-
-    final updatedMed = Medication(
-      id: med.id,
-      name: med.name,
-      dosage: med.dosage,
-      conditionNames: med.conditionNames,
-      isPRN: med.isPRN,
-      scheduledTimes: med.scheduledTimes,
-      maxDailyDoses: med.maxDailyDoses,
-      currentDoseCount: med.currentDoseCount - 1,
-      lastDoseCountReset: med.lastDoseCountReset,
-    );
-
+    final updatedMed = med.copyWith(currentDoseCount: med.currentDoseCount - 1);
     await updateMeds(updatedMed);
   }
 
-  /// Reset dose count for a PRN medication
   Future<void> resetDoseCount(Medication med) async {
     if (!med.isPRN) return;
-
-    final updatedMed = Medication(
-      id: med.id,
-      name: med.name,
-      dosage: med.dosage,
-      conditionNames: med.conditionNames,
-      isPRN: med.isPRN,
-      scheduledTimes: med.scheduledTimes,
-      maxDailyDoses: med.maxDailyDoses,
+    final updatedMed = med.copyWith(
       currentDoseCount: 0,
       lastDoseCountReset: DateTime.now(),
     );
-
     await updateMeds(updatedMed);
   }
 
-  /// Check and reset dose counts for PRN medications if it's a new day
-  Future<void> checkAndResetDailyCounts() async {
+  Future<List<Medication>> _checkAndResetDailyCounts(List<Medication> initialMeds) async {
     final today = DateTime.now();
-    final box = await _getBox();
     bool hasUpdates = false;
 
-    // Get unique medications from Hive to avoid duplicates
-    final uniqueMeds = box.values.cast<Medication>().toList();
+    // Build a map for O(1) lookup of original dose counts
+    final originalCounts = <String, int>{
+      for (final med in initialMeds) med.id: med.currentDoseCount
+    };
 
-    final updatedMeds = uniqueMeds.map((med) {
-      if (!med.isPRN) return med;
-
-      if (med.lastDoseCountReset == null ||
-          !_isSameDay(med.lastDoseCountReset!, today)) {
+    final updatedMeds = initialMeds.map((med) {
+      if (med.isPRN && (med.lastDoseCountReset == null || !_isSameDay(med.lastDoseCountReset!, today))) {
         hasUpdates = true;
-        return Medication(
-          id: med.id,
-          name: med.name,
-          dosage: med.dosage,
-          conditionNames: med.conditionNames,
-          isPRN: med.isPRN,
-          scheduledTimes: med.scheduledTimes,
-          maxDailyDoses: med.maxDailyDoses,
-          currentDoseCount: 0,
-          lastDoseCountReset: today,
-        );
+        return med.copyWith(currentDoseCount: 0, lastDoseCountReset: today);
       }
       return med;
     }).toList();
 
     if (hasUpdates) {
+      final box = await _getBox();
       for (final med in updatedMeds) {
-        if (med.isPRN) {
+        // O(1) lookup instead of O(n) firstWhere
+        if (originalCounts[med.id] != med.currentDoseCount) {
           await box.put(med.id, med);
         }
       }
-      state = _applySorting(updatedMeds);
+      return updatedMeds;
     }
+    return initialMeds;
   }
 }

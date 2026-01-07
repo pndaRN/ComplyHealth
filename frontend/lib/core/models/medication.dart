@@ -35,10 +35,34 @@ class Medication {
     this.lastDoseCountReset,
   });
 
+  Medication copyWith({
+    String? id,
+    String? name,
+    String? dosage,
+    List<String>? conditionNames,
+    bool? isPRN,
+    List<String>? scheduledTimes,
+    int? maxDailyDoses,
+    int? currentDoseCount,
+    DateTime? lastDoseCountReset,
+  }) {
+    return Medication(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      dosage: dosage ?? this.dosage,
+      conditionNames: conditionNames ?? this.conditionNames,
+      isPRN: isPRN ?? this.isPRN,
+      scheduledTimes: scheduledTimes ?? this.scheduledTimes,
+      maxDailyDoses: maxDailyDoses ?? this.maxDailyDoses,
+      currentDoseCount: currentDoseCount ?? this.currentDoseCount,
+      lastDoseCountReset: lastDoseCountReset ?? this.lastDoseCountReset,
+    );
+  }
+
   factory Medication.fromJson(Map<String, dynamic> json) => Medication(
     id: json['id'] ?? '',
     name: json['name'] ?? '',
-    dosage: json['doseage'] ?? '',
+    dosage: json['dosage'] ?? '',
     conditionNames: json['conditionNames'] != null
         ? List<String>.from(json['conditionNames'])
         : [],
@@ -49,7 +73,7 @@ class Medication {
     maxDailyDoses: json['maxDailyDoses'],
     currentDoseCount: json['currentDoseCount'] ?? 0,
     lastDoseCountReset: json['lastDoseCountReset'] != null
-        ? DateTime.parse(json['lastDoseCountReset'])
+        ? DateTime.tryParse(json['lastDoseCountReset'])
         : null,
   );
 

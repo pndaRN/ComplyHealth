@@ -17,7 +17,7 @@ class AtAGlanceWidget extends StatefulWidget {
 }
 
 class _AtAGlanceWidgetState extends State<AtAGlanceWidget> {
-  bool _isExpanded = true;
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +41,15 @@ class _AtAGlanceWidgetState extends State<AtAGlanceWidget> {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      'At A Glance',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'At A Glance',
+                        maxLines: 1,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -52,43 +57,54 @@ class _AtAGlanceWidgetState extends State<AtAGlanceWidget> {
               ),
             ),
           ),
-          if (_isExpanded) ...[
-            const Divider(height: 1),
-            if (widget.conditions.isEmpty)
-              Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  'No conditions tracked yet.\nAdd a condition to get started!',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
-              )
-            else
-              ...widget.conditions.map((condition) {
-                final related = widget.medications
-                    .where(
-                      (medication) =>
-                          medication.conditionNames.contains(condition.name),
-                    )
-                    .toList();
-                return ListTile(
-                  leading: Icon(
-                    Icons.healing,
-                    color: theme.colorScheme.primary,
-                  ),
-                  title: Text(condition.commonName),
-                  subtitle: related.isEmpty
-                      ? const Text('No medications yet')
-                      : Text(
-                          related
-                              .map((m) => '▸ ${m.name} - ${m.dosage}')
-                              .join('\n'),
-                        ),
-                );
-              }),
-          ],
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: _isExpanded
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond,
+            firstChild: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Divider(height: 1),
+                if (widget.conditions.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      'No conditions tracked yet.\nAdd a condition to get started!',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  )
+                else
+                  ...widget.conditions.map((condition) {
+                    final related = widget.medications
+                        .where(
+                          (medication) => medication.conditionNames.contains(
+                            condition.name,
+                          ),
+                        )
+                        .toList();
+                    return ListTile(
+                      leading: Icon(
+                        Icons.healing,
+                        color: theme.colorScheme.primary,
+                      ),
+                      title: Text(condition.commonName),
+                      subtitle: related.isEmpty
+                          ? const Text('No medications yet')
+                          : Text(
+                              related
+                                  .map((m) => '▸ ${m.name} - ${m.dosage}')
+                                  .join('\n'),
+                            ),
+                    );
+                  }),
+              ],
+            ),
+            secondChild: const SizedBox.shrink(),
+          ),
         ],
       ),
     );

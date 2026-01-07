@@ -556,7 +556,7 @@ void main() {
         final json = {
           'id': 'json-test-2',
           'name': 'Test Med',
-          'doseage': '20mg', // Note: typo in original implementation
+          'dosage': '20mg',
           'isPRN': true,
           'maxDailyDoses': 4,
           'currentDoseCount': 2,

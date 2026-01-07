@@ -5,232 +5,182 @@ import '../models/profile.dart';
 import 'adherence_provider.dart';
 import '../../core/services/encryption_migration_service.dart';
 
-final profileProvider = NotifierProvider<ProfileNotifier, Profile>(
+final profileProvider = AsyncNotifierProvider<ProfileNotifier, Profile>(
   ProfileNotifier.new,
 );
 
-class ProfileNotifier extends Notifier<Profile> {
+class ProfileNotifier extends AsyncNotifier<Profile> {
   static const int maxLevel = 100;
   static const int baseXpPerDay = 100;
 
-  @override
-  Profile build() {
-    _loadProfile();
-    return Profile(
-      firstName: '',
-      dob: '',
-      allergies: '',
-      xp: 0,
-      streak: 0,
-      levelProgress: 0.0,
-      lastXpAwardDate: null,
-      lastPopupShownDate: null,
-      lastXpGained: 0,
-      lastName: '',
-    );
-  }
-
-  Future<void> _loadProfile() async {
+  Future<Box<Profile>> _getBox() async {
+    if (Hive.isBoxOpen('profile')) return Hive.box('profile');
     final key = await EncryptionMigrationService.getEncryptionKey();
-
-    final box = await Hive.openBox(
+    return await Hive.openBox<Profile>(
       'profile',
       encryptionCipher: HiveAesCipher(key),
     );
-    final saved = box.get('user');
-    if (saved != null && saved is Profile) {
-      state = saved;
-    } else {
-      // Create a default profile if none exists
-      final defaultProfile = Profile(
-        firstName: 'John',
-        lastName: 'Smith',
-        dob: '04/19/1985',
-        allergies: 'None',
+  }
+
+  @override
+  Future<Profile> build() async {
+    final box = await _getBox();
+    Profile? profile = box.get('user');
+
+    if (profile == null) {
+      profile = Profile(
+        firstName: '',
+        dob: '',
+        allergies: '',
         xp: 0,
         streak: 0,
         levelProgress: 0.0,
-        lastXpAwardDate: null,
-        lastPopupShownDate: null,
-        lastXpGained: 0,
+        lastName: '',
       );
-      await box.put('user', defaultProfile);
-      state = defaultProfile;
+      await box.put('user', profile);
     }
-    // Check and award XP for yesterday when profile loads
-    await checkAndAwardDailyXp();
+
+    // Run XP check in background after initial load with error handling
+    checkAndAwardDailyXp().catchError((e) {
+      // Silently handle errors - XP award is not critical for app function
+    });
+
+    return profile;
   }
 
   Future<void> save(Profile p) async {
-    final box = await Hive.openBox('profile');
-    await box.put('user', p);
-    state = p;
+    state = await AsyncValue.guard(() async {
+      final box = await _getBox();
+      await box.put('user', p);
+      return p;
+    });
   }
 
-  /// Calculate current level from total XP
-  /// Formula: level = floor((-1 + sqrt(1 + 8*XP/100)) / 2)
-  /// Capped at maxLevel
   int getCurrentLevel(int xp) {
     if (xp == 0) return 0;
     final level = ((-1 + sqrt(1 + 8 * xp / 100)) / 2).floor();
     return level > maxLevel ? maxLevel : level;
   }
 
-  /// Calculate total XP required to reach a specific level
-  /// Formula: XP = 100 * level * (level + 1) / 2
   int getXpForLevel(int level) {
     return 100 * level * (level + 1) ~/ 2;
   }
 
-  /// Calculate XP needed for next level
   int getXpForNextLevel(int currentLevel) {
     if (currentLevel >= maxLevel) return 0;
     return (currentLevel + 1) * 100;
   }
 
-  /// Check if two DateTime objects are on the same day
   bool _isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  /// Check and award XP for any missed days
-  ///
-  /// This method:
-  /// - Checks if XP has already been awarded today
-  /// - Awards XP for yesterday if not already done
-  /// - Should be called when app opens or at midnight
   Future<void> checkAndAwardDailyXp() async {
+    final profile = state.value;
+    if (profile == null) return;
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    // If we've already awarded XP today, skip
-    if (state.lastXpAwardDate != null &&
-        _isSameDay(state.lastXpAwardDate!, today)) {
+    if (profile.lastXpAwardDate != null &&
+        _isSameDay(profile.lastXpAwardDate!, today)) {
       return;
     }
 
-    // Award XP for yesterday (if we haven't already)
     final yesterday = today.subtract(const Duration(days: 1));
 
-    if (state.lastXpAwardDate == null ||
-        !_isSameDay(state.lastXpAwardDate!, yesterday)) {
+    if (profile.lastXpAwardDate == null ||
+        !_isSameDay(profile.lastXpAwardDate!, yesterday)) {
       await awardDailyXp(yesterday);
     }
   }
 
-  /// Award XP for a specific day based on medication adherence
-  ///
-  /// XP Calculation:
-  /// 1. Base XP = 100 * (adherence percentage / 100)
-  ///    - 100% adherence = 100 XP
-  ///    - 80% adherence = 80 XP
-  ///    - 50% adherence = 50 XP
-  ///
-  /// 2. Streak Multiplier = 1 + (0.01 * streak_days)
-  ///    - Day 1 streak: 1.01x (101 XP for perfect adherence)
-  ///    - Day 2 streak: 1.02x (102 XP for perfect adherence)
-  ///    - Day 30 streak: 1.30x (130 XP for perfect adherence)
-  ///
-  /// 3. Final XP = Base XP * Streak Multiplier
-  ///
-  /// Examples:
-  /// - Day 1, 100% adherence: 100 * 1.01 = 101 XP
-  /// - Day 5, 80% adherence: 80 * 1.05 = 84 XP
-  /// - Day 30, 100% adherence: 100 * 1.30 = 130 XP
   Future<void> awardDailyXp(DateTime date) async {
-    final adherenceNotifier = ref.read(adherenceProvider.notifier);
+    final profile = state.value;
+    if (profile == null) return;
 
-    // Get adherence for the specific day
+    final adherenceNotifier = ref.read(adherenceProvider.notifier);
     final dailyAdherence = await adherenceNotifier.getDailyAdherence(date);
     final logs = await adherenceNotifier.getLogsForDate(date);
 
-    // Don't award XP if there were no medications scheduled
-    if (logs.isEmpty) {
-      return;
-    }
+    if (logs.isEmpty) return;
 
-    // Calculate base XP based on adherence percentage
-    // If 100% adherence, get full 100 XP
-    // If 80% adherence, get 80 XP, etc.
     final baseXp = ((dailyAdherence / 100) * baseXpPerDay).round();
-
-    // Get current adherence streak
     final adherenceStreak = await adherenceNotifier.getCurrentStreak();
-
-    // Apply streak multiplier: 1 + (0.01 * streak_days)
-    // Day 1: 1.01x, Day 2: 1.02x, Day 30: 1.30x
     final streakMultiplier = 1.0 + (0.01 * adherenceStreak);
     final finalXp = (baseXp * streakMultiplier).round();
+    
+    await addXP(finalXp, newStreak: adherenceStreak);
 
-    // Add XP and update streak
-    addXP(finalXp, newStreak: adherenceStreak);
+    final currentProfile = state.value;
+    if(currentProfile == null) return;
 
-    // Update last award date and store XP gained for popup
-    final updated = state.copyWith(
+    final updated = currentProfile.copyWith(
       lastXpAwardDate: date,
       lastXpGained: finalXp,
     );
-    save(updated);
+    await save(updated);
   }
 
-  /// Add XP and update level progress
-  void addXP(int amount, {int? newStreak}) {
-    int newXP = state.xp + amount;
-    int newLevel = getCurrentLevel(newXP);
+  Future<void> addXP(int amount, {int? newStreak}) async {
+    final profile = state.value;
+    if (profile == null) return;
 
-    // Calculate progress to next level
+    int newXP = profile.xp + amount;
+    int newLevel = getCurrentLevel(newXP);
     double newProgress = 0.0;
+    
     if (newLevel < maxLevel) {
       int xpForCurrentLevel = getXpForLevel(newLevel);
       int xpForNextLevel = getXpForNextLevel(newLevel);
       int xpIntoCurrentLevel = newXP - xpForCurrentLevel;
       newProgress = xpIntoCurrentLevel / xpForNextLevel;
     } else {
-      newProgress = 1.0; // Max level reached
+      newProgress = 1.0;
     }
 
-    final updated = state.copyWith(
+    final updated = profile.copyWith(
       xp: newXP,
-      streak: newStreak ?? state.streak,
+      streak: newStreak ?? profile.streak,
       levelProgress: newProgress,
     );
-    save(updated);
+    await save(updated);
   }
 
-  void resetProgress() {
-    final updated = state.copyWith(
+  Future<void> resetProgress() async {
+    final profile = state.value;
+    if (profile == null) return;
+    
+    final updated = profile.copyWith(
       streak: 0,
       xp: 0,
       levelProgress: 0.0,
       lastXpAwardDate: null,
     );
-    save(updated);
+    await save(updated);
   }
 
-  /// Check if we should show the XP gain popup
-  ///
-  /// Returns true if:
-  /// - We haven't shown the popup today
-  /// - XP was gained yesterday (lastXpGained > 0)
   bool shouldShowXpPopup() {
+    final profile = state.value;
+    if (profile == null) return false;
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    // If we've already shown the popup today, don't show it again
-    if (state.lastPopupShownDate != null &&
-        _isSameDay(state.lastPopupShownDate!, today)) {
+    if (profile.lastPopupShownDate != null &&
+        _isSameDay(profile.lastPopupShownDate!, today)) {
       return false;
     }
-
-    // Show popup if XP was gained
-    return state.lastXpGained > 0;
+    return profile.lastXpGained > 0;
   }
 
-  /// Mark the popup as shown for today
   Future<void> markPopupShown() async {
+    final profile = state.value;
+    if (profile == null) return;
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final updated = state.copyWith(lastPopupShownDate: today);
+    final updated = profile.copyWith(lastPopupShownDate: today);
     await save(updated);
   }
 }

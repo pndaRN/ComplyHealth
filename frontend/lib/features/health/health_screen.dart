@@ -30,7 +30,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
   HealthViewMode _viewMode = HealthViewMode.myConditions;
   String _searchQuery = '';
   List<Disease> _allConditions = [];
-  bool _isLoading = true;
+  bool _isLoadingAll = true;
 
   @override
   void initState() {
@@ -57,17 +57,21 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
   }
 
   Future<void> _loadAllConditions() async {
-    setState(() => _isLoading = true);
+    setState(() => _isLoadingAll = true);
     final conditions = await ICDService.loadAll();
-    setState(() {
-      _allConditions = conditions;
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _allConditions = conditions;
+        _isLoadingAll = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final userConditions = ref.watch(conditionsProvider);
+    final userConditionsAsync = ref.watch(conditionsProvider);
+    // Note: medicationProvider will also be converted to Async,
+    // but we handle it here to prepare for the change.
     final medications = ref.watch(medicationProvider);
 
     return Scaffold(
@@ -79,7 +83,8 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
               final themeState = ref.watch(themeProvider);
               final isDark = themeState.themeMode == ThemeMode.dark ||
                   (themeState.themeMode == ThemeMode.system &&
-                      MediaQuery.of(context).platformBrightness == Brightness.dark);
+                      MediaQuery.of(context).platformBrightness ==
+                          Brightness.dark);
 
               return PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert),
@@ -112,7 +117,14 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
               TabBar(
                 controller: _tabController,
                 tabs: [
-                  Tab(text: 'My Conditions (${userConditions.length})'),
+                  Tab(
+                    text: userConditionsAsync.when(
+                      data: (conditions) =>
+                          'My Conditions (${conditions.length})',
+                      loading: () => 'My Conditions (...)',
+                      error: (_, _) => 'My Conditions (Error)',
+                    ),
+                  ),
                   const Tab(text: 'Browse All'),
                 ],
               ),
@@ -149,9 +161,14 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
           ),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _buildBody(userConditions, medications),
+      body: userConditionsAsync.when(
+        data: (userConditions) =>
+            _buildBody(userConditions, medications.asData?.value ?? []),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Text('Error: $error'),
+        ),
+      ),
     );
   }
 
@@ -159,6 +176,9 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
     if (_viewMode == HealthViewMode.myConditions) {
       return _buildMyConditionsView(userConditions, medications);
     } else {
+      if (_isLoadingAll) {
+        return const Center(child: CircularProgressIndicator());
+      }
       return _buildBrowseAllView(userConditions, medications);
     }
   }
@@ -224,7 +244,9 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
   ) {
     final groupedConditions = <String, List<Disease>>{};
     for (final condition in conditions) {
-      groupedConditions.putIfAbsent(condition.category, () => []).add(condition);
+      groupedConditions
+          .putIfAbsent(condition.category, () => [])
+          .add(condition);
     }
     return groupedConditions;
   }
@@ -304,8 +326,8 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
             final isAdded = userConditions.any((c) => c.code == condition.code);
             final medCount = isAdded
                 ? medications
-                      .where((m) => m.conditionNames.contains(condition.name))
-                      .length
+                    .where((m) => m.conditionNames.contains(condition.name))
+                    .length
                 : 0;
 
             return ConditionCard(
