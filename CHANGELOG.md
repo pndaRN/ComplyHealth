@@ -12,13 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dashboard titles adapt to screen size using FittedBox
 - Date of birth input now uses date picker instead of text input
 - Profile placeholders now show helpful prompts ("Tap Edit to add...")
+- Migrated state providers to AsyncNotifierProvider pattern for better async handling
+- Replaced deprecated withOpacity() with withValues() for color transparency
 
 ### Fixed
 - Removed pre-filled default profile so new users start with empty fields
+- Fixed AsyncValue handling across multiple screens preventing runtime errors
 
 ### Added
 - CI/CD & Deployment documentation in CLAUDE.md (branch strategy, Codemagic workflows)
 - Changelog requirements section in CLAUDE.md
+- Smooth animated expand/collapse transitions on dashboard widgets
 
 ## [1.2.1] - 2026-01-06
 
