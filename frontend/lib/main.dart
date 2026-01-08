@@ -58,7 +58,8 @@ void main() async {
     return true;
   };
 
-  final medicattions = container.read(medicationProvider);
+  final medicationsAsync = container.read(medicationProvider);
+  final medications = medicationsAsync.value ?? [];
   if (medications.isNotEmpty) {
     await NotificationService().scheduleAllMedications(medications);
   }

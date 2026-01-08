@@ -620,9 +620,8 @@ class _TodaysMedicationsWidgetState
                 ),
               ),
               // Action button
-              if (isOverdue) {
+              if (isOverdue)
                 _buildOverdueActionsMenu(instance)
-              }
               else {
                 ElevatedButton(
                 onPressed: () => _quickMarkAsTaken(instance),
@@ -708,7 +707,7 @@ class _TodaysMedicationsWidgetState
           ],
         ),
       ),
-      const PopupMenuItemDivider(),
+      const PopupMenuDivider(),
       PopupMenuItem(
         value: 'skip',
         child: Row(
@@ -880,7 +879,7 @@ Future<void> _markAsTakenAtTime(
   HapticFeedback.lightImpact();
 
   if (instance.isPRN) {
-    final medications = ref.read(medicationProvider);
+    final medications = ref.read(medicationProvider).value ?? [];
     final latestMed = medications.firstWhere(
       (m) => m.id == instance.medication.id,
       orElse: () => instance.medication,
