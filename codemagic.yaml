@@ -122,10 +122,9 @@ workflows:
       - name: Extract release notes from CHANGELOG
         script: |
           # Extract the latest version section (between first two ## headers)
-          sed -n '/^## \[.*\] -/,/^## \[.*\] -/p' CHANGELOG.md | head -n -1 | tail -n +1 > release_notes.txt
+          awk '/^## \[.*\] -/{if(found) exit; found=1} found' CHANGELOG.md > release_notes.txt
           echo "Release notes extracted:"
           cat release_notes.txt
-
       - name: Flutter build ipa
         script: |
           cd frontend
