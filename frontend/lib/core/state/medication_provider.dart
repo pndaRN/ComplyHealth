@@ -79,11 +79,6 @@ class MedicationNotifier extends Notifier<List<Medication>> {
     if (meds.isNotEmpty || state.isEmpty) {
       state = _applySorting(meds);
     }
-
-    // Schedule notifications for all medications
-    if (meds.isNotEmpty) {
-      await NotificationService().scheduleAllMedications(meds);
-    }
   }
 
   Future<void> addMeds(Medication med) async {

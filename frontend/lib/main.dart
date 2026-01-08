@@ -64,6 +64,11 @@ void main() async {
   // Give providers time to load from Hive
   await Future.delayed(const Duration(milliseconds: 200));
 
+  final medications = container.read(medicationProvider);
+  if (medications.isNotEmpty) {
+    await NotificationService().scheduleAllMedications(medications);
+  }
+
   runApp(UncontrolledProviderScope(
     container: container,
     child: const ComplyHealthApp(),
