@@ -105,8 +105,9 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
       });
     });
 
-    // Check for missed doses on app startup
+    // Clear incorrectly auto-marked missed logs and check for actual missed doses
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(adherenceProvider.notifier).clearMissedLogs();
       await ref.read(adherenceProvider.notifier).checkAndMarkMissedDoses();
     });
   }

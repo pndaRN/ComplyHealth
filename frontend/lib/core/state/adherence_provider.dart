@@ -169,13 +169,37 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
   }
 
   /// Auto-mark doses as missed for past days that were never logged
+  /// Only marks doses as missed for dates AFTER the user's first taken log
   Future<void> autoMarkMissedDosesForPastDays({int daysToCheck = 7}) async {
     final medications = await ref.read(medicationProvider.future);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
+    // Get all existing logs to find the first taken log date
+    final box = await _getBox();
+    final allLogs = box.values.toList();
+
+    // Only proceed if user has at least one taken log (they're actively tracking)
+    final takenLogs =
+        allLogs.where((log) => log.status == DoseStatus.taken).toList();
+    if (takenLogs.isEmpty) {
+      return; // User hasn't started tracking yet, don't auto-mark anything
+    }
+
+    // Find the earliest taken log date - only mark missed after that date
+    final firstTakenDate = takenLogs
+        .map((log) => DateTime(
+            log.scheduledTime.year, log.scheduledTime.month, log.scheduledTime.day))
+        .reduce((a, b) => a.isBefore(b) ? a : b);
+
     for (int i = 1; i <= daysToCheck; i++) {
       final date = today.subtract(Duration(days: i));
+
+      // Skip dates before the user started tracking
+      if (date.isBefore(firstTakenDate)) {
+        continue;
+      }
+
       final existingLogs = await getLogsForDate(date);
 
       for (final med in medications) {
@@ -246,6 +270,22 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     state = await AsyncValue.guard(() async {
       final box = await _getBox();
       await box.delete(logId);
+      return box.values.toList();
+    });
+  }
+
+  /// Clear all missed logs (for fixing the auto-mark bug)
+  Future<void> clearMissedLogs() async {
+    state = await AsyncValue.guard(() async {
+      final box = await _getBox();
+      final keysToDelete = box.keys.where((key) {
+        final log = box.get(key);
+        return log?.status == DoseStatus.missed;
+      }).toList();
+
+      for (final key in keysToDelete) {
+        await box.delete(key);
+      }
       return box.values.toList();
     });
   }

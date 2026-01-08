@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/state/adherence_provider.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/theme/theme_provider.dart';
@@ -8,11 +9,36 @@ import 'widgets/adherence_history_widget.dart';
 import 'widgets/at_a_glance_widget.dart';
 import '../../core/state/profile_provider.dart';
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  int _refreshKey = 0;
+
+  Future<void> _onRefresh() async {
+    ref.invalidate(adherenceProvider);
+    ref.invalidate(medicationProvider);
+    ref.invalidate(profileProvider);
+    ref.invalidate(conditionsProvider);
+
+    await Future.wait([
+      ref.read(adherenceProvider.future),
+      ref.read(medicationProvider.future),
+      ref.read(profileProvider.future),
+      ref.read(conditionsProvider.future),
+    ]);
+
+    setState(() {
+      _refreshKey++;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final conditionsAsync = ref.watch(conditionsProvider);
     final medsAsync = ref.watch(medicationProvider);
     final profileAsync = ref.watch(profileProvider);
@@ -61,9 +87,11 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      CustomScrollView(
-                        slivers: [
-                          SliverAppBar(
+                      RefreshIndicator(
+                        onRefresh: _onRefresh,
+                        child: CustomScrollView(
+                          slivers: [
+                            SliverAppBar(
                             floating: true,
                             snap: true,
                             backgroundColor: Colors.transparent,
@@ -130,19 +158,25 @@ class DashboardScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          const SliverToBoxAdapter(
-                            child: AdherenceHistoryWidget(),
-                          ),
-                          const SliverToBoxAdapter(
-                            child: TodaysMedicationsWidget(),
-                          ),
-                          SliverToBoxAdapter(
-                            child: AtAGlanceWidget(
-                              conditions: conditions,
-                              medications: meds,
+                            SliverToBoxAdapter(
+                              child: AdherenceHistoryWidget(
+                                key: ValueKey('adherence_$_refreshKey'),
+                              ),
                             ),
-                          ),
-                        ],
+                            SliverToBoxAdapter(
+                              child: TodaysMedicationsWidget(
+                                key: ValueKey('medications_$_refreshKey'),
+                              ),
+                            ),
+                            SliverToBoxAdapter(
+                              child: AtAGlanceWidget(
+                                key: ValueKey('glance_$_refreshKey'),
+                                conditions: conditions,
+                                medications: meds,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   );
