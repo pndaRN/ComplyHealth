@@ -622,7 +622,7 @@ class _TodaysMedicationsWidgetState
               // Action button
               if (isOverdue)
                 _buildOverdueActionsMenu(instance)
-              else {
+              else 
                 ElevatedButton(
                 onPressed: () => _quickMarkAsTaken(instance),
                 style: ElevatedButton.styleFrom(
@@ -637,7 +637,6 @@ class _TodaysMedicationsWidgetState
                 ),
                 child: const Text('Mark Taken', style: TextStyle(fontSize: 13)),
                 ),
-              }
             ],
           ),
         ),
