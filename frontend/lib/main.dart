@@ -12,6 +12,7 @@ import 'core/services/notification_service.dart';
 import 'core/services/encryption_migration_service.dart';
 import 'core/state/profile_provider.dart';
 import 'core/state/adherence_provider.dart';
+import 'core/state/medication_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/state/settings_provider.dart';
@@ -38,6 +39,8 @@ void main() async {
   Hive.registerAdapter(EducationContentAdapter());
   Hive.registerAdapter(ArticleAdapter());
   Hive.registerAdapter(VideoAdapter());
+
+  final container = ProviderContainer();
 
   // Initialize notification service
   await NotificationService().initialize();
