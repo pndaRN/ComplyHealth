@@ -58,6 +58,11 @@ void main() async {
     return true;
   };
 
+  final medicattions = container.read(medicationProvider);
+  if (medications.isNotEmpty) {
+    await NotificationService().scheduleAllMedications(medications);
+  }
+
   runApp(const ProviderScope(
     child: ComplyHealthApp(),
   ));
