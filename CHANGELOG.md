@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Fixed adherence showing 0% when auto-mark incorrectly marked all historical doses as missed
+
+### Added
+- Pull-to-refresh on dashboard to reload all widgets and data
+
 ## [1.2.2] - 2026-01-07
 
 ### Changed
