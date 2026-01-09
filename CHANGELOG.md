@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.3] - 2026-01-09
+
 ### Changed
 - Updated medication timing window to clinical standard: 1 hour after scheduled time before marking as missed (previously 30 minutes)
 
