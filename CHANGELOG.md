@@ -7,11 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.3] - 2026-01-09
+
+### Changed
+- Updated medication timing window to clinical standard: 1 hour after scheduled time before marking as missed (previously 30 minutes)
+
 ### Fixed
 - Fixed adherence showing 0% when auto-mark incorrectly marked all historical doses as missed
+- Fixed duplicate medication notifications caused by redundant scheduling at app startup
 
 ### Added
 - Pull-to-refresh on dashboard to reload all widgets and data
+- New "Missed" section in Today's Medications showing recoverable missed doses
+- Recovery actions for missed doses: Mark as Taken (with time picker), Mark as Skipped, Dismiss
+- Ability to dismiss missed doses to acknowledge them without changing their status
 
 ## [1.2.2] - 2026-01-07
 

@@ -26,13 +26,14 @@ class MedicationLogAdapter extends TypeAdapter<MedicationLog> {
       notes: fields[6] as String?,
       dosage: fields[7] as String,
       skipReason: fields[8] as String?,
+      isDismissed: fields[9] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, MedicationLog obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -50,7 +51,9 @@ class MedicationLogAdapter extends TypeAdapter<MedicationLog> {
       ..writeByte(7)
       ..write(obj.dosage)
       ..writeByte(8)
-      ..write(obj.skipReason);
+      ..write(obj.skipReason)
+      ..writeByte(9)
+      ..write(obj.isDismissed);
   }
 
   @override

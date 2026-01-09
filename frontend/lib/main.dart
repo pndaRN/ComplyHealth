@@ -12,7 +12,6 @@ import 'core/services/notification_service.dart';
 import 'core/services/encryption_migration_service.dart';
 import 'core/state/profile_provider.dart';
 import 'core/state/adherence_provider.dart';
-import 'core/state/medication_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/state/settings_provider.dart';
@@ -40,8 +39,6 @@ void main() async {
   Hive.registerAdapter(ArticleAdapter());
   Hive.registerAdapter(VideoAdapter());
 
-  final container = ProviderContainer();
-
   // Initialize notification service
   await NotificationService().initialize();
 
@@ -61,11 +58,8 @@ void main() async {
     return true;
   };
 
-  final medicationsAsync = container.read(medicationProvider);
-  final medications = medicationsAsync.value ?? [];
-  if (medications.isNotEmpty) {
-    await NotificationService().scheduleAllMedications(medications);
-  }
+  // Note: Notification scheduling is handled by the medication provider's build() method
+  // to avoid duplicate scheduling from separate ProviderContainer instances
 
   runApp(const ProviderScope(
     child: ComplyHealthApp(),
