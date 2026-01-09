@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fixed adherence showing 0% when auto-mark incorrectly marked all historical doses as missed
+- Fixed duplicate medication notifications caused by redundant scheduling at app startup
 
 ### Added
 - Pull-to-refresh on dashboard to reload all widgets and data
