@@ -21,10 +21,12 @@ class _TodaysMedicationsWidgetState
   List<MedicationInstance> _immediateInstances = [];
   List<MedicationInstance> _laterInstances = [];
   List<MedicationInstance> _prnInstances = [];
+  List<MedicationInstance> _missedInstances = [];
 
   // UI state
   bool _laterExpanded = false;
   bool _prnExpanded = false;
+  bool _missedExpanded = true;
   bool _isLoading = true;
   bool _isExpanded = false;
 
@@ -62,6 +64,7 @@ class _TodaysMedicationsWidgetState
     final immediate = <MedicationInstance>[];
     final later = <MedicationInstance>[];
     final prn = <MedicationInstance>[];
+    final missed = <MedicationInstance>[];
 
     // Categorize each instance
     for (final instance in instances) {
@@ -69,8 +72,16 @@ class _TodaysMedicationsWidgetState
         // PRN medications always show regardless of status
         prn.add(instance);
       } else {
-        // Skip completed scheduled medications (taken, skipped, or missed)
-        if (instance.isTaken || instance.isSkipped || instance.isMissed) {
+        // Collect missed doses (non-dismissed) into missed section
+        if (instance.isMissed) {
+          if (instance.log != null && !instance.log!.isDismissed) {
+            missed.add(instance);
+          }
+          continue;
+        }
+
+        // Skip other completed scheduled medications (taken, skipped)
+        if (instance.isTaken || instance.isSkipped) {
           continue;
         }
 
@@ -90,6 +101,9 @@ class _TodaysMedicationsWidgetState
         }
       }
     }
+
+    // Sort missed by scheduled time (most recent first)
+    missed.sort((a, b) => b.scheduledTime.compareTo(a.scheduledTime));
 
     // Sort immediate: overdue first, then by scheduled time
     immediate.sort((a, b) {
@@ -121,6 +135,7 @@ class _TodaysMedicationsWidgetState
       _immediateInstances = immediate;
       _laterInstances = later;
       _prnInstances = prn;
+      _missedInstances = missed;
       _todayTotal = total;
       _todayTaken = taken;
       _todayAdherence = adherence;
@@ -336,6 +351,7 @@ class _TodaysMedicationsWidgetState
               children: [
                 const Divider(height: 1),
                 _buildAdherenceSummary(),
+                if (_missedInstances.isNotEmpty) _buildMissedSection(),
                 _buildImmediateSection(),
                 if (_laterInstances.isNotEmpty) _buildLaterSection(),
                 if (_prnInstances.isNotEmpty) _buildPRNSection(),
@@ -964,6 +980,452 @@ Future<void> _quickMarkAsSkipped(MedicationInstance instance) async {
           ],
         ),
         backgroundColor: Colors.orange,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+}
+
+  Widget _buildMissedSection() {
+    final theme = Theme.of(context);
+
+    return ExpansionTile(
+      title: Row(
+        children: [
+          Icon(Icons.error_outline, color: theme.statusColors.error, size: 20),
+          const SizedBox(width: 8),
+          Text(
+            'Missed (${_missedInstances.length})',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: theme.statusColors.error,
+            ),
+          ),
+        ],
+      ),
+      initiallyExpanded: _missedExpanded,
+      onExpansionChanged: (expanded) {
+        setState(() => _missedExpanded = expanded);
+      },
+      children: _missedInstances.map((instance) {
+        return _buildMissedItem(instance);
+      }).toList(),
+    );
+  }
+
+  Widget _buildMissedItem(MedicationInstance instance) {
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        border: Border(
+          left: BorderSide(color: theme.statusColors.error, width: 4),
+        ),
+        color: theme.statusColors.error.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: theme.statusColors.error.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.medication,
+                color: theme.statusColors.error,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          instance.medication.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.statusColors.error,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Text(
+                          'Missed',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    instance.medication.dosage,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Scheduled: ${_formatTime(instance.scheduledTime)}',
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            _buildMissedActionsMenu(instance),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMissedActionsMenu(MedicationInstance instance) {
+    return PopupMenuButton<String>(
+      icon: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).statusColors.error,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Recover',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(width: 4),
+            Icon(Icons.arrow_drop_down, color: Colors.white, size: 20),
+          ],
+        ),
+      ),
+      offset: const Offset(0, 40),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'mark_taken',
+          child: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.green[700], size: 20),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Mark as Taken',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    Text(
+                      'Select when you took it',
+                      style: TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          value: 'mark_skipped',
+          child: Row(
+            children: [
+              Icon(Icons.cancel, color: Colors.orange[700], size: 20),
+              const SizedBox(width: 12),
+              const Text('Mark as Skipped'),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          value: 'dismiss',
+          child: Row(
+            children: [
+              Icon(Icons.visibility_off, color: Colors.grey[700], size: 20),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Dismiss'),
+                    Text(
+                      'Hide from list, keep as missed',
+                      style: TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+      onSelected: (value) async {
+        switch (value) {
+          case 'mark_taken':
+            await _showRecoveryTakenDialog(instance);
+            break;
+          case 'mark_skipped':
+            await _showRecoverySkippedDialog(instance);
+            break;
+          case 'dismiss':
+            await _dismissMissedDose(instance);
+            break;
+        }
+      },
+    );
+  }
+
+Future<void> _showRecoveryTakenDialog(MedicationInstance instance) async {
+  DateTime selectedTime = DateTime.now();
+
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) {
+        return AlertDialog(
+          title: const Text('Mark as Taken'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                instance.medication.name,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Originally scheduled: ${_formatTime(instance.scheduledTime)}',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 16),
+              const Text(
+                'When did you actually take it?',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 12),
+              InkWell(
+                onTap: () async {
+                  final picked = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.fromDateTime(selectedTime),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      selectedTime = DateTime(
+                        selectedTime.year,
+                        selectedTime.month,
+                        selectedTime.day,
+                        picked.hour,
+                        picked.minute,
+                      );
+                    });
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[300]!),
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.grey[50],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.access_time, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        _formatTime(selectedTime),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const Spacer(),
+                      Icon(Icons.edit, size: 18, color: Colors.grey[600]),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+
+  if (confirmed == true && instance.log != null) {
+    HapticFeedback.lightImpact();
+
+    await ref.read(adherenceProvider.notifier).recoverMissedDoseAsTaken(
+      logId: instance.log!.id,
+      actualTakenTime: selectedTime,
+    );
+
+    await _loadAndCategorizeInstances();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 8),
+              Text('Recovered as taken at ${_formatTime(selectedTime)}'),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+}
+
+Future<void> _showRecoverySkippedDialog(MedicationInstance instance) async {
+  final skipReasons = [
+    'Forgot',
+    'Side effects',
+    'Unavailable',
+    'Not needed',
+    'Other',
+  ];
+
+  final reason = await showDialog<String>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Mark as Skipped'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            instance.medication.name,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Select a reason:',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          ...skipReasons.map(
+            (r) => ListTile(
+              dense: true,
+              title: Text(r),
+              onTap: () => Navigator.pop(context, r),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+      ],
+    ),
+  );
+
+  if (reason != null && instance.log != null) {
+    HapticFeedback.lightImpact();
+
+    await ref.read(adherenceProvider.notifier).recoverMissedDoseAsSkipped(
+      logId: instance.log!.id,
+      skipReason: reason,
+    );
+
+    await _loadAndCategorizeInstances();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.cancel, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Changed to skipped'),
+            ],
+          ),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+}
+
+Future<void> _dismissMissedDose(MedicationInstance instance) async {
+  if (instance.log == null) return;
+
+  HapticFeedback.lightImpact();
+
+  await ref.read(adherenceProvider.notifier).dismissMissedDose(
+    logId: instance.log!.id,
+  );
+
+  await _loadAndCategorizeInstances();
+
+  if (mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.visibility_off, color: Colors.white),
+            SizedBox(width: 8),
+            Text('Dismissed from list'),
+          ],
+        ),
+        backgroundColor: Colors.grey,
         duration: Duration(seconds: 2),
       ),
     );

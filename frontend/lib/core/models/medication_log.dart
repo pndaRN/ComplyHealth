@@ -46,6 +46,9 @@ class MedicationLog {
   @HiveField(8)
   final String? skipReason;
 
+  @HiveField(9)
+  final bool isDismissed;
+
   MedicationLog({
     String? id,
     required this.medicationId,
@@ -56,6 +59,7 @@ class MedicationLog {
     this.notes,
     required this.dosage,
     this.skipReason,
+    this.isDismissed = false,
   }) : id = id ?? const Uuid().v4();
 
   /// Create a copy with modified fields
@@ -69,6 +73,7 @@ class MedicationLog {
     String? notes,
     String? dosage,
     String? skipReason,
+    bool? isDismissed,
   }) {
     return MedicationLog(
       id: id ?? this.id,
@@ -80,6 +85,7 @@ class MedicationLog {
       notes: notes ?? this.notes,
       dosage: dosage ?? this.dosage,
       skipReason: skipReason ?? this.skipReason,
+      isDismissed: isDismissed ?? this.isDismissed,
     );
   }
 
@@ -92,7 +98,8 @@ class MedicationLog {
   }
 
   /// Check if this dose is overdue (past scheduled time + grace period)
-  bool isOverdue({int graceMinutes = 30}) {
+  /// Default grace period is 60 minutes (clinical standard)
+  bool isOverdue({int graceMinutes = 60}) {
     if (status != DoseStatus.taken) {
       final gracePeriod = Duration(minutes: graceMinutes);
       final deadline = scheduledTime.add(gracePeriod);

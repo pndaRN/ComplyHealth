@@ -146,7 +146,8 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
   }
 
   /// Auto-mark doses as missed if past grace period (today only)
-  Future<void> autoMarkMissedDoses({int graceMinutes = 30}) async {
+  /// Default grace period is 60 minutes (clinical standard)
+  Future<void> autoMarkMissedDoses({int graceMinutes = 60}) async {
     final instances = await getTodayInstances();
     final now = DateTime.now();
 
@@ -295,6 +296,75 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     state = await AsyncValue.guard(() async {
       final box = await _getBox();
       await box.put(log.id, log);
+      return box.values.toList();
+    });
+  }
+
+  /// Recover a missed dose by marking it as taken
+  /// Updates the existing log rather than creating a new one
+  Future<void> recoverMissedDoseAsTaken({
+    required String logId,
+    required DateTime actualTakenTime,
+    String? notes,
+  }) async {
+    state = await AsyncValue.guard(() async {
+      final box = await _getBox();
+      final existingLog = box.get(logId);
+
+      if (existingLog == null || existingLog.status != DoseStatus.missed) {
+        throw Exception('Log not found or not a missed dose');
+      }
+
+      final updatedLog = existingLog.copyWith(
+        status: DoseStatus.taken,
+        actualTakenTime: actualTakenTime,
+        notes: notes ?? existingLog.notes,
+      );
+
+      await box.put(logId, updatedLog);
+      return box.values.toList();
+    });
+  }
+
+  /// Recover a missed dose by marking it as skipped
+  /// Updates the existing log rather than creating a new one
+  Future<void> recoverMissedDoseAsSkipped({
+    required String logId,
+    required String skipReason,
+    String? notes,
+  }) async {
+    state = await AsyncValue.guard(() async {
+      final box = await _getBox();
+      final existingLog = box.get(logId);
+
+      if (existingLog == null || existingLog.status != DoseStatus.missed) {
+        throw Exception('Log not found or not a missed dose');
+      }
+
+      final updatedLog = existingLog.copyWith(
+        status: DoseStatus.skipped,
+        skipReason: skipReason,
+        notes: notes ?? existingLog.notes,
+      );
+
+      await box.put(logId, updatedLog);
+      return box.values.toList();
+    });
+  }
+
+  /// Dismiss a missed dose (acknowledges the miss but removes from active list)
+  Future<void> dismissMissedDose({required String logId}) async {
+    state = await AsyncValue.guard(() async {
+      final box = await _getBox();
+      final existingLog = box.get(logId);
+
+      if (existingLog == null || existingLog.status != DoseStatus.missed) {
+        throw Exception('Log not found or not a missed dose');
+      }
+
+      final updatedLog = existingLog.copyWith(isDismissed: true);
+
+      await box.put(logId, updatedLog);
       return box.values.toList();
     });
   }
@@ -449,10 +519,12 @@ class MedicationInstance {
   bool get isMissed => status == DoseStatus.missed;
   bool get isPending => status == null;
 
+  /// Check if dose is overdue (past grace period)
+  /// Uses 60-minute clinical standard window
   bool get isOverdue {
     if (isPending && !isPRN) {
       final now = DateTime.now();
-      final gracePeriod = Duration(minutes: 30);
+      const gracePeriod = Duration(minutes: 60);
       final deadline = scheduledTime.add(gracePeriod);
       return now.isAfter(deadline);
     }
