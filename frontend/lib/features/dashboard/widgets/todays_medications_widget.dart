@@ -32,7 +32,6 @@ class _TodaysMedicationsWidgetState
   final bool _missedExpanded = true;
   bool _isLoading = true;
   bool _isExpanded = false;
-  final Set<String> _processingMedications = {};
 
   // Adherence tracking
   int _todayTotal = 0;
@@ -214,21 +213,8 @@ class _TodaysMedicationsWidgetState
   }
 
   Future<void> _markAsTakenWithDelay(MedicationInstance instance) async {
-    final medicationKey =
-        '${instance.medication.id}_${instance.scheduledTime.millisecondsSinceEpoch}';
-
-    // Add to processing set to turn button green
-    setState(() => _processingMedications.add(medicationKey));
-
-    // Mark as taken immediately
+    // Just mark as taken - the child widget handles animation and refresh
     await _quickMarkAsTaken(instance);
-
-    // Wait 2 seconds then reload (which will remove it from the list)
-    await Future.delayed(const Duration(seconds: 2));
-
-    // Remove from processing set and reload
-    setState(() => _processingMedications.remove(medicationKey));
-    await _loadAndCategorizeInstances();
   }
 
   Future<void> _openDetailedDialog(MedicationInstance instance) async {
@@ -276,7 +262,6 @@ class _TodaysMedicationsWidgetState
                 ImmediateSectionWidget(
                   instances: _immediateInstances,
                   laterInstances: _laterInstances,
-                  processingMedications: _processingMedications,
                   onMarkAsTaken: _markAsTakenWithDelay,
                   onRefresh: _loadAndCategorizeInstances,
                 ),

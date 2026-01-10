@@ -12,7 +12,6 @@ import 'package:complyhealth/features/dashboard/utils/todays_medications_utils.d
 class ImmediateSectionWidget extends ConsumerWidget {
   final List<MedicationInstance> instances;
   final List<MedicationInstance> laterInstances;
-  final Set<String> processingMedications;
   final Future<void> Function(MedicationInstance instance) onMarkAsTaken;
   final VoidCallback onRefresh;
 
@@ -20,7 +19,6 @@ class ImmediateSectionWidget extends ConsumerWidget {
     super.key,
     required this.instances,
     required this.laterInstances,
-    required this.processingMedications,
     required this.onMarkAsTaken,
     required this.onRefresh,
   });
@@ -54,7 +52,6 @@ class ImmediateSectionWidget extends ConsumerWidget {
           (instance) => _ImmediateItem(
             key: Key(_getMedicationKey(instance)),
             instance: instance,
-            isProcessing: processingMedications.contains(_getMedicationKey(instance)),
             onMarkAsTaken: onMarkAsTaken,
             onRefresh: onRefresh,
           ),
@@ -91,19 +88,87 @@ class ImmediateSectionWidget extends ConsumerWidget {
 }
 
 /// Individual item in the immediate section.
-class _ImmediateItem extends ConsumerWidget {
+class _ImmediateItem extends ConsumerStatefulWidget {
   final MedicationInstance instance;
-  final bool isProcessing;
   final Future<void> Function(MedicationInstance instance) onMarkAsTaken;
   final VoidCallback onRefresh;
 
   const _ImmediateItem({
     super.key,
     required this.instance,
-    required this.isProcessing,
     required this.onMarkAsTaken,
     required this.onRefresh,
   });
+
+  @override
+  ConsumerState<_ImmediateItem> createState() => _ImmediateItemState();
+}
+
+class _ImmediateItemState extends ConsumerState<_ImmediateItem>
+    with TickerProviderStateMixin {
+  late AnimationController _checkAnimationController;
+  late AnimationController _slideAnimationController;
+  late Animation<double> _checkAnimation;
+  late Animation<Offset> _slideAnimation;
+  bool _isAnimating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Checkbox fill animation (1 second)
+    _checkAnimationController = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    );
+    _checkAnimation = CurvedAnimation(
+      parent: _checkAnimationController,
+      curve: Curves.easeInOut,
+    );
+
+    // Slide-off animation (300ms)
+    _slideAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(1.5, 0),
+    ).animate(CurvedAnimation(
+      parent: _slideAnimationController,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _checkAnimationController.dispose();
+    _slideAnimationController.dispose();
+    super.dispose();
+  }
+
+  MedicationInstance get instance => widget.instance;
+  Future<void> Function(MedicationInstance) get onMarkAsTaken =>
+      widget.onMarkAsTaken;
+  VoidCallback get onRefresh => widget.onRefresh;
+
+  Future<void> _onCheckTapped() async {
+    if (_isAnimating) return;
+
+    setState(() => _isAnimating = true);
+    HapticFeedback.lightImpact();
+
+    // 1. Start and wait for checkbox fill animation (1 second)
+    await _checkAnimationController.forward().orCancel;
+
+    // 2. Mark as taken (data update)
+    await onMarkAsTaken(instance);
+
+    // 3. Start slide-off animation
+    await _slideAnimationController.forward().orCancel;
+
+    // 4. Refresh the list after animation completes
+    onRefresh();
+  }
 
   Future<bool> _handleSkipSwipe(BuildContext context, WidgetRef ref) async {
     final reason = await showSkipDoseDialog(
@@ -257,11 +322,13 @@ class _ImmediateItem extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isOverdue = isInstanceOverdue(instance);
 
-    return Dismissible(
+    return SlideTransition(
+      position: _slideAnimation,
+      child: Dismissible(
       key: Key(
         'dismiss_${instance.medication.id}_${instance.scheduledTime.millisecondsSinceEpoch}',
       ),
@@ -368,19 +435,29 @@ class _ImmediateItem extends ConsumerWidget {
               if (isOverdue)
                 _buildOverdueActionsMenu(context, ref)
               else
-                IconButton(
-                  onPressed: () => onMarkAsTaken(instance),
-                  icon: Icon(
-                    Icons.check_circle_outline,
-                    color: isProcessing
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.outline,
-                  ),
-                  tooltip: 'Mark as taken',
+                AnimatedBuilder(
+                  animation: _checkAnimation,
+                  builder: (context, child) {
+                    final animValue = _checkAnimation.value;
+                    return IconButton(
+                      onPressed: _isAnimating ? null : _onCheckTapped,
+                      icon: Icon(
+                        animValue > 0.5
+                            ? Icons.check_circle
+                            : Icons.check_circle_outline,
+                        color: animValue > 0.5
+                            ? Colors.green
+                            : Colors.green.withValues(alpha: 0.7 + (animValue * 0.3)),
+                        size: 28 + (animValue * 4), // Slight size increase during animation
+                      ),
+                      tooltip: 'Mark as taken',
+                    );
+                  },
                 ),
             ],
           ),
         ),
+      ),
       ),
     );
   }
