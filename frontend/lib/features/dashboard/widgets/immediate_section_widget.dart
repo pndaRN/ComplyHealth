@@ -117,7 +117,7 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
     super.initState();
     // Checkbox fill animation (1 second)
     _checkAnimationController = AnimationController(
-      duration: const Duration(seconds: 1),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
     _checkAnimation = CurvedAnimation(
@@ -127,7 +127,7 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
 
     // Slide-off animation (1 second)
     _slideAnimationController = AnimationController(
-      duration: const Duration(seconds: 1),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
     _slideAnimation = Tween<Offset>(
@@ -295,10 +295,6 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
                             maxLines: 1,
                           ),
                         ),
-                        if (isOverdue) ...[
-                          const SizedBox(width: 8),
-                          Icon(Icons.warning, size: 16, color: Colors.red[700]),
-                        ],
                       ],
                     ),
                     const SizedBox(height: 2),
@@ -463,9 +459,9 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
       builder: (context, child) {
         final animValue = _checkAnimation.value;
         // Transition from orange (outline) to green (primary)
-        final orangeColor = Colors.orange;
-        final greenColor = theme.colorScheme.primary;
-        final currentColor = Color.lerp(orangeColor, greenColor, animValue)!;
+        final errorColor = theme.colorScheme.error;
+        final primaryColor = theme.colorScheme.primary;
+        final currentColor = Color.lerp(errorColor, primaryColor, animValue)!;
 
         return PopupMenuButton<String>(
           enabled: !_isAnimating,

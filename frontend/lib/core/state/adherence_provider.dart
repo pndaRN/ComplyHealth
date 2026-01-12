@@ -117,6 +117,11 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       await box.put(log.id, log);
       return box.values.toList();
     });
+
+    // Rethrow error if save failed so caller can handle it
+    if (state.hasError) {
+      throw state.error!;
+    }
   }
 
   /// Log a dose as skipped
@@ -143,6 +148,11 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       await box.put(log.id, log);
       return box.values.toList();
     });
+
+    // Rethrow error if save failed so caller can handle it
+    if (state.hasError) {
+      throw state.error!;
+    }
   }
 
   /// Auto-mark doses as missed if past grace period (today only)
@@ -264,6 +274,11 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       await box.put(log.id, log);
       return box.values.toList();
     });
+
+    // Rethrow error if save failed so caller can handle it
+    if (state.hasError) {
+      throw state.error!;
+    }
   }
 
   /// Delete a log entry
@@ -273,6 +288,11 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       await box.delete(logId);
       return box.values.toList();
     });
+
+    // Rethrow error if delete failed so caller can handle it
+    if (state.hasError) {
+      throw state.error!;
+    }
   }
 
   /// Clear all missed logs (for fixing the auto-mark bug)
@@ -289,6 +309,11 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       }
       return box.values.toList();
     });
+
+    // Rethrow error if clear failed so caller can handle it
+    if (state.hasError) {
+      throw state.error!;
+    }
   }
 
   /// Update an existing log
@@ -298,6 +323,11 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       await box.put(log.id, log);
       return box.values.toList();
     });
+
+    // Rethrow error if update failed so caller can handle it
+    if (state.hasError) {
+      throw state.error!;
+    }
   }
 
   /// Recover a missed dose by marking it as taken
@@ -324,6 +354,11 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       await box.put(logId, updatedLog);
       return box.values.toList();
     });
+
+    // Rethrow error if recovery failed so caller can handle it
+    if (state.hasError) {
+      throw state.error!;
+    }
   }
 
   /// Recover a missed dose by marking it as skipped
@@ -350,6 +385,11 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       await box.put(logId, updatedLog);
       return box.values.toList();
     });
+
+    // Rethrow error if recovery failed so caller can handle it
+    if (state.hasError) {
+      throw state.error!;
+    }
   }
 
   /// Dismiss a missed dose (acknowledges the miss but removes from active list)
@@ -367,6 +407,11 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       await box.put(logId, updatedLog);
       return box.values.toList();
     });
+
+    // Rethrow error if dismiss failed so caller can handle it
+    if (state.hasError) {
+      throw state.error!;
+    }
   }
 
   /// Get logs for a specific date
