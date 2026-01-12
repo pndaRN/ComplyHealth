@@ -56,9 +56,7 @@
 <main class="min-h-screen">
   <!-- Header -->
   <header class="px-6 py-4">
-    <span class="text-2xl font-semibold text-primary font-heading"
-      >ComplyHealth</span
-    >
+    <img src="/complyhealth-logo.svg" alt="ComplyHealth" class="h-10" />
   </header>
 
   <!-- Hero Section -->
