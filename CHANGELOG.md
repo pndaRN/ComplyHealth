@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Animated checkmark completion for medications: green outline fills in over 1 second, then card slides off to the right
+
+### Changed
+- Refactored Today's Medications widget into smaller, focused components for improved maintainability
+
 ## [1.2.3] - 2026-01-09
 
 ### Changed
