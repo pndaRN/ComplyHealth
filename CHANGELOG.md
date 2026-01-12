@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Refactored Today's Medications widget into smaller, focused components for improved maintainability
 
+### Fixed
+- Fixed medication completion not being saved when using checkmark button or late menu (errors were being silently swallowed by AsyncValue.guard)
+
 ## [1.2.3] - 2026-01-09
 
 ### Changed
