@@ -157,17 +157,26 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
     setState(() => _isAnimating = true);
     HapticFeedback.lightImpact();
 
-    // 1. Start and wait for checkbox fill animation (1 second)
-    await _checkAnimationController.forward().orCancel;
+    try {
+      // 1. Start and wait for checkbox fill animation (1 second)
+      await _checkAnimationController.forward().orCancel;
 
-    // 2. Mark as taken (data update)
-    await onMarkAsTaken(instance);
+      // 2. Mark as taken (data update)
+      await onMarkAsTaken(instance);
 
-    // 3. Start slide-off animation
-    await _slideAnimationController.forward().orCancel;
+      // 3. Start slide-off animation
+      await _slideAnimationController.forward().orCancel;
 
-    // 4. Refresh the list after animation completes
-    onRefresh();
+      // 4. Refresh the list after animation completes
+      onRefresh();
+    } catch (e) {
+      // Reset animation state on error so button can be tapped again
+      if (mounted) {
+        setState(() => _isAnimating = false);
+        _checkAnimationController.reset();
+        _slideAnimationController.reset();
+      }
+    }
   }
 
   Future<bool> _handleSkipSwipe(BuildContext context, WidgetRef ref) async {
@@ -347,14 +356,23 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
     setState(() => _isAnimating = true);
     HapticFeedback.lightImpact();
 
-    // 1. Start and wait for checkbox fill animation
-    await _checkAnimationController.forward().orCancel;
+    try {
+      // 1. Start and wait for checkbox fill animation
+      await _checkAnimationController.forward().orCancel;
 
-    // 2. Start slide-off animation
-    await _slideAnimationController.forward().orCancel;
+      // 2. Start slide-off animation
+      await _slideAnimationController.forward().orCancel;
 
-    // 3. Refresh the list after animation completes
-    onRefresh();
+      // 3. Refresh the list after animation completes
+      onRefresh();
+    } catch (e) {
+      // Reset animation state on error so button can be tapped again
+      if (mounted) {
+        setState(() => _isAnimating = false);
+        _checkAnimationController.reset();
+        _slideAnimationController.reset();
+      }
+    }
   }
 
   Future<void> _markAsTakenNoRefresh(MedicationInstance inst) async {
