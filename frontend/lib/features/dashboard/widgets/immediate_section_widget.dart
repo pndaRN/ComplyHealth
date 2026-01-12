@@ -125,9 +125,9 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
       curve: Curves.easeInOut,
     );
 
-    // Slide-off animation (300ms)
+    // Slide-off animation (1 second)
     _slideAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(seconds: 1),
       vsync: this,
     );
     _slideAnimation = Tween<Offset>(
@@ -197,128 +197,6 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
     }
 
     return false; // Don't dismiss the widget, we handle removal via reload
-  }
-
-  Future<void> _handleBackdate(BuildContext context, WidgetRef ref) async {
-    final selectedTime = await showBackdateDoseDialog(
-      context: context,
-      instance: instance,
-    );
-
-    if (selectedTime != null) {
-      await _markAsTakenAtTime(context, ref, selectedTime);
-    }
-  }
-
-  Future<void> _markAsTakenAtTime(
-    BuildContext context,
-    WidgetRef ref,
-    DateTime takenTime,
-  ) async {
-    HapticFeedback.lightImpact();
-
-    if (instance.isPRN) {
-      final medications = ref.read(medicationProvider).value ?? [];
-      final latestMed = medications.firstWhere(
-        (m) => m.id == instance.medication.id,
-        orElse: () => instance.medication,
-      );
-
-      try {
-        await ref.read(medicationProvider.notifier).incrementDoseCount(latestMed);
-        await ref.read(adherenceProvider.notifier).logDoseTaken(
-              medicationId: latestMed.id,
-              medicationName: latestMed.name,
-              dosage: latestMed.dosage,
-              scheduledTime: instance.scheduledTime,
-              actualTakenTime: takenTime,
-            );
-      } catch (e) {
-        await ref.read(medicationProvider.notifier).decrementDoseCount(latestMed);
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to log dose: $e')),
-          );
-        }
-        return;
-      }
-    } else {
-      try {
-        await ref.read(adherenceProvider.notifier).logDoseTaken(
-              medicationId: instance.medication.id,
-              medicationName: instance.medication.name,
-              dosage: instance.medication.dosage,
-              scheduledTime: instance.scheduledTime,
-              actualTakenTime: takenTime,
-            );
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to log dose: $e')),
-          );
-        }
-        return;
-      }
-    }
-
-    onRefresh();
-
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: 8),
-              Text('Marked as taken at ${formatMedicationTime(takenTime)}'),
-            ],
-          ),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  Future<void> _quickMarkAsSkipped(BuildContext context, WidgetRef ref) async {
-    HapticFeedback.lightImpact();
-
-    await ref.read(adherenceProvider.notifier).logDoseSkipped(
-          medicationId: instance.medication.id,
-          medicationName: instance.medication.name,
-          dosage: instance.medication.dosage,
-          scheduledTime: instance.scheduledTime,
-          skipReason: 'Skipped from quick action',
-        );
-
-    onRefresh();
-
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.cancel, color: Colors.white),
-              SizedBox(width: 8),
-              Text('Marked as skipped'),
-            ],
-          ),
-          backgroundColor: Colors.orange,
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  Future<void> _openDetailedDialog(BuildContext context) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => DoseLoggingDialog(instance: instance),
-    );
-
-    if (result == true) {
-      onRefresh();
-    }
   }
 
   @override
@@ -439,15 +317,17 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
                   animation: _checkAnimation,
                   builder: (context, child) {
                     final animValue = _checkAnimation.value;
+                    // Transition from grey (outline) to green (primary)
+                    final greyColor = theme.colorScheme.outline;
+                    final greenColor = theme.colorScheme.primary;
+                    final currentColor = Color.lerp(greyColor, greenColor, animValue)!;
                     return IconButton(
                       onPressed: _isAnimating ? null : _onCheckTapped,
                       icon: Icon(
                         animValue > 0.5
                             ? Icons.check_circle
                             : Icons.check_circle_outline,
-                        color: animValue > 0.5
-                            ? Colors.green
-                            : Colors.green.withValues(alpha: 0.7 + (animValue * 0.3)),
+                        color: currentColor,
                         size: 28 + (animValue * 4), // Slight size increase during animation
                       ),
                       tooltip: 'Mark as taken',
@@ -462,106 +342,217 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
     );
   }
 
-  Widget _buildOverdueActionsMenu(BuildContext context, WidgetRef ref) {
-    return PopupMenuButton<String>(
-      icon: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.orange,
-          borderRadius: BorderRadius.circular(8),
+  Future<void> _animateCompletion() async {
+    if (_isAnimating) return;
+    setState(() => _isAnimating = true);
+    HapticFeedback.lightImpact();
+
+    // 1. Start and wait for checkbox fill animation
+    await _checkAnimationController.forward().orCancel;
+
+    // 2. Start slide-off animation
+    await _slideAnimationController.forward().orCancel;
+
+    // 3. Refresh the list after animation completes
+    onRefresh();
+  }
+
+  Future<void> _markAsTakenNoRefresh(MedicationInstance inst) async {
+    await onMarkAsTaken(inst);
+  }
+
+  Future<bool> _markAsTakenAtTimeNoRefresh(
+    BuildContext context,
+    WidgetRef ref,
+    DateTime takenTime,
+  ) async {
+    if (instance.isPRN) {
+      final medications = ref.read(medicationProvider).value ?? [];
+      final latestMed = medications.firstWhere(
+        (m) => m.id == instance.medication.id,
+        orElse: () => instance.medication,
+      );
+
+      try {
+        await ref.read(medicationProvider.notifier).incrementDoseCount(latestMed);
+        await ref.read(adherenceProvider.notifier).logDoseTaken(
+              medicationId: latestMed.id,
+              medicationName: latestMed.name,
+              dosage: latestMed.dosage,
+              scheduledTime: instance.scheduledTime,
+              actualTakenTime: takenTime,
+            );
+      } catch (e) {
+        await ref.read(medicationProvider.notifier).decrementDoseCount(latestMed);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to log dose: $e')),
+          );
+        }
+        return false;
+      }
+    } else {
+      try {
+        await ref.read(adherenceProvider.notifier).logDoseTaken(
+              medicationId: instance.medication.id,
+              medicationName: instance.medication.name,
+              dosage: instance.medication.dosage,
+              scheduledTime: instance.scheduledTime,
+              actualTakenTime: takenTime,
+            );
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to log dose: $e')),
+          );
+        }
+        return false;
+      }
+    }
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 8),
+              Text('Marked as taken at ${formatMedicationTime(takenTime)}'),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
         ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Options',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+      );
+    }
+    return true;
+  }
+
+  Future<void> _markAsSkippedNoRefresh(WidgetRef ref) async {
+    await ref.read(adherenceProvider.notifier).logDoseSkipped(
+          medicationId: instance.medication.id,
+          medicationName: instance.medication.name,
+          dosage: instance.medication.dosage,
+          scheduledTime: instance.scheduledTime,
+          skipReason: 'Skipped from quick action',
+        );
+  }
+
+  Widget _buildOverdueActionsMenu(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    return AnimatedBuilder(
+      animation: _checkAnimation,
+      builder: (context, child) {
+        final animValue = _checkAnimation.value;
+        // Transition from orange (outline) to green (primary)
+        final orangeColor = Colors.orange;
+        final greenColor = theme.colorScheme.primary;
+        final currentColor = Color.lerp(orangeColor, greenColor, animValue)!;
+
+        return PopupMenuButton<String>(
+          enabled: !_isAnimating,
+          icon: Icon(
+            animValue > 0.5 ? Icons.check_circle : Icons.error_outline,
+            color: currentColor,
+            size: 28 + (animValue * 4),
+          ),
+          offset: const Offset(0, 40),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'taken_late',
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green[700], size: 20),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Mark as Taken (Late)',
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        Text(
+                          'I took it but forgot to log',
+                          style: TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(width: 4),
-            Icon(Icons.arrow_drop_down, color: Colors.white, size: 20),
-          ],
-        ),
-      ),
-      offset: const Offset(0, 40),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: 'taken_late',
-          child: Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.green[700], size: 20),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Mark as Taken (Late)',
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                    Text(
-                      'I took it but forgot to log',
-                      style: TextStyle(fontSize: 11, color: Colors.grey),
-                    ),
-                  ],
-                ),
+            PopupMenuItem(
+              value: 'taken_now',
+              child: Row(
+                children: [
+                  Icon(Icons.check, color: Colors.green[700], size: 20),
+                  const SizedBox(width: 12),
+                  const Text('Mark as Taken Now'),
+                ],
               ),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'taken_now',
-          child: Row(
-            children: [
-              Icon(Icons.check, color: Colors.green[700], size: 20),
-              const SizedBox(width: 12),
-              const Text('Mark as Taken Now'),
-            ],
-          ),
-        ),
-        const PopupMenuDivider(),
-        PopupMenuItem(
-          value: 'skip',
-          child: Row(
-            children: [
-              Icon(Icons.cancel, color: Colors.orange[700], size: 20),
-              const SizedBox(width: 12),
-              const Text('Mark as Skipped'),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'details',
-          child: Row(
-            children: [
-              Icon(Icons.more_horiz, color: Colors.grey[700], size: 20),
-              const SizedBox(width: 12),
-              const Text('More Options'),
-            ],
-          ),
-        ),
-      ],
-      onSelected: (value) async {
-        switch (value) {
-          case 'taken_late':
-            await _handleBackdate(context, ref);
-            break;
-          case 'taken_now':
-            await onMarkAsTaken(instance);
-            break;
-          case 'skip':
-            await _quickMarkAsSkipped(context, ref);
-            break;
-          case 'details':
-            await _openDetailedDialog(context);
-            break;
-        }
+            ),
+            const PopupMenuDivider(),
+            PopupMenuItem(
+              value: 'skip',
+              child: Row(
+                children: [
+                  Icon(Icons.cancel, color: Colors.orange[700], size: 20),
+                  const SizedBox(width: 12),
+                  const Text('Mark as Skipped'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'details',
+              child: Row(
+                children: [
+                  Icon(Icons.more_horiz, color: Colors.grey[700], size: 20),
+                  const SizedBox(width: 12),
+                  const Text('More Options'),
+                ],
+              ),
+            ),
+          ],
+          onSelected: (value) async {
+            bool shouldAnimate = false;
+            switch (value) {
+              case 'taken_late':
+                final selectedTime = await showBackdateDoseDialog(
+                  context: context,
+                  instance: instance,
+                );
+                if (selectedTime != null) {
+                  await _markAsTakenAtTimeNoRefresh(context, ref, selectedTime);
+                  shouldAnimate = true;
+                }
+                break;
+              case 'taken_now':
+                await _markAsTakenNoRefresh(instance);
+                shouldAnimate = true;
+                break;
+              case 'skip':
+                await _markAsSkippedNoRefresh(ref);
+                shouldAnimate = true;
+                break;
+              case 'details':
+                final result = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => DoseLoggingDialog(instance: instance),
+                );
+                if (result == true) {
+                  shouldAnimate = true;
+                }
+                break;
+            }
+            if (shouldAnimate) {
+              await _animateCompletion();
+            }
+          },
+        );
       },
     );
   }
