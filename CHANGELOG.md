@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.4] - 2026-01-12
+
 ### Added
 - Animated checkmark completion for medications: green outline fills in over 1 second, then card slides off to the right
 
@@ -16,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed medication completion not being saved when using checkmark button or late menu (errors were being silently swallowed by AsyncValue.guard)
 - Fixed duplicate medication notifications caused by provider rebuilds scheduling notifications multiple times
+- Fixed "failed to log dose: type 'null' is not a subtype of type bool" error when logging doses for medications created before the isDismissed field was added
 
 ## [1.2.3] - 2026-01-09
 

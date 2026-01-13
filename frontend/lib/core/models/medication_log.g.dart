@@ -26,7 +26,7 @@ class MedicationLogAdapter extends TypeAdapter<MedicationLog> {
       notes: fields[6] as String?,
       dosage: fields[7] as String,
       skipReason: fields[8] as String?,
-      isDismissed: fields[9] as bool,
+      isDismissed: fields[9] == null ? false : fields[9] as bool,
     );
   }
 
