@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/disease.dart';
@@ -20,6 +22,24 @@ class ConditionDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
+  late TextEditingController _notesController;
+  Timer? _debounceTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _notesController = TextEditingController(
+      text: widget.condition.personalNotes ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    _notesController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final conditionsAsync = ref.watch(conditionsProvider);
@@ -36,6 +56,7 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
             tabs: [
               Tab(text: 'Overview'),
               Tab(text: 'Medications'),
+              Tab(text: 'Notes'),
             ],
           ),
         ),
@@ -76,7 +97,11 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
   }
 
   Widget _buildBodyWithData(bool isAdded) {
-    return TabBarView(children: [_buildOverviewTab(), _buildMedicationsTab()]);
+    return TabBarView(children: [
+      _buildOverviewTab(),
+      _buildMedicationsTab(),
+      _buildNotesTab(isAdded),
+    ]);
   }
 
   Widget _buildOverviewTab() {
@@ -369,6 +394,87 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildNotesTab(bool isAdded) {
+    final theme = Theme.of(context);
+
+    if (!isAdded) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.note_add_outlined,
+              size: 64,
+              color: theme.colorScheme.outline,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Add to My Conditions first',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'You can add notes after adding this condition',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Personal Notes',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Add your own notes about this condition',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: TextField(
+              controller: _notesController,
+              maxLines: null,
+              expands: true,
+              textAlignVertical: TextAlignVertical.top,
+              decoration: InputDecoration(
+                hintText: 'Write your notes here...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: theme.colorScheme.surfaceContainerLowest,
+              ),
+              onChanged: (value) {
+                _debounceTimer?.cancel();
+                _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+                  ref.read(conditionsProvider.notifier).updateConditionNotes(
+                        widget.condition.code,
+                        value,
+                      );
+                });
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 

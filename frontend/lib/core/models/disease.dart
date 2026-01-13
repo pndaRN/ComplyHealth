@@ -63,4 +63,17 @@ class Disease {
         'personalNotes': personalNotes,
         'createdAt': createdAt?.toIso8601String(),
       };
+
+    Disease copyWith({String? personalNotes}) {
+      return Disease(
+        code: code,
+        name: name,
+        category: category,
+        commonName: commonName,
+        description: description,
+        isCustom: isCustom,
+        personalNotes: personalNotes ?? this.personalNotes,
+        createdAt: createdAt,
+      );
+    }
   }
