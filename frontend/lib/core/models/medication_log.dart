@@ -46,7 +46,7 @@ class MedicationLog {
   @HiveField(8)
   final String? skipReason;
 
-  @HiveField(9)
+  @HiveField(9, defaultValue: false)
   final bool isDismissed;
 
   MedicationLog({
