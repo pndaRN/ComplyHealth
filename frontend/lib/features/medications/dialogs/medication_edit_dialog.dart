@@ -13,7 +13,8 @@ class MedicationEditDialog extends ConsumerStatefulWidget {
   const MedicationEditDialog({super.key, required this.medication});
 
   @override
-  ConsumerState<MedicationEditDialog> createState() => _MedicationEditDialogState();
+  ConsumerState<MedicationEditDialog> createState() =>
+      _MedicationEditDialogState();
 }
 
 class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
@@ -21,6 +22,7 @@ class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
   late TextEditingController doseCtrl;
   late TextEditingController maxDosesCtrl;
   late List<String> selectedConditions;
+  Set<String> _autoSelectedConditions = {};
   late bool isPRN;
   late List<TimeOfDay> scheduledTimes;
   List<TimeOfDay>? _savedScheduledTimes;
@@ -53,7 +55,10 @@ class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
     try {
       final parts = timeString.split(':');
       if (parts.length == 2) {
-        return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+        return TimeOfDay(
+          hour: int.parse(parts[0]),
+          minute: int.parse(parts[1]),
+        );
       }
     } catch (e) {
       // Invalid time string
@@ -70,11 +75,26 @@ class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
     final conditionsAsync = ref.watch(conditionsProvider);
     final notifier = ref.read(medicationProvider.notifier);
 
+    // Auto-selection logic for edit dialog
+    conditionsAsync.whenData((conditions) {
+      if (selectedConditions.isEmpty && conditions.length == 1) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              selectedConditions = [conditions.first.name];
+              _autoSelectedConditions = {conditions.first.name};
+            });
+          }
+        });
+      }
+    });
+
     return AlertDialog(
       title: const Text('Edit Medication'),
       content: conditionsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error loading conditions: $err')),
+        error: (err, stack) =>
+            Center(child: Text('Error loading conditions: $err')),
         data: (conditions) => MedicationFormContent(
           nameController: nameCtrl,
           dosageController: doseCtrl,
@@ -83,6 +103,10 @@ class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
           onConditionsChanged: (value) {
             setState(() {
               selectedConditions = value;
+              // Clear auto-selection if user manually changes conditions
+              if (!_autoSelectedConditions.every(value.contains)) {
+                _autoSelectedConditions.clear();
+              }
             });
           },
           isPRN: isPRN,
@@ -111,6 +135,7 @@ class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
             });
           },
           maxDosesController: maxDosesCtrl,
+          autoSelectedConditions: _autoSelectedConditions,
         ),
       ),
       actions: [
@@ -129,7 +154,9 @@ class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
                     conditions: selectedConditions,
                     isPRN: isPRN,
                     scheduledTimes: scheduledTimes,
-                    maxDailyDoses: maxDosesCtrl.text.isEmpty ? null : int.tryParse(maxDosesCtrl.text),
+                    maxDailyDoses: maxDosesCtrl.text.isEmpty
+                        ? null
+                        : int.tryParse(maxDosesCtrl.text),
                   )) {
                     return;
                   }
@@ -141,7 +168,9 @@ class _MedicationEditDialogState extends ConsumerState<MedicationEditDialog> {
                     conditionNames: selectedConditions,
                     isPRN: isPRN,
                     scheduledTimes: scheduledTimes.map(_timeToString).toList(),
-                    maxDailyDoses: maxDosesCtrl.text.isEmpty ? null : int.tryParse(maxDosesCtrl.text),
+                    maxDailyDoses: maxDosesCtrl.text.isEmpty
+                        ? null
+                        : int.tryParse(maxDosesCtrl.text),
                     currentDoseCount: widget.medication.currentDoseCount,
                     lastDoseCountReset: widget.medication.lastDoseCountReset,
                   );
