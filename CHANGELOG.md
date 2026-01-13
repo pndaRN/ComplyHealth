@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Notes tab in condition detail screen for personal notes about each condition with auto-save
+
+### Changed
+- Medication name input now auto-capitalizes the first letter of the first word in both add and edit dialogs
+- Auto-select single condition in add and edit medication dialogs when only one condition is available
+- Auto-selected conditions display with light blue background, blue border, and auto icon with subtle scale animation
+
 ## [1.2.4] - 2026-01-12
 
 ### Added
