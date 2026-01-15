@@ -5,7 +5,7 @@ import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/theme/theme_provider.dart';
 import 'widgets/todays_medications_widget.dart';
-import 'widgets/adherence_history_widget.dart';
+import 'widgets/enhanced_calendar_widget.dart';
 import 'widgets/at_a_glance_widget.dart';
 import '../../core/state/profile_provider.dart';
 
@@ -92,74 +92,77 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         child: CustomScrollView(
                           slivers: [
                             SliverAppBar(
-                            floating: true,
-                            snap: true,
-                            backgroundColor: Colors.transparent,
-                            foregroundColor: Colors.white,
-                            titleTextStyle: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 30,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            iconTheme: const IconThemeData(color: Colors.white),
-                            elevation: 0,
-                            title: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: profile.firstName.isNotEmpty
-                                  ? Text(
-                                      'Good to see you, ${profile.firstName}',
-                                    )
-                                  : const Text('Welcome'),
-                            ),
-                            actions: [
-                              Consumer(
-                                builder: (context, ref, child) {
-                                  final themeState = ref.watch(themeProvider);
-                                  final isDark =
-                                      themeState.themeMode == ThemeMode.dark ||
-                                      (themeState.themeMode ==
-                                              ThemeMode.system &&
-                                          MediaQuery.of(
-                                                context,
-                                              ).platformBrightness ==
-                                              Brightness.dark);
-
-                                  return PopupMenuButton<String>(
-                                    icon: const Icon(Icons.more_vert),
-                                    onSelected: (value) {
-                                      if (value == 'theme') {
-                                        ref
-                                            .read(themeProvider.notifier)
-                                            .toggleTheme();
-                                      }
-                                    },
-                                    itemBuilder: (context) => [
-                                      PopupMenuItem(
-                                        value: 'theme',
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              isDark
-                                                  ? Icons.light_mode
-                                                  : Icons.dark_mode,
-                                            ),
-                                            const SizedBox(width: 12),
-                                            Text(
-                                              isDark
-                                                  ? 'Light mode'
-                                                  : 'Dark mode',
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
+                              floating: true,
+                              snap: true,
+                              backgroundColor: Colors.transparent,
+                              foregroundColor: Colors.white,
+                              titleTextStyle: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 30,
+                                fontWeight: FontWeight.w600,
                               ),
-                            ],
-                          ),
+                              iconTheme: const IconThemeData(
+                                color: Colors.white,
+                              ),
+                              elevation: 0,
+                              title: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: profile.firstName.isNotEmpty
+                                    ? Text(
+                                        'Good to see you, ${profile.firstName}',
+                                      )
+                                    : const Text('Welcome'),
+                              ),
+                              actions: [
+                                Consumer(
+                                  builder: (context, ref, child) {
+                                    final themeState = ref.watch(themeProvider);
+                                    final isDark =
+                                        themeState.themeMode ==
+                                            ThemeMode.dark ||
+                                        (themeState.themeMode ==
+                                                ThemeMode.system &&
+                                            MediaQuery.of(
+                                                  context,
+                                                ).platformBrightness ==
+                                                Brightness.dark);
+
+                                    return PopupMenuButton<String>(
+                                      icon: const Icon(Icons.more_vert),
+                                      onSelected: (value) {
+                                        if (value == 'theme') {
+                                          ref
+                                              .read(themeProvider.notifier)
+                                              .toggleTheme();
+                                        }
+                                      },
+                                      itemBuilder: (context) => [
+                                        PopupMenuItem(
+                                          value: 'theme',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                isDark
+                                                    ? Icons.light_mode
+                                                    : Icons.dark_mode,
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Text(
+                                                isDark
+                                                    ? 'Light mode'
+                                                    : 'Dark mode',
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
                             SliverToBoxAdapter(
-                              child: AdherenceHistoryWidget(
+                              child: EnhancedCalendarWidget(
                                 key: ValueKey('adherence_$_refreshKey'),
                               ),
                             ),

@@ -51,4 +51,14 @@ class ConditionsNotifier extends AsyncNotifier<List<Disease>> {
       state = AsyncValue.error(e, s);
     }
   }
+
+  Future<void> updateConditionNotes(String code, String notes) async {
+    final box = await _getBox();
+    final existing = box.get(code);
+    if (existing != null) {
+      final updated = existing.copyWith(personalNotes: notes);
+      await box.put(code, updated);
+      state = AsyncValue.data(box.values.toList());
+    }
+  }
 }

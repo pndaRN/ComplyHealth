@@ -12,7 +12,8 @@ class MedicationAddDialog extends ConsumerStatefulWidget {
   const MedicationAddDialog({super.key});
 
   @override
-  ConsumerState<MedicationAddDialog> createState() => _MedicationAddDialogState();
+  ConsumerState<MedicationAddDialog> createState() =>
+      _MedicationAddDialogState();
 }
 
 class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
@@ -20,6 +21,7 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
   late TextEditingController doseCtrl;
   late TextEditingController maxDosesCtrl;
   List<String> selectedConditions = [];
+  Set<String> _autoSelectedConditions = {};
   bool isPRN = false;
   List<TimeOfDay> scheduledTimes = [];
   List<TimeOfDay>? _savedScheduledTimes;
@@ -49,11 +51,26 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
     final conditionsAsync = ref.watch(conditionsProvider);
     final notifier = ref.read(medicationProvider.notifier);
 
+    // Auto-selection logic
+    conditionsAsync.whenData((conditions) {
+      if (selectedConditions.isEmpty && conditions.length == 1) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              selectedConditions = [conditions.first.name];
+              _autoSelectedConditions = {conditions.first.name};
+            });
+          }
+        });
+      }
+    });
+
     return AlertDialog(
       title: const Text('Add Medication'),
       content: conditionsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error loading conditions: $err')),
+        error: (err, stack) =>
+            Center(child: Text('Error loading conditions: $err')),
         data: (conditions) => MedicationFormContent(
           nameController: nameCtrl,
           dosageController: doseCtrl,
@@ -62,6 +79,10 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
           onConditionsChanged: (value) {
             setState(() {
               selectedConditions = value;
+              // Clear auto-selection if user manually changes conditions
+              if (!_autoSelectedConditions.every(value.contains)) {
+                _autoSelectedConditions.clear();
+              }
             });
           },
           isPRN: isPRN,
@@ -90,6 +111,7 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
             });
           },
           maxDosesController: maxDosesCtrl,
+          autoSelectedConditions: _autoSelectedConditions,
         ),
       ),
       actions: [
@@ -108,7 +130,9 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
                     conditions: selectedConditions,
                     isPRN: isPRN,
                     scheduledTimes: scheduledTimes,
-                    maxDailyDoses: maxDosesCtrl.text.isEmpty ? null : int.tryParse(maxDosesCtrl.text),
+                    maxDailyDoses: maxDosesCtrl.text.isEmpty
+                        ? null
+                        : int.tryParse(maxDosesCtrl.text),
                   )) {
                     return;
                   }
@@ -120,7 +144,9 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
                     conditionNames: selectedConditions,
                     isPRN: isPRN,
                     scheduledTimes: scheduledTimes.map(_timeToString).toList(),
-                    maxDailyDoses: maxDosesCtrl.text.isEmpty ? null : int.tryParse(maxDosesCtrl.text),
+                    maxDailyDoses: maxDosesCtrl.text.isEmpty
+                        ? null
+                        : int.tryParse(maxDosesCtrl.text),
                   );
                   notifier.addMeds(newMedication);
                   Navigator.pop(context);
