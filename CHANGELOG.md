@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Enhanced 7-day calendar adherence view on dashboard with date display showing "Today, Jan 14, 2026" format
 - Calendar navigation with back button to browse previous weeks and next week button for forward navigation
 - Interactive week range display that opens a week picker dialog for selecting specific weeks
@@ -22,10 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Notes tab in condition detail screen for personal notes about each condition with auto-save
 
 ### Changed
+
 - Replaced existing AdherenceHistoryWidget with new EnhancedCalendarWidget for improved navigation and user experience
 - Updated date display to show selected date with smart formatting ("Today, ..." for current day, full weekday for other days)
 
 ### Changed
+
 - Medication name input now auto-capitalizes the first letter of the first word in both add and edit dialogs
 - Auto-select single condition in add and edit medication dialogs when only one condition is available
 - Auto-selected conditions display with light blue background, blue border, and auto icon with subtle scale animation
@@ -33,12 +36,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.4] - 2026-01-12
 
 ### Added
+
 - Animated checkmark completion for medications: green outline fills in over 1 second, then card slides off to the right
 
 ### Changed
+
 - Refactored Today's Medications widget into smaller, focused components for improved maintainability
 
 ### Fixed
+
 - Fixed medication completion not being saved when using checkmark button or late menu (errors were being silently swallowed by AsyncValue.guard)
 - Fixed duplicate medication notifications caused by provider rebuilds scheduling notifications multiple times
 - Fixed "failed to log dose: type 'null' is not a subtype of type bool" error when logging doses for medications created before the isDismissed field was added
@@ -46,13 +52,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.3] - 2026-01-09
 
 ### Changed
+
 - Updated medication timing window to clinical standard: 1 hour after scheduled time before marking as missed (previously 30 minutes)
 
 ### Fixed
+
 - Fixed adherence showing 0% when auto-mark incorrectly marked all historical doses as missed
 - Fixed duplicate medication notifications caused by redundant scheduling at app startup
 
 ### Added
+
 - Pull-to-refresh on dashboard to reload all widgets and data
 - New "Missed" section in Today's Medications showing recoverable missed doses
 - Recovery actions for missed doses: Mark as Taken (with time picker), Mark as Skipped, Dismiss
@@ -61,6 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.2] - 2026-01-07
 
 ### Changed
+
 - Dashboard app bar now scrolls with content (SliverAppBar with floating/snap)
 - Dashboard titles adapt to screen size using FittedBox
 - Date of birth input now uses date picker instead of text input
@@ -71,6 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optimized medication daily count reset from O(n²) to O(n) using Map lookup
 
 ### Fixed
+
 - Removed pre-filled default profile so new users start with empty fields
 - Fixed AsyncValue handling across multiple screens preventing runtime errors
 - Fixed compliance showing 100% when evening doses were missed (now auto-marks unlogged past doses)
@@ -88,6 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed hardcoded colors breaking dark mode in adherence history widget
 
 ### Added
+
 - CI/CD & Deployment documentation in CLAUDE.md (branch strategy, Codemagic workflows)
 - Changelog requirements section in CLAUDE.md
 - Smooth animated expand/collapse transitions on dashboard widgets
@@ -96,16 +108,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.1] - 2026-01-06
 
 ### Changed
+
 - Updated dashboard gradient colors
 - Improved "At A Glance" widget formatting
 
 ### Added
+
 - Local encryption for all Hive data boxes using AES-256
 - Encryption migration service for seamless upgrade from unencrypted data
 - Secure key storage using flutter_secure_storage
 - Comprehensive encryption tests (40 unit tests)
 
 ### Changed
+
 - Updated color scheme to match logo primary color (#0000CC)
 - New complementary purple secondary color (#6600CC)
 - Improved light mode contrast for better visibility
@@ -113,26 +128,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated status colors to match new brand palette
 
 ### Fixed
+
 - Condition card text overflow - long medical names now truncate with ellipsis
 
 ## [1.1.1] - 2026-01-01
 
 ### Added - 2025-12-30
+
 - Firebase beta testing warning on about screen
 - Additional text content to website
 
 ### Changed - 2025-12-30
+
 - Updated text fields for website content
 - Personalized app bar title and removed welcome message from dashboard
 - Improved today's medications widget UI
 
 ### Changed - 2025-12-26
+
 - Updated group name configuration
 - Updated iOS deployment target to 15.0 for Firebase SDK compatibility
 - Simplified codemagic.yaml configuration for Firebase distribution
 - Renamed codemagic_new.yaml to codemagic.yaml
 
 ### Fixed - 2025-12-26
+
 - Fixed Firebase workflow to use DISTRIBUTION_FIREBASE certificate
 - Fixed flutter pub get command in CI/CD pipeline
 - Added email notifications to build workflow
@@ -142,17 +162,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed medication form to show validation errors from top with overlay
 
 ### Added - 2025-12-26
+
 - Codemagic YAML configuration for TestFlight and Firebase distribution
 - Enhanced medication validation utilities
 - UI improvements to conditions and dashboard screens
 - Additional ICD-10 chronic condition entries
 
 ### Fixed - 2025-12-23
+
 - iOS build configuration in Codemagic
 - Android section of codemagic.yaml
 - General CI/CD pipeline fixes
 
 ### Changed - 2025-12-22
+
 - Updated Codemagic configuration for improved build process
 
 ---
@@ -160,6 +183,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Release Notes
 
 ### Recent Highlights
+
 - **UI/UX Improvements**: Enhanced user experience with personalized app bar, improved dashboard layout, and better medication widgets
 - **Firebase Integration**: Successfully configured Firebase App Distribution for beta testing with proper iOS and Android builds
 - **CI/CD Pipeline**: Streamlined build and deployment process through Codemagic with TestFlight and Firebase distribution
@@ -167,6 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Platform Support**: Updated iOS deployment target to support latest Firebase SDK features
 
 ### Technical Improvements
+
 - Refactored medication validation logic for better error handling
 - Optimized Podfile configuration for iOS builds
 - Enhanced notification service with proper timezone handling
