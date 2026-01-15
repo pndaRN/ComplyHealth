@@ -8,7 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Enhanced 7-day calendar adherence view on dashboard with date display showing "Today, Jan 14, 2026" format
+- Calendar navigation with back button to browse previous weeks and next week button for forward navigation
+- Interactive week range display that opens a week picker dialog for selecting specific weeks
+- Week picker dialog with full month calendar view, automatic week selection on day tap, and month navigation
+- Visual week selection in picker with both background color and border highlighting
+- Conditional calendar icon that only appears when user has navigated away from current week
+- Interactive calendar days that show medication details dialog when tapped
+- Visual selection indicators for tapped days with blue border highlight
+- Collapsible calendar widget with expand/collapse functionality and smooth animations
+- Slide animations for week transitions with 300ms duration and directional movement
+- Loading overlay and button state management during week transitions for professional polish
 - Notes tab in condition detail screen for personal notes about each condition with auto-save
+
+### Changed
+- Replaced existing AdherenceHistoryWidget with new EnhancedCalendarWidget for improved navigation and user experience
+- Updated date display to show selected date with smart formatting ("Today, ..." for current day, full weekday for other days)
 
 ### Changed
 - Medication name input now auto-capitalizes the first letter of the first word in both add and edit dialogs
