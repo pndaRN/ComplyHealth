@@ -67,7 +67,6 @@ class ThemeNotifier extends Notifier<ThemeState> {
 
     switch (state.themeMode) {
       case ThemeMode.system:
-        // Default to light when toggling from system
         newMode = ThemeMode.light;
         break;
       case ThemeMode.light:

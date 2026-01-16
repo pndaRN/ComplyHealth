@@ -20,19 +20,21 @@ class SettingsScreen extends ConsumerWidget {
     final themeState = ref.watch(themeProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         children: [
           // Notifications section
           _buildSectionHeader(context, 'Notifications'),
           SwitchListTile(
             title: const Text('Medication Reminders'),
-            subtitle: const Text('Receive notifications for scheduled medications'),
+            subtitle: const Text(
+              'Receive notifications for scheduled medications',
+            ),
             value: settings.notificationsEnabled,
             onChanged: (value) {
-              ref.read(settingsProvider.notifier).setNotificationsEnabled(value);
+              ref
+                  .read(settingsProvider.notifier)
+                  .setNotificationsEnabled(value);
             },
           ),
           const Divider(),
@@ -61,7 +63,9 @@ class SettingsScreen extends ConsumerWidget {
               'Clear All Data',
               style: TextStyle(color: theme.colorScheme.error),
             ),
-            subtitle: const Text('Delete all conditions, medications, and settings'),
+            subtitle: const Text(
+              'Delete all conditions, medications, and settings',
+            ),
             onTap: () => _showClearDataDialog(context, ref),
           ),
           const Divider(),
@@ -84,7 +88,9 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const PrivacyPolicyScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const PrivacyPolicyScreen(),
+                ),
               );
             },
           ),
@@ -118,15 +124,31 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  void _showThemeDialog(BuildContext context, WidgetRef ref, ThemeMode currentMode) {
+  void _showThemeDialog(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeMode currentMode,
+  ) {
     showDialog(
       context: context,
       builder: (context) => SimpleDialog(
         title: const Text('Choose Theme'),
         children: [
-          _buildThemeOption(context, ref, 'Light', ThemeMode.light, currentMode),
+          _buildThemeOption(
+            context,
+            ref,
+            'Light',
+            ThemeMode.light,
+            currentMode,
+          ),
           _buildThemeOption(context, ref, 'Dark', ThemeMode.dark, currentMode),
-          _buildThemeOption(context, ref, 'System default', ThemeMode.system, currentMode),
+          _buildThemeOption(
+            context,
+            ref,
+            'System default',
+            ThemeMode.system,
+            currentMode,
+          ),
         ],
       ),
     );
@@ -148,7 +170,9 @@ class SettingsScreen extends ConsumerWidget {
       child: Row(
         children: [
           Icon(
-            isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+            isSelected
+                ? Icons.radio_button_checked
+                : Icons.radio_button_unchecked,
             color: isSelected ? Theme.of(context).colorScheme.primary : null,
           ),
           const SizedBox(width: 16),
@@ -163,7 +187,12 @@ class SettingsScreen extends ConsumerWidget {
       // Collect data from all boxes
       final Map<String, dynamic> exportData = {};
 
-      final boxNames = ['conditions', 'medications', 'profile', 'medication_logs'];
+      final boxNames = [
+        'conditions',
+        'medications',
+        'profile',
+        'medication_logs',
+      ];
       for (final name in boxNames) {
         try {
           final box = await Hive.openBox(name);
@@ -192,16 +221,13 @@ class SettingsScreen extends ConsumerWidget {
       await file.writeAsString(jsonString);
 
       await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path)],
-          subject: 'ComplyHealth Backup',
-        ),
+        ShareParams(files: [XFile(file.path)], subject: 'ComplyHealth Backup'),
       );
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
       }
     }
   }

@@ -115,10 +115,10 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
     setState(() => _isAnimating = true);
 
     // Slide out to the right
-    _slideAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(1.0, 0.0),
-    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeInOut));
+    _slideAnimation =
+        Tween<Offset>(begin: Offset.zero, end: const Offset(1.0, 0.0)).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeInOut),
+        );
 
     await _slideController.forward();
 
@@ -131,10 +131,10 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
     await _loadWeekData();
 
     // Slide in from the left
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(-1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeInOut));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(-1.0, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeInOut),
+        );
 
     _slideController.reset();
     await _slideController.forward();
@@ -147,10 +147,10 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
     setState(() => _isAnimating = true);
 
     // Slide out to the left
-    _slideAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(-1.0, 0.0),
-    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeInOut));
+    _slideAnimation =
+        Tween<Offset>(begin: Offset.zero, end: const Offset(-1.0, 0.0)).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeInOut),
+        );
 
     await _slideController.forward();
 
@@ -163,10 +163,10 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
     await _loadWeekData();
 
     // Slide in from the right
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeInOut));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeInOut),
+        );
 
     _slideController.reset();
     await _slideController.forward();
@@ -182,10 +182,13 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
     final isGoingForward = targetWeekStart.isAfter(_currentWeekStart);
 
     // Slide out in the appropriate direction
-    _slideAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: Offset(isGoingForward ? -1.0 : 1.0, 0.0),
-    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeInOut));
+    _slideAnimation =
+        Tween<Offset>(
+          begin: Offset.zero,
+          end: Offset(isGoingForward ? -1.0 : 1.0, 0.0),
+        ).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeInOut),
+        );
 
     await _slideController.forward();
 
@@ -197,10 +200,13 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
     await _loadWeekData();
 
     // Slide in from the opposite direction
-    _slideAnimation = Tween<Offset>(
-      begin: Offset(isGoingForward ? 1.0 : -1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeInOut));
+    _slideAnimation =
+        Tween<Offset>(
+          begin: Offset(isGoingForward ? 1.0 : -1.0, 0.0),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeInOut),
+        );
 
     _slideController.reset();
     await _slideController.forward();
@@ -461,32 +467,33 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color:
-                                          theme.colorScheme.surfaceContainerHighest,
+                                      color: theme
+                                          .colorScheme
+                                          .surfaceContainerHighest,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
                                       _getWeekRangeDisplay(),
-                                      style: theme.textTheme.labelLarge?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: theme.colorScheme.onSurfaceVariant,
-                                      ),
+                                      style: theme.textTheme.labelLarge
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
                                     ),
                                   ),
                                 ),
                                 if (!_isViewingCurrentWeek()) ...[
                                   const SizedBox(width: 8),
-                                  FilledButton.tonalIcon(
+                                  IconButton.filledTonal(
                                     onPressed: _navigateToCurrentWeek,
-                                    icon: const Icon(Icons.calendar_today, size: 18),
-                                    label: const Text('Today'),
-                                    style: FilledButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 8,
-                                      ),
-                                      textStyle: theme.textTheme.labelMedium,
+                                    icon: const Icon(
+                                      Icons.calendar_today,
+                                      size: 18,
                                     ),
+                                    tooltip:
+                                        'Today', // Good for accessibility since text is gone
                                   ),
                                 ],
                               ],
@@ -515,122 +522,122 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
                   child: SlideTransition(
                     position: _slideAnimation,
                     child: Column(
-                    children: [
-                      // Day headers
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: weekDays.map((date) {
-                          return SizedBox(
-                            width: 40,
-                            child: Text(
-                              DateFormat('E').format(date),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: theme.colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.bold,
+                      children: [
+                        // Day headers
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: weekDays.map((date) {
+                            return SizedBox(
+                              width: 40,
+                              child: Text(
+                                DateFormat('E').format(date),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 8),
-                      // Calendar days
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: weekDays.map((date) {
-                          final isToday =
-                              date.year == now.year &&
-                              date.month == now.month &&
-                              date.day == now.day;
-                          final isSelected =
-                              date.year == _selectedDate.year &&
-                              date.month == _selectedDate.month &&
-                              date.day == _selectedDate.day;
-                          final color = _getDayColor(date, theme);
-                          final adherence = _getDayAdherence(date);
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 8),
+                        // Calendar days
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: weekDays.map((date) {
+                            final isToday =
+                                date.year == now.year &&
+                                date.month == now.month &&
+                                date.day == now.day;
+                            final isSelected =
+                                date.year == _selectedDate.year &&
+                                date.month == _selectedDate.month &&
+                                date.day == _selectedDate.day;
+                            final color = _getDayColor(date, theme);
+                            final adherence = _getDayAdherence(date);
 
-                          return GestureDetector(
-                            onTap: () => _selectDate(date),
-                            child: Column(
-                              children: [
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: color,
-                                    shape: BoxShape.circle,
-                                    border: isToday
-                                        ? Border.all(
-                                            color: theme.statusColors.info,
-                                            width: 2,
-                                          )
-                                        : isSelected
-                                        ? Border.all(
-                                            color: theme.colorScheme.primary,
-                                            width: 2,
-                                          )
-                                        : null,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      DateFormat('d').format(date),
-                                      style: TextStyle(
-                                        color: theme.colorScheme.onPrimary,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
+                            return GestureDetector(
+                              onTap: () => _selectDate(date),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: color,
+                                      shape: BoxShape.circle,
+                                      border: isToday
+                                          ? Border.all(
+                                              color: theme.statusColors.info,
+                                              width: 2,
+                                            )
+                                          : isSelected
+                                          ? Border.all(
+                                              color: theme.colorScheme.primary,
+                                              width: 2,
+                                            )
+                                          : null,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        DateFormat('d').format(date),
+                                        style: TextStyle(
+                                          color: theme.colorScheme.onPrimary,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${adherence.toStringAsFixed(0)}%',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                    fontWeight: FontWeight.bold,
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${adherence.toStringAsFixed(0)}%',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 16),
+                        // Legend
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildLegendItem(
+                              theme.statusColors.success,
+                              'Perfect',
+                              theme,
                             ),
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 16),
-                      // Legend
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildLegendItem(
-                            theme.statusColors.success,
-                            'Perfect',
-                            theme,
-                          ),
-                          const SizedBox(width: 12),
-                          _buildLegendItem(
-                            theme.statusColors.success.withValues(alpha: 0.7),
-                            'Good',
-                            theme,
-                          ),
-                          const SizedBox(width: 12),
-                          _buildLegendItem(
-                            theme.statusColors.warning,
-                            'Fair',
-                            theme,
-                          ),
-                          const SizedBox(width: 12),
-                          _buildLegendItem(
-                            theme.statusColors.error,
-                            'Poor',
-                            theme,
-                          ),
-                        ],
-                      ),
-                    ],
+                            const SizedBox(width: 12),
+                            _buildLegendItem(
+                              theme.statusColors.success.withValues(alpha: 0.7),
+                              'Good',
+                              theme,
+                            ),
+                            const SizedBox(width: 12),
+                            _buildLegendItem(
+                              theme.statusColors.warning,
+                              'Fair',
+                              theme,
+                            ),
+                            const SizedBox(width: 12),
+                            _buildLegendItem(
+                              theme.statusColors.error,
+                              'Poor',
+                              theme,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
               ],
             ),
             secondChild: const SizedBox.shrink(),

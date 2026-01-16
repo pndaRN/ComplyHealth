@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Unused custom widget files (AppButton, AppCard, AppTextField) that were never integrated
+- Unused design tokens file that was only referenced by removed widgets
+
 ### Added
 
 - Notebook section in Profile screen to save and organize notes from conditions and medications
