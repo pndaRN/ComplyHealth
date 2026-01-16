@@ -3,13 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/disease.dart';
-import '../../core/models/education_content.dart';
-import '../../core/services/education_service.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
-import 'widgets/articles_section.dart';
-import 'widgets/lifestyle_tips_section.dart';
-import 'widgets/video_section.dart';
 
 class ConditionDetailScreen extends ConsumerStatefulWidget {
   final Disease condition;
@@ -70,38 +65,21 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, stack) => Center(child: Text('Error: $err')),
         ),
-        floatingActionButton: conditionsAsync.when(
-          data: (conditions) {
-            final isAdded = conditions.any(
-              (c) => c.code == widget.condition.code,
-            );
-            return FloatingActionButton.extended(
-              onPressed: () => _toggleCondition(isAdded),
-              icon: Icon(isAdded ? Icons.remove_circle : Icons.add_circle),
-              label: Text(isAdded ? 'Remove' : 'Add to My Conditions'),
-            );
-          },
-          loading: () => FloatingActionButton.extended(
-            onPressed: null,
-            icon: const CircularProgressIndicator(strokeWidth: 2),
-            label: const Text('Loading...'),
-          ),
-          error: (err, stack) => FloatingActionButton.extended(
-            onPressed: null,
-            icon: const Icon(Icons.error),
-            label: const Text('Error'),
-          ),
-        ),
       ),
     );
   }
 
   Widget _buildBodyWithData(bool isAdded) {
-    return TabBarView(children: [
-      _buildOverviewTab(),
-      _buildMedicationsTab(),
-      _buildNotesTab(isAdded),
-    ]);
+    return TabBarView(
+      children: [
+        Scaffold(
+          body: _buildOverviewTab(),
+          floatingActionButton: _buildFloatingActionButton(isAdded),
+        ),
+        Scaffold(body: _buildMedicationsTab()),
+        Scaffold(body: _buildNotesTab(isAdded)),
+      ],
+    );
   }
 
   Widget _buildOverviewTab() {
@@ -321,82 +299,6 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
     );
   }
 
-  Widget _buildLearnMoreTab() {
-    final theme = Theme.of(context);
-
-    return FutureBuilder<EducationContent?>(
-      future: EducationService.getContentForCondition(widget.condition.code),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final content = snapshot.data;
-
-        if (content == null) {
-          // No content available for this condition
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.school_outlined,
-                          size: 64,
-                          color: theme.colorScheme.primary,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Educational content coming soon',
-                          style: theme.textTheme.titleMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Educational resources for ${widget.condition.commonName.isNotEmpty ? widget.condition.commonName : widget.condition.name} will be available here.',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        // Display educational content
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Articles section
-              ArticlesSection(articles: content.articles),
-              const SizedBox(height: 24),
-              // Lifestyle tips section
-              LifestyleTipsSection(tips: content.lifestyleTips),
-              const SizedBox(height: 24),
-              // Videos section
-              VideoSection(videos: content.videos),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildNotesTab(bool isAdded) {
     final theme = Theme.of(context);
 
@@ -465,16 +367,23 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
               onChanged: (value) {
                 _debounceTimer?.cancel();
                 _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-                  ref.read(conditionsProvider.notifier).updateConditionNotes(
-                        widget.condition.code,
-                        value,
-                      );
+                  ref
+                      .read(conditionsProvider.notifier)
+                      .updateConditionNotes(widget.condition.code, value);
                 });
               },
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFloatingActionButton(bool isAdded) {
+    return FloatingActionButton.extended(
+      onPressed: () => _toggleCondition(isAdded),
+      icon: Icon(isAdded ? Icons.remove_circle : Icons.add_circle),
+      label: Text(isAdded ? 'Remove' : 'Add to My Conditions'),
     );
   }
 
