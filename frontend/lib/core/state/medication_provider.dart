@@ -93,6 +93,16 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
     });
   }
 
+  Future<void> updateMedicationNotes(String id, String notes) async {
+    final box = await _getBox();
+    final existing = box.get(id);
+    if (existing != null) {
+      final updated = existing.copyWith(personalNotes: notes);
+      await box.put(id, updated);
+      state = AsyncValue.data(_applySorting(box.values.toList()));
+    }
+  }
+
   Future<void> setSortOption(MedicationSortOption option) async {
     state = await AsyncValue.guard(() async {
       _sortOption = option;

@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import '../../core/models/disease.dart';
+import '../../core/models/notebook_entry.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
+import '../../core/state/notebook_provider.dart';
 
 class ConditionDetailScreen extends ConsumerStatefulWidget {
   final Disease condition;
@@ -77,7 +80,16 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
           floatingActionButton: _buildFloatingActionButton(isAdded),
         ),
         Scaffold(body: _buildMedicationsTab()),
-        Scaffold(body: _buildNotesTab(isAdded)),
+        Scaffold(
+          body: _buildNotesTab(isAdded),
+          floatingActionButton: isAdded && _notesController.text.isNotEmpty
+              ? FloatingActionButton.extended(
+                  onPressed: () => _saveToNotebook(),
+                  icon: const Icon(Icons.note_add),
+                  label: const Text('New Note'),
+                )
+              : null,
+        ),
       ],
     );
   }
@@ -412,6 +424,39 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _saveToNotebook() async {
+    final content = _notesController.text;
+    if (content.isEmpty) return;
+
+    final displayName = widget.condition.commonName.isNotEmpty
+        ? widget.condition.commonName
+        : widget.condition.name;
+
+    final entry = NotebookEntry(
+      id: const Uuid().v4(),
+      sourceType: 0, // condition
+      sourceName: displayName,
+      sourceCode: widget.condition.code,
+      content: content,
+      timestamp: DateTime.now(),
+    );
+
+    await ref.read(notebookProvider.notifier).addEntry(entry);
+
+    // Clear the notes field
+    _notesController.clear();
+    await ref
+        .read(conditionsProvider.notifier)
+        .updateConditionNotes(widget.condition.code, '');
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Note saved in notebook in profile')),
+      );
+      setState(() {}); // Refresh to hide FAB
     }
   }
 }

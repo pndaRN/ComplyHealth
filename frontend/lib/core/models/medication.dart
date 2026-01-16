@@ -22,6 +22,8 @@ class Medication {
   final int currentDoseCount; // Doses taken today
   @HiveField(9)
   final DateTime? lastDoseCountReset; // When counter was last reset
+  @HiveField(10)
+  final String? personalNotes;
 
   Medication({
     required this.id,
@@ -33,6 +35,7 @@ class Medication {
     this.maxDailyDoses,
     this.currentDoseCount = 0,
     this.lastDoseCountReset,
+    this.personalNotes,
   });
 
   Medication copyWith({
@@ -45,6 +48,7 @@ class Medication {
     int? maxDailyDoses,
     int? currentDoseCount,
     DateTime? lastDoseCountReset,
+    String? personalNotes,
   }) {
     return Medication(
       id: id ?? this.id,
@@ -56,6 +60,7 @@ class Medication {
       maxDailyDoses: maxDailyDoses ?? this.maxDailyDoses,
       currentDoseCount: currentDoseCount ?? this.currentDoseCount,
       lastDoseCountReset: lastDoseCountReset ?? this.lastDoseCountReset,
+      personalNotes: personalNotes ?? this.personalNotes,
     );
   }
 
@@ -75,6 +80,7 @@ class Medication {
     lastDoseCountReset: json['lastDoseCountReset'] != null
         ? DateTime.tryParse(json['lastDoseCountReset'])
         : null,
+    personalNotes: json['personalNotes'],
   );
 
   Map<String, dynamic> toJson() => {
@@ -87,6 +93,7 @@ class Medication {
     'maxDailyDoses': maxDailyDoses,
     'currentDoseCount': currentDoseCount,
     'lastDoseCountReset': lastDoseCountReset?.toIso8601String(),
+    'personalNotes': personalNotes,
   };
 }
 
@@ -131,6 +138,7 @@ class MedicationAdapterCustom extends TypeAdapter<Medication> {
     final maxDailyDoses = fields[7] as int?;
     final currentDoseCount = fields[8] as int? ?? 0;
     final lastDoseCountReset = fields[9] as DateTime?;
+    final personalNotes = fields[10] as String?;
 
     return Medication(
       id: fields[0] as String,
@@ -142,13 +150,14 @@ class MedicationAdapterCustom extends TypeAdapter<Medication> {
       maxDailyDoses: maxDailyDoses,
       currentDoseCount: currentDoseCount,
       lastDoseCountReset: lastDoseCountReset,
+      personalNotes: personalNotes,
     );
   }
 
   @override
   void write(BinaryWriter writer, Medication obj) {
     writer
-      ..writeByte(9) // Number of fields
+      ..writeByte(10) // Number of fields
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -166,7 +175,9 @@ class MedicationAdapterCustom extends TypeAdapter<Medication> {
       ..writeByte(8)
       ..write(obj.currentDoseCount)
       ..writeByte(9)
-      ..write(obj.lastDoseCountReset);
+      ..write(obj.lastDoseCountReset)
+      ..writeByte(10)
+      ..write(obj.personalNotes);
   }
 
   @override

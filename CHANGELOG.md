@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Notebook section in Profile screen to save and organize notes from conditions and medications
+- "New Note" floating button in condition and medication Notes tabs to save notes to notebook
+- Notes are saved with format "Source Name - DD-MM-YYYY" and confirmation popup "Note saved in notebook in profile"
+- Notebook sorting options: chronological (by date) or grouped by condition/medication with expandable cards
+- Notes tab added to medication detail screen with auto-save functionality (matching conditions pattern)
+- Personal notes field added to medications for tracking medication-specific notes
 - Enhanced 7-day calendar adherence view on dashboard with date display showing "Today, Jan 14, 2026" format
 - Calendar navigation with back button to browse previous weeks and next week button for forward navigation
 - Interactive week range display that opens a week picker dialog for selecting specific weeks

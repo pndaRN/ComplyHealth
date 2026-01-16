@@ -6,6 +6,7 @@ import '../../core/theme/theme_provider.dart';
 import '../dashboard/widgets/adherence_metrics_widget.dart';
 import '../settings/settings_screen.dart';
 import 'dialogs/feedback_dialog.dart';
+import 'widgets/notebook_widget.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -312,6 +313,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ),
           const AdherenceMetricsWidget(),
+          const NotebookWidget(),
           Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: Padding(

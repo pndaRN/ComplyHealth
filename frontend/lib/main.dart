@@ -8,6 +8,7 @@ import 'core/models/medication.dart';
 import 'core/models/medication_log.dart';
 import 'core/models/education_content.dart';
 import 'core/models/feedback.dart';
+import 'core/models/notebook_entry.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/encryption_migration_service.dart';
 import 'core/state/profile_provider.dart';
@@ -38,6 +39,7 @@ void main() async {
   Hive.registerAdapter(EducationContentAdapter());
   Hive.registerAdapter(ArticleAdapter());
   Hive.registerAdapter(VideoAdapter());
+  Hive.registerAdapter(NotebookEntryAdapter());
 
   // Initialize notification service
   await NotificationService().initialize();
@@ -61,9 +63,7 @@ void main() async {
   // Note: Notification scheduling is handled by the medication provider's build() method
   // to avoid duplicate scheduling from separate ProviderContainer instances
 
-  runApp(const ProviderScope(
-    child: ComplyHealthApp(),
-  ));
+  runApp(const ProviderScope(child: ComplyHealthApp()));
 }
 
 class ComplyHealthApp extends ConsumerStatefulWidget {
@@ -80,19 +80,25 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
   int _dashboardRefreshKey = 0;
 
   List<Widget> get _screens => [
-        DashboardScreen(key: ValueKey('dashboard_$_dashboardRefreshKey')),
-        const HealthScreen(),
-        const MedicationsScreen(),
-        const ProfileScreen(),
-      ];
+    DashboardScreen(key: ValueKey('dashboard_$_dashboardRefreshKey')),
+    const HealthScreen(),
+    const MedicationsScreen(),
+    const ProfileScreen(),
+  ];
 
   final List<BottomNavigationBarItem> _bottomNavigationBarItems = [
-    const BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+    const BottomNavigationBarItem(
+      icon: Icon(Icons.dashboard),
+      label: 'Dashboard',
+    ),
     const BottomNavigationBarItem(
       icon: Icon(Icons.health_and_safety),
       label: 'Health',
     ),
-    const BottomNavigationBarItem(icon: Icon(Icons.medication), label: 'Medications'),
+    const BottomNavigationBarItem(
+      icon: Icon(Icons.medication),
+      label: 'Medications',
+    ),
     const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
   ];
 
@@ -100,8 +106,9 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
   void initState() {
     super.initState();
     // Listen for notification taps to navigate to dashboard
-    _notificationSubscription =
-        NotificationService.onNotificationTap.listen((payload) {
+    _notificationSubscription = NotificationService.onNotificationTap.listen((
+      payload,
+    ) {
       setState(() {
         _index = 0; // Navigate to dashboard
         _dashboardRefreshKey++; // Force dashboard to rebuild and refresh
@@ -171,10 +178,25 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
     // Determine if we should show onboarding
     final showOnboarding = _showOnboarding && !settings.hasCompletedOnboarding;
 
+    // Determine theme based on mode
+    ThemeData getTheme() {
+      switch (themeState.themeMode) {
+        case ThemeMode.light:
+          return AppTheme.modernLightTheme();
+        case ThemeMode.dark:
+          return AppTheme.modernDarkTheme();
+        case ThemeMode.system:
+          final brightness = MediaQuery.of(context).platformBrightness;
+          return brightness == Brightness.dark
+              ? AppTheme.modernDarkTheme()
+              : AppTheme.modernLightTheme();
+      }
+    }
+
     return MaterialApp(
       title: 'ComplyHealth',
-      theme: AppTheme.lightTheme(),
-      darkTheme: AppTheme.darkTheme(),
+      theme: getTheme(),
+      darkTheme: getTheme(),
       themeMode: themeState.themeMode,
       home: showOnboarding
           ? OnboardingScreen(
