@@ -98,3 +98,4 @@ Thumbs.db
 *.kate-swp
 *~
 .aider*
+.opencode/
