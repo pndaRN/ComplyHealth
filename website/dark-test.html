@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+        // Test dark mode detection and switching
+        console.log("Testing dark mode implementation...");
+        
+        // Check current theme
+        const rootDiv = document.querySelector('div');
+        const isDark = rootDiv && rootDiv.classList.contains('dark');
+        console.log("Current theme detected:", isDark ? "DARK" : "LIGHT");
+        
+        // Check logos
+        const lightLogo = document.querySelector('img[src*="complyhealth-logo.svg"][class*="dark:hidden"]');
+        const darkLogo = document.querySelector('img[src*="complyhealth-logo-dark.svg"][class*="dark:block"]');
+        
+        console.log("Light logo present:", !!lightLogo);
+        console.log("Dark logo present:", !!darkLogo);
+        
+        // Test theme switching
+        if (typeof window !== 'undefined' && window.toggleTheme) {
+            console.log("Testing theme toggle...");
+            window.toggleTheme();
+            setTimeout(() => {
+                const newTheme = document.querySelector('div').classList.contains('dark') ? "DARK" : "LIGHT";
+                console.log("Theme after toggle:", newTheme);
+            }, 100);
+        }
+        
+        // Test system preference detection
+        if (window.matchMedia) {
+            const systemPref = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            console.log("System preference:", systemPref);
+        }
+    </script>
+</head>
+<body>
+    <h1>Dark Mode Test Complete</h1>
+    <p>Check browser console for test results.</p>
+</body>
+</html>

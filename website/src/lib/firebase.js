@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { PUBLIC_FIREBASE_API_KEY, PUBLIC_FIREBASE_AUTH_DOMAIN, PUBLIC_FIREBASE_PROJECT_ID, PUBLIC_FIREBASE_STORAGE_BUCKET, PUBLIC_FIREBASE_MESSAGING_SENDER_ID, PUBLIC_FIREBASE_APP_ID } from '$env/static/public';
+import { getFirestore, collection, query, where, getDocs, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { getAnalytics } from 'firebase/analytics';
+import { PUBLIC_FIREBASE_API_KEY, PUBLIC_FIREBASE_AUTH_DOMAIN, PUBLIC_FIREBASE_PROJECT_ID, PUBLIC_FIREBASE_STORAGE_BUCKET, PUBLIC_FIREBASE_MESSAGING_SENDER_ID, PUBLIC_FIREBASE_APP_ID, PUBLIC_MEASUREMENT_ID } from '$env/static/public';
 
 const firebaseConfig = {
 	apiKey: PUBLIC_FIREBASE_API_KEY,
@@ -27,3 +28,5 @@ export function getDb() {
 	}
 	return db;
 }
+
+export { collection, query, where, getDocs, addDoc, updateDoc, serverTimestamp, getAnalytics };
