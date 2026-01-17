@@ -7,8 +7,8 @@
 /* Custom CSS variables matching the Flutter app theme */
 @theme {
 	/* Primary Colors (Blue - Medical Trust) */
-	--color-primary: #0000CC;
-	--color-primary-dark: #6666FF;
+	--color-primary: #2563EB;
+	--color-primary-dark: #60A5FA;
 
 	/* Secondary Colors (Violet - Innovation) */
 	--color-secondary: #7C3AED;
@@ -20,22 +20,45 @@
 
 	/* Error Colors */
 	--color-error: #DC2626;
+	--color-error-dark: #F87171;
 
 	/* Background Colors */
-	--color-background: #FFFFFF;
-	--color-surface: #F9FAFB;
-	--color-surface-variant: #F1F5F9;
+	--color-background: var(--theme-background, #FFFFFF);
+	--color-surface: var(--theme-surface, #F9FAFB);
+	--color-surface-variant: var(--theme-surface-variant, #F1F5F9);
 
 	/* Text Colors */
-	--color-text-primary: #0F172A;
-	--color-text-secondary: #64748B;
+	--color-text-primary: var(--theme-text-primary, #0F172A);
+	--color-text-secondary: var(--theme-text-secondary, #64748B);
 
 	/* Border Colors */
-	--color-outline: #E2E8F0;
+	--color-outline: var(--theme-outline, #E2E8F0);
 
 	/* Font families */
 	--font-heading: 'Poppins', sans-serif;
 	--font-body: 'Raleway', sans-serif;
+}
+
+/* Dark mode color scheme */
+@media (prefers-color-scheme: dark) {
+	:root {
+		--theme-background: #0F172A;
+		--theme-surface: #1E293B;
+		--theme-surface-variant: #334155;
+		--theme-text-primary: #F1F5F9;
+		--theme-text-secondary: #94A3B8;
+		--theme-outline: #475569;
+	}
+}
+
+/* Manual dark mode override */
+.dark {
+	--theme-background: #0F172A !important;
+	--theme-surface: #1E293B !important;
+	--theme-surface-variant: #334155 !important;
+	--theme-text-primary: #F1F5F9 !important;
+	--theme-text-secondary: #94A3B8 !important;
+	--theme-outline: #475569 !important;
 }
 
 /* Base styles */
@@ -57,6 +80,32 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Focus styles for accessibility */
 :focus-visible {
-	outline: 2px solid var(--color-primary);
-	outline-offset: 2px;
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Mobile optimizations */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Tab animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
 }
