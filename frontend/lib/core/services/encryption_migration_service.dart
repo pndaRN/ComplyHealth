@@ -88,6 +88,7 @@ class EncryptionMigrationService {
       'settings',
       'medication_settings',
       'theme',
+      'notebook',
     ];
 
     for (final boxName in boxesToMigrate) {

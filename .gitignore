@@ -2,6 +2,9 @@
 # 🐦 Flutter / Dart
 # ==============================
 .dart_tool/
+
+# ─── Design source files ───
+frontend/assets/Comply Health/
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
@@ -98,3 +101,4 @@ Thumbs.db
 *.kate-swp
 *~
 .aider*
+.opencode/

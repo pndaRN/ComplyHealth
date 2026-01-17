@@ -34,9 +34,9 @@ class _WeekPickerDialogState extends State<WeekPickerDialog> {
     final weekEnd = weekStart.add(const Duration(days: 6));
 
     if (weekStart.month == weekEnd.month) {
-      return 'Week of ${DateFormat('MMM d').format(weekStart)}-${DateFormat('d, y').format(weekEnd)}';
+      return '${DateFormat('MMM d').format(weekStart)}-${DateFormat('d, y').format(weekEnd)}';
     } else {
-      return 'Week of ${DateFormat('MMM d').format(weekStart)} - ${DateFormat('MMM d, y').format(weekEnd)}';
+      return '${DateFormat('MMM d').format(weekStart)} - ${DateFormat('MMM d, y').format(weekEnd)}';
     }
   }
 

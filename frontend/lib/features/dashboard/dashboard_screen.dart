@@ -66,10 +66,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           gradient: LinearGradient(
                             begin: const Alignment(0.985, -0.174),
                             end: const Alignment(-0.985, 0.174),
-                            colors: [
-                              theme.colorScheme.secondary,
-                              theme.colorScheme.primary,
-                            ],
+                            colors: theme.brightness == Brightness.dark
+                                ? [
+                                    theme.colorScheme.primary,
+                                    const Color(0xFF050A15), // Almost black with blue tint
+                                  ]
+                                : [
+                                    theme.colorScheme.primary.withValues(alpha: 0.7),
+                                    const Color(0xFFF5F8FF), // Very subtle blue-tinted white
+                                  ],
                           ),
                         ),
                       ),
@@ -83,7 +88,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               Colors.transparent,
                               theme.scaffoldBackgroundColor,
                             ],
-                            stops: const [0.0, 0.8],
+                            stops: const [0.3, 0.95],
                           ),
                         ),
                       ),

@@ -7,8 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-01-17
+
+### Removed
+
+- Unused custom widget files (AppButton, AppCard, AppTextField) that were never integrated
+- Unused design tokens file that was only referenced by removed widgets
+
 ### Added
 
+- Multi-theme selection with 11 theme options across 4 categories (Standard, Accessibility, Calming, Practical)
+- Visual theme picker with preview cards showing color swatches for each theme
+- New themes: High Contrast Light, High Contrast Dark, AMOLED Black, Ocean, Forest, Lavender, Sepia, and Muted
+- Theme persistence with automatic migration from previous light/dark/system preference
+- Notebook section in Profile screen to save and organize notes from conditions and medications
+- "New Note" floating button in condition and medication Notes tabs to save notes to notebook
+- Notes are saved with format "Source Name - DD-MM-YYYY" and confirmation popup "Note saved in notebook in profile"
+- Notebook sorting options: chronological (by date) or grouped by condition/medication with expandable cards
+- Notes tab added to medication detail screen with auto-save functionality (matching conditions pattern)
+- Personal notes field added to medications for tracking medication-specific notes
 - Enhanced 7-day calendar adherence view on dashboard with date display showing "Today, Jan 14, 2026" format
 - Calendar navigation with back button to browse previous weeks and next week button for forward navigation
 - Interactive week range display that opens a week picker dialog for selecting specific weeks
@@ -26,8 +43,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Replaced existing AdherenceHistoryWidget with new EnhancedCalendarWidget for improved navigation and user experience
 - Updated date display to show selected date with smart formatting ("Today, ..." for current day, full weekday for other days)
-
-### Changed
+- Improved dashboard gradient with adaptive colors for light/dark modes (blue fade to near-white in light, blue fade to near-black in dark)
+- Extended dashboard gradient further down the screen for better visual effect
+- Enhanced light mode card styling with better contrast, more visible borders, and neutral shadows
 
 - Medication name input now auto-capitalizes the first letter of the first word in both add and edit dialogs
 - Auto-select single condition in add and edit medication dialogs when only one condition is available

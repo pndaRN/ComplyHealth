@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import '../../core/models/medication.dart';
+import '../../core/models/notebook_entry.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/state/conditions_provider.dart';
+import '../../core/state/notebook_provider.dart';
 import '../../core/utils/condition_helper.dart';
 import '../../core/utils/time_formatting_utils.dart';
 import 'dialogs/medication_edit_dialog.dart';
@@ -22,6 +27,24 @@ class MedicationDetailScreen extends ConsumerStatefulWidget {
 
 class _MedicationDetailScreenState
     extends ConsumerState<MedicationDetailScreen> {
+  late TextEditingController _notesController;
+  Timer? _debounceTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _notesController = TextEditingController(
+      text: widget.medication.personalNotes ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    _notesController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final medicationsAsync = ref.watch(medicationProvider);
@@ -41,8 +64,13 @@ class _MedicationDetailScreenState
       conditions: conditions,
     );
 
+    // Update notes controller if medication notes changed externally
+    if (_notesController.text != (currentMed.personalNotes ?? '')) {
+      _notesController.text = currentMed.personalNotes ?? '';
+    }
+
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: Text(currentMed.name),
@@ -87,6 +115,7 @@ class _MedicationDetailScreenState
             tabs: [
               Tab(text: 'Overview'),
               Tab(text: 'Schedule'),
+              Tab(text: 'Notes'),
             ],
           ),
         ),
@@ -94,6 +123,16 @@ class _MedicationDetailScreenState
           children: [
             _buildOverviewTab(currentMed, conditionDisplayNames),
             _buildScheduleTab(currentMed),
+            Scaffold(
+              body: _buildNotesTab(currentMed),
+              floatingActionButton: _notesController.text.isNotEmpty
+                  ? FloatingActionButton.extended(
+                      onPressed: () => _saveToNotebook(currentMed),
+                      icon: const Icon(Icons.note_add),
+                      label: const Text('New Note'),
+                    )
+                  : null,
+            ),
           ],
         ),
       ),
@@ -530,5 +569,86 @@ class _MedicationDetailScreenState
         ],
       ),
     );
+  }
+
+  Widget _buildNotesTab(Medication medication) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Personal Notes',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Add your own notes about this medication',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: TextField(
+              controller: _notesController,
+              maxLines: null,
+              expands: true,
+              textAlignVertical: TextAlignVertical.top,
+              decoration: InputDecoration(
+                hintText: 'Write your notes here...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: theme.colorScheme.surfaceContainerLowest,
+              ),
+              onChanged: (value) {
+                _debounceTimer?.cancel();
+                _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+                  ref
+                      .read(medicationProvider.notifier)
+                      .updateMedicationNotes(medication.id, value);
+                });
+                setState(() {}); // Update FAB visibility
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _saveToNotebook(Medication medication) async {
+    final content = _notesController.text;
+    if (content.isEmpty) return;
+
+    final entry = NotebookEntry(
+      id: const Uuid().v4(),
+      sourceType: 1, // medication
+      sourceName: medication.name,
+      sourceCode: medication.id,
+      content: content,
+      timestamp: DateTime.now(),
+    );
+
+    await ref.read(notebookProvider.notifier).addEntry(entry);
+
+    // Clear the notes field
+    _notesController.clear();
+    await ref
+        .read(medicationProvider.notifier)
+        .updateMedicationNotes(medication.id, '');
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Note saved in notebook in profile')),
+      );
+      setState(() {}); // Refresh to hide FAB
+    }
   }
 }
