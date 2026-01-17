@@ -35,14 +35,16 @@
   
   async function submitSurvey() {
     isSubmitting = true;
-    
+
     try {
+      console.log("Submitting survey for email:", userEmail);
       const db = getDb();
-      // Find user document by email and update it
       const supportersRef = collection(db, "mission_supporters");
       const q = query(supportersRef, where("email", "==", userEmail));
       const querySnapshot = await getDocs(q);
-      
+
+      console.log("Found documents:", querySnapshot.size);
+
       if (!querySnapshot.empty) {
         const docRef = querySnapshot.docs[0].ref;
         await updateDoc(docRef, {
@@ -50,12 +52,14 @@
           status: "surveyed",
           survey_completed: serverTimestamp()
         });
-        
+
+        console.log("Survey updated successfully");
         currentStep = "complete";
+      } else {
+        console.error("No mission supporter document found for email:", userEmail);
       }
     } catch (error) {
       console.error('Survey submission error:', error);
-      // Could add error state here if needed
     } finally {
       isSubmitting = false;
     }

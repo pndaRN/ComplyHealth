@@ -14,12 +14,6 @@ export function initAnalytics() {
     analytics = getAnalytics(getFirebaseApp());
     initialized = true;
     
-    // Set default user properties
-    setUserProperties({
-      platform: 'web',
-      app_version: '2.0.0'
-    });
-    
     console.log('Analytics initialized successfully');
   } catch (error) {
     console.warn('Analytics initialization failed:', error);

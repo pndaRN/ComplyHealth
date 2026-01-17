@@ -21,6 +21,7 @@
   let loadingStep = $state(0);
   let validationStartTime = $state(0);
   let activeTab = $state(0);
+  let submittedEmail = $state("");
 
   const loadingMessages = [
     "Checking email format...",
@@ -102,13 +103,16 @@
 
   async function handleSubmit(event) {
     event.preventDefault();
+    console.log("Form submitted with email:", email);
 
     if (!email || !email.includes("@")) {
+      console.log("Email validation failed");
       errorMessage = "Please enter a valid email address";
       submitStatus = "error";
       return;
     }
 
+    console.log("Starting submission process");
     isSubmitting = true;
     submitStatus = "";
     errorMessage = "";
@@ -117,6 +121,7 @@
 
     // Track validation start
     trackEmailValidationStart(email);
+    console.log("Calling validateEmail");
 
     // Update loading message every 2 seconds
     const loadingInterval = setInterval(() => {
@@ -127,9 +132,11 @@
 
     try {
       const validation = await validateEmail(email);
+      console.log("Validation result:", validation);
       clearInterval(loadingInterval);
 
       if (validation.valid) {
+        console.log("Email valid, saving to Firebase");
         // Success flow
         trackEmailValidationSuccess(email, validation.validationTime);
         
@@ -146,18 +153,21 @@
             validation_time: validation.validationTime || 0
           }
         });
+        console.log("Saved to Firebase successfully");
 
         trackFormSubmission(email, 'landing_page_phase3');
 
         submitStatus = "success";
+        submittedEmail = email;
         email = "";
-        
+
         // Show survey modal after short delay
         setTimeout(() => {
           showSurveyModal = true;
-          trackSurveyStarted(email);
+          trackSurveyStarted(submittedEmail);
         }, 1000);
       } else {
+        console.log("Email invalid:", validation.reason);
         // Error flow with retry option
         trackEmailValidationFailure(email, validation.reason);
         errorMessage = errorMessages[validation.reason];
@@ -178,6 +188,11 @@
 
   function scrollToSignup() {
     document.getElementById("signup")?.scrollIntoView({ behavior: "smooth" });
+  }
+
+  function handleSurveyClosed() {
+    showSurveyModal = false;
+    submittedEmail = "";
   }
 
   function getLoadingMessage() {
@@ -332,7 +347,7 @@
           </p>
         </div>
       {:else}
-        <form onsubmit={handleSubmit} class="space-y-6">
+        <form onsubmit={(e) => handleSubmit(e)} class="space-y-6">
           {#if submitStatus === "error"}
             <div
               class="bg-error/10 border border-error text-error p-4 rounded-lg"
@@ -409,7 +424,7 @@
 </main>
 
 <!-- Survey Modal -->
-<SurveyModal 
-  bind:isOpen={showSurveyModal} 
-  userEmail={email} 
+<SurveyModal
+  bind:isOpen={showSurveyModal}
+  userEmail={submittedEmail}
 />
