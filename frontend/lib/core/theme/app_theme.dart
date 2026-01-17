@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_text_theme.dart';
+import 'app_theme_type.dart';
+import 'theme_palettes.dart';
 
 /// App theme configuration for light and dark modes
 /// Implements Material Design 3 with custom colors and typography
@@ -417,14 +419,14 @@ class AppTheme {
         titleTextStyle: AppTextTheme.lightTextTheme.titleLarge,
       ),
 
-      // Card Theme with gradient borders and enhanced shadows
+      // Card Theme with enhanced shadows for depth
       cardTheme: CardThemeData(
-        elevation: 6,
-        shadowColor: AppColors.shadowColorWithOpacity(0.15),
+        elevation: 4,
+        shadowColor: Colors.black.withValues(alpha: 0.12),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: AppColors.outlineLight.withValues(alpha: 0.3),
+            color: AppColors.outlineLight.withValues(alpha: 0.6),
             width: 1,
           ),
         ),
@@ -723,5 +725,216 @@ class AppTheme {
         elevation: 6,
       ),
     );
+  }
+
+  /// Build ThemeData from any palette
+  static ThemeData buildTheme(ThemePalette palette) {
+    final bool isLight = palette.brightness == Brightness.light;
+    final textTheme =
+        isLight ? AppTextTheme.lightTextTheme : AppTextTheme.darkTextTheme;
+
+    final ColorScheme colorScheme = ColorScheme(
+      brightness: palette.brightness,
+      primary: palette.primary,
+      onPrimary: palette.onPrimary,
+      primaryContainer: palette.primaryContainer,
+      onPrimaryContainer: palette.onPrimaryContainer,
+      secondary: palette.secondary,
+      onSecondary: palette.onSecondary,
+      secondaryContainer: palette.secondaryContainer,
+      onSecondaryContainer: palette.onSecondaryContainer,
+      tertiary: palette.tertiary,
+      onTertiary: palette.onTertiary,
+      tertiaryContainer: palette.tertiaryContainer,
+      onTertiaryContainer: palette.onTertiaryContainer,
+      error: palette.error,
+      onError: palette.onError,
+      errorContainer: palette.errorContainer,
+      onErrorContainer: palette.onErrorContainer,
+      surface: palette.surface,
+      onSurface: palette.onSurface,
+      surfaceContainerHighest: palette.surfaceVariant,
+      onSurfaceVariant: palette.onSurfaceVariant,
+      outline: palette.outline,
+      outlineVariant: palette.outlineVariant,
+      shadow: palette.shadow,
+      scrim: Colors.black,
+      inverseSurface: palette.textPrimary,
+      onInverseSurface: isLight ? Colors.white : palette.background,
+      inversePrimary: isLight ? AppColors.primaryDark : AppColors.primaryLight,
+      surfaceTint: palette.surfaceTint,
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: colorScheme,
+      textTheme: textTheme,
+      brightness: palette.brightness,
+
+      // AppBar Theme
+      appBarTheme: AppBarTheme(
+        centerTitle: false,
+        elevation: 0,
+        scrolledUnderElevation: 1,
+        backgroundColor: palette.surface,
+        foregroundColor: palette.textPrimary,
+        surfaceTintColor: isLight ? Colors.transparent : palette.primary.withValues(alpha: 0.1),
+        shadowColor: palette.shadow.withValues(alpha: isLight ? 0.1 : 0.3),
+        iconTheme: IconThemeData(color: palette.textPrimary),
+        titleTextStyle: textTheme.titleLarge,
+      ),
+
+      // Card Theme
+      cardTheme: CardThemeData(
+        elevation: isLight ? 6 : 8,
+        shadowColor: palette.shadow.withValues(alpha: isLight ? 0.15 : 0.4),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: palette.outline.withValues(alpha: isLight ? 0.3 : 0.4),
+            width: 1,
+          ),
+        ),
+        color: palette.surface,
+        surfaceTintColor: isLight ? Colors.transparent : palette.primary.withValues(alpha: 0.05),
+      ),
+
+      // Bottom Navigation Bar Theme
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: palette.surface,
+        selectedItemColor: palette.primary,
+        unselectedItemColor: palette.textSecondary,
+        type: BottomNavigationBarType.fixed,
+        elevation: 12,
+      ),
+
+      // FloatingActionButton Theme
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: palette.primary,
+        foregroundColor: palette.onPrimary,
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+
+      // Input Decoration Theme
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: palette.surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: palette.outline, width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: palette.outline, width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: palette.primary, width: 2.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: palette.error, width: 1.5),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: palette.error, width: 2.5),
+        ),
+        hintStyle: TextStyle(color: palette.textSecondary),
+        labelStyle: TextStyle(color: palette.textSecondary),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 18,
+        ),
+      ),
+
+      // Elevated Button Theme
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: palette.primary,
+          foregroundColor: palette.onPrimary,
+          elevation: 4,
+          shadowColor: palette.shadow.withValues(alpha: isLight ? 0.3 : 0.4),
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+
+      // Text Button Theme
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: palette.primary,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        ),
+      ),
+
+      // Chip Theme
+      chipTheme: ChipThemeData(
+        backgroundColor: palette.surfaceVariant,
+        selectedColor: palette.primary.withValues(alpha: isLight ? 0.15 : 0.25),
+        labelStyle: textTheme.labelMedium!.copyWith(
+          color: palette.textPrimary,
+        ),
+        side: BorderSide(color: palette.outline.withValues(alpha: isLight ? 0.5 : 0.6)),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+
+      // Dialog Theme
+      dialogTheme: DialogThemeData(
+        backgroundColor: palette.surface,
+        surfaceTintColor: isLight ? Colors.transparent : palette.primary.withValues(alpha: 0.1),
+        elevation: 12,
+        shadowColor: palette.shadow.withValues(alpha: isLight ? 0.2 : 0.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
+
+      // Snackbar Theme
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: isLight ? palette.textPrimary : palette.surface,
+        contentTextStyle: textTheme.bodyMedium!.copyWith(
+          color: isLight ? Colors.white : palette.textPrimary,
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 6,
+      ),
+
+      // Divider Theme
+      dividerTheme: DividerThemeData(
+        color: palette.outline,
+        thickness: 1,
+        space: 1,
+      ),
+
+      // List Tile Theme
+      listTileTheme: ListTileThemeData(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+        tileColor: Colors.transparent,
+        selectedTileColor: palette.primary.withValues(alpha: 0.08),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  /// Get ThemeData for a specific AppThemeType
+  static ThemeData getTheme(AppThemeType type, {Brightness? platformBrightness}) {
+    return switch (type) {
+      SystemTheme() => platformBrightness == Brightness.dark
+          ? modernDarkTheme()
+          : modernLightTheme(),
+      LightTheme() => modernLightTheme(),
+      DarkTheme() => modernDarkTheme(),
+      HighContrastLightTheme() => buildTheme(const HighContrastLightPalette()),
+      HighContrastDarkTheme() => buildTheme(const HighContrastDarkPalette()),
+      AmoledBlackTheme() => buildTheme(const AmoledBlackPalette()),
+      OceanTheme() => buildTheme(const OceanPalette()),
+      ForestTheme() => buildTheme(const ForestPalette()),
+      LavenderTheme() => buildTheme(const LavenderPalette()),
+      SepiaTheme() => buildTheme(const SepiaPalette()),
+      MutedTheme() => buildTheme(const MutedPalette()),
+    };
   }
 }

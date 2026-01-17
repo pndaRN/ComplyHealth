@@ -178,19 +178,13 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
     // Determine if we should show onboarding
     final showOnboarding = _showOnboarding && !settings.hasCompletedOnboarding;
 
-    // Determine theme based on mode
+    // Determine theme based on selected theme type
     ThemeData getTheme() {
-      switch (themeState.themeMode) {
-        case ThemeMode.light:
-          return AppTheme.modernLightTheme();
-        case ThemeMode.dark:
-          return AppTheme.modernDarkTheme();
-        case ThemeMode.system:
-          final brightness = MediaQuery.of(context).platformBrightness;
-          return brightness == Brightness.dark
-              ? AppTheme.modernDarkTheme()
-              : AppTheme.modernLightTheme();
-      }
+      final platformBrightness = MediaQuery.of(context).platformBrightness;
+      return AppTheme.getTheme(
+        themeState.themeType,
+        platformBrightness: platformBrightness,
+      );
     }
 
     return MaterialApp(
