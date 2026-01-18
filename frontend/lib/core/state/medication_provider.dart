@@ -7,8 +7,8 @@ import '../../features/medications/utils/medication_sorter.dart';
 
 final medicationProvider =
     AsyncNotifierProvider<MedicationNotifier, List<Medication>>(
-  MedicationNotifier.new,
-);
+      MedicationNotifier.new,
+    );
 
 class MedicationNotifier extends AsyncNotifier<List<Medication>> {
   MedicationSortOption _sortOption = MedicationSortOption.alphabetical;
@@ -34,11 +34,14 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
   Future<List<Medication>> build() async {
     await _loadSortPreference();
     final box = await _getBox();
-    List<Medication> meds = await _checkAndResetDailyCounts(box.values.toList());
+    List<Medication> meds = await _checkAndResetDailyCounts(
+      box.values.toList(),
+    );
 
     // Only schedule notifications on the first build to prevent duplicates
     // Individual add/update operations will handle their own scheduling
     if (!_hasScheduledInitialNotifications && meds.isNotEmpty) {
+      await NotificationService().cancelAllNotifications();
       await NotificationService().scheduleAllMedications(meds);
       _hasScheduledInitialNotifications = true;
     }
@@ -108,7 +111,7 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
       _sortOption = option;
       final settingsBox = await _getSettingsBox();
       await settingsBox.put('sortOption', option.index);
-      
+
       final box = await _getBox();
       return _applySorting(box.values.toList());
     });
@@ -163,17 +166,21 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
     await updateMeds(updatedMed);
   }
 
-  Future<List<Medication>> _checkAndResetDailyCounts(List<Medication> initialMeds) async {
+  Future<List<Medication>> _checkAndResetDailyCounts(
+    List<Medication> initialMeds,
+  ) async {
     final today = DateTime.now();
     bool hasUpdates = false;
 
     // Build a map for O(1) lookup of original dose counts
     final originalCounts = <String, int>{
-      for (final med in initialMeds) med.id: med.currentDoseCount
+      for (final med in initialMeds) med.id: med.currentDoseCount,
     };
 
     final updatedMeds = initialMeds.map((med) {
-      if (med.isPRN && (med.lastDoseCountReset == null || !_isSameDay(med.lastDoseCountReset!, today))) {
+      if (med.isPRN &&
+          (med.lastDoseCountReset == null ||
+              !_isSameDay(med.lastDoseCountReset!, today))) {
         hasUpdates = true;
         return med.copyWith(currentDoseCount: 0, lastDoseCountReset: today);
       }

@@ -163,10 +163,16 @@ void main() {
           final hour = int.parse(parts[0]);
           final minute = int.parse(parts[1]);
 
-          expect(hour >= 0 && hour <= 23, true,
-              reason: 'Hour $hour should be between 0-23');
-          expect(minute >= 0 && minute <= 59, true,
-              reason: 'Minute $minute should be between 0-59');
+          expect(
+            hour >= 0 && hour <= 23,
+            true,
+            reason: 'Hour $hour should be between 0-23',
+          );
+          expect(
+            minute >= 0 && minute <= 59,
+            true,
+            reason: 'Minute $minute should be between 0-59',
+          );
         }
       });
 
@@ -181,7 +187,11 @@ void main() {
           final timeStr = entry.key;
           final parts = timeStr.split(':');
 
-          expect(parts.length, 2, reason: 'Time should have hour:minute format');
+          expect(
+            parts.length,
+            2,
+            reason: 'Time should have hour:minute format',
+          );
 
           final hour = int.parse(parts[0]);
           final minute = int.parse(parts[1]);
@@ -239,17 +249,22 @@ void main() {
     });
 
     group('Notification ID Generation Logic', () {
-      test('should generate consistent IDs for same medication and time index',
-          () {
-        final medicationId = 'test-med-123';
-        final timeIndex = 0;
+      test(
+        'should generate consistent IDs for same medication and time index',
+        () {
+          final medicationId = 'test-med-123';
+          final timeIndex = 0;
 
-        final id1 = generateNotificationId(medicationId, timeIndex);
-        final id2 = generateNotificationId(medicationId, timeIndex);
+          final id1 = generateNotificationId(medicationId, timeIndex);
+          final id2 = generateNotificationId(medicationId, timeIndex);
 
-        expect(id1, equals(id2),
-            reason: 'Same medication and time should produce same ID');
-      });
+          expect(
+            id1,
+            equals(id2),
+            reason: 'Same medication and time should produce same ID',
+          );
+        },
+      );
 
       test('should generate different IDs for different time indices', () {
         final medicationId = 'med-123';
@@ -272,8 +287,11 @@ void main() {
           ids.add(id);
         }
 
-        expect(ids.length, greaterThan(45),
-            reason: 'Most IDs should be unique (some hash collisions acceptable)');
+        expect(
+          ids.length,
+          greaterThan(45),
+          reason: 'Most IDs should be unique (some hash collisions acceptable)',
+        );
       });
 
       test('should handle various medication ID formats', () {
@@ -292,8 +310,11 @@ void main() {
         }
 
         expect(generatedIds.length, testIds.length);
-        expect(generatedIds.toSet().length, testIds.length,
-            reason: 'Different med IDs should produce different notification IDs');
+        expect(
+          generatedIds.toSet().length,
+          testIds.length,
+          reason: 'Different med IDs should produce different notification IDs',
+        );
       });
     });
 
@@ -391,12 +412,7 @@ void main() {
             dosage: '20mg',
             scheduledTimes: ['08:00', '12:00', '18:00'],
           ),
-          Medication(
-            id: 'med-3',
-            name: 'Med 3',
-            dosage: '30mg',
-            isPRN: true,
-          ),
+          Medication(id: 'med-3', name: 'Med 3', dosage: '30mg', isPRN: true),
         ];
 
         final totalNotifications = medications
@@ -526,8 +542,9 @@ void main() {
         }
 
         expect(
-            scheduledTime.isAfter(now) || scheduledTime.isAtSameMomentAs(now),
-            true);
+          scheduledTime.isAfter(now) || scheduledTime.isAtSameMomentAs(now),
+          true,
+        );
       });
     });
 
@@ -587,6 +604,6 @@ String formatTime(int hour, int minute) {
 
 /// Generate notification ID (mimics _generateNotificationId in NotificationService)
 int generateNotificationId(String medicationId, int timeIndex) {
-  final hash = medicationId.hashCode;
-  return (hash.abs() % 100000) * 10 + timeIndex;
+  final hash = medicationId.hashCode.abs();
+  return hash + (timeIndex * 10000000);
 }
