@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed Android 12+ crash caused by missing exact alarm permission (SCHEDULE_EXACT_ALARM)
+- Added graceful fallback to inexact alarms when user denies exact alarm permission
+
 ## [1.3.0] - 2026-01-17
 
 ### Removed

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -18,6 +19,7 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notifications;
 
   bool _initialized = false;
+  bool _exactAlarmsPermitted = true;
 
   /// Setter for testing to bypass initialization
   @visibleForTesting
@@ -79,6 +81,13 @@ class NotificationService {
 
     if (androidPlugin != null) {
       await androidPlugin.requestNotificationsPermission();
+
+      // Request exact alarm permission for Android 12+ (API 31+)
+      if (Platform.isAndroid) {
+        final exactAlarmGranted =
+            await androidPlugin.requestExactAlarmsPermission();
+        _exactAlarmsPermitted = exactAlarmGranted ?? false;
+      }
     }
 
     final iosPlugin = _notifications
@@ -180,13 +189,18 @@ class NotificationService {
       iOS: iosDetails,
     );
 
+    // Use exact alarms if permitted, otherwise fall back to inexact
+    final scheduleMode = _exactAlarmsPermitted
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.inexactAllowWhileIdle;
+
     await _notifications.zonedSchedule(
       id,
       title,
       body,
       scheduledDate,
       details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: scheduleMode,
       matchDateTimeComponents: DateTimeComponents.time,
       payload: payload,
     );
