@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -8,17 +9,25 @@ import 'package:complyhealth/core/models/medication.dart';
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
-  NotificationService._internal();
+  NotificationService._internal() : _notifications = FlutterLocalNotificationsPlugin();
 
-  final FlutterLocalNotificationsPlugin _notifications =
-      FlutterLocalNotificationsPlugin();
+  /// Testing constructor that accepts a mock plugin
+  @visibleForTesting
+  NotificationService.withPlugin(this._notifications);
+
+  final FlutterLocalNotificationsPlugin _notifications;
 
   bool _initialized = false;
+
+  /// Setter for testing to bypass initialization
+  @visibleForTesting
+  set initialized(bool value) => _initialized = value;
 
   // Stream controller for notification tap events
   static final StreamController<String> _notificationTapController =
       StreamController<String>.broadcast();
-  static Stream<String> get onNotificationTap => _notificationTapController.stream;
+  static Stream<String> get onNotificationTap =>
+      _notificationTapController.stream;
 
   /// Initialize the notification service
   Future<void> initialize() async {
@@ -209,13 +218,16 @@ class NotificationService {
   }
 
   /// Generate a unique notification ID from medication ID and time index
-  int _generateNotificationId(String medicationId, int timeIndex) {
-    // Use a larger range to reduce collision risk
-    // Combine hash with timeIndex in a way that supports more scheduled times
+  @visibleForTesting
+  static int generateNotificationId(String medicationId, int timeIndex) {
+    // Use hash directly to minimize collision risk, offset by time index
     final hash = medicationId.hashCode.abs();
-    // Use modulo with larger number and shift for time index
-    return (hash % 10000000) + (timeIndex * 10000000);
+    // Large multiplier to separate time indices
+    return hash + (timeIndex * 10000000);
   }
+
+  int _generateNotificationId(String medicationId, int timeIndex) =>
+      generateNotificationId(medicationId, timeIndex);
 
   /// Format time for display
   String _formatTime(int hour, int minute) {
