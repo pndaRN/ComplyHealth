@@ -20,7 +20,6 @@
   let showSurveyModal = $state(false);
   let loadingStep = $state(0);
   let validationStartTime = $state(0);
-  let activeTab = $state(0);
   let submittedEmail = $state("");
 
   const loadingMessages = [
@@ -29,71 +28,7 @@
     "Almost done..."
   ];
 
-  const tabs = [
-    {
-      title: "The Challenge",
-      content: {
-        heading: "The Daily Struggle is Real",
-        subheading: "Millions of adults manage chronic conditions, often feeling:",
-        items: [
-          "Fragmented information across apps, paper notes, and memory",
-          "Confused by medical terminology and treatment plans",
-          "Worried about forgetting medications or instructions",
-          "Emotional frustration and exhaustion from it all"
-        ],
-        footer: "As nurses, we've seen this struggle firsthand. That's why we're building something different."
-      }
-    },
-    {
-      title: "Our Solution",
-      content: {
-        heading: "What if it could be simpler?",
-        subheading: "ComplyHealth brings structure and clarity to everyday health management by:",
-        items: [
-          "Centralizing your medications and conditions in one place",
-          "Explaining everything in plain language that makes sense",
-          "Reducing cognitive burden so you can focus on living",
-          "Helping you feel more confident and in control"
-        ]
-      }
-    },
-    {
-      title: "Who It's For",
-      content: {
-        heading: "You're Not Alone in This",
-        items: [
-          {
-            title: "For Adults Managing Chronic Conditions",
-            description: "If you're 25-65, managing 2+ chronic conditions and taking multiple medications, and feeling overwhelmed - this is for you."
-          },
-          {
-            title: "For Caregivers",
-            description: "If you're helping a loved one navigate their health journey, we want to support you too."
-          }
-        ]
-      }
-    },
-    {
-      title: "Why We're Different",
-      content: {
-        heading: "Built Differently Because It Has to Be",
-        items: [
-          {
-            title: "Nurse-Founded",
-            description: "Built by people with direct patient-care experience who understand the real challenges."
-          },
-          {
-            title: "Plain Language",
-            description: "No confusing medical jargon. Just clear explanations that make sense."
-          },
-          {
-            title: "Independent",
-            description: "Built for people, not for systems. Your confidence over clinical workflows."
-          }
-        ]
-      }
-    }
-  ];
+
 
   // Initialize analytics on component mount
   $effect(() => {
@@ -214,13 +149,12 @@
     <h1
       class="text-4xl md:text-5xl lg:text-6xl font-semibold text-text-primary mb-6"
     >
-      Managing chronic conditions shouldn't feel overwhelming
+      Chronic health shouldn't be overwhelming
     </h1>
     <p
       class="text-lg md:text-xl text-text-secondary max-w-2xl mx-auto mb-10 leading-relaxed"
     >
-      We're building a simple way to organize your health information so you can feel more in control. 
-      Built by nurses who get it, because we've been there too.
+      We're healthcare professionals building a simple way to track meds and conditions, all in one simple place - without juggling portals or paperwork.
     </p>
     <button
       onclick={scrollToSignup}
@@ -230,86 +164,243 @@
     </button>
   </section>
 
-  <!-- Tabbed Content Section -->
-  <section class="px-4 py-8 md:py-12 bg-surface">
+  <!-- Before/After Section -->
+   <section class="px-4 py-12 md:py-20">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-semibold text-text-primary text-center mb-12">
+        From Chaos to Clarity
+      </h2>
+      <div class="grid md:grid-cols-2 gap-8 md:gap-12">
+        <div class="bg-background p-6 rounded-xl shadow-lg border border-outline">
+          <h3 class="text-xl font-semibold text-text-primary mb-6 text-center">Before</h3>
+          <ul class="space-y-4">
+            <li class="flex items-start gap-3">
+              <div class="w-2 h-2 bg-error rounded-full mt-2 flex-shrink-0"></div>
+              <span class="text-text-secondary">Cluttered instructions</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-2 h-2 bg-error rounded-full mt-2 flex-shrink-0"></div>
+              <span class="text-text-secondary">Unorganized information</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-2 h-2 bg-error rounded-full mt-2 flex-shrink-0"></div>
+              <span class="text-text-secondary">Miscommunication</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-2 h-2 bg-error rounded-full mt-2 flex-shrink-0"></div>
+              <span class="text-text-secondary">Missed medications</span>
+            </li>
+          </ul>
+        </div>
+        <div class="bg-background p-6 rounded-xl shadow-lg border border-outline">
+          <h3 class="text-xl font-semibold text-text-primary mb-6 text-center">After</h3>
+          <ul class="space-y-4">
+            <li class="flex items-start gap-3">
+              <div class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+              <span class="text-text-secondary">Clear health organization</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+              <span class="text-text-secondary">Reduced stress</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+              <span class="text-text-secondary">Promotes medication compliance</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+              <span class="text-text-secondary">Fewer missed appointments</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+              <span class="text-text-secondary">Better understanding</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+     </div>
+
+     <!-- Gradient Separator -->
+     <div class="h-12 bg-gradient-to-b from-white/30 to-surface/30"></div>
+   </section>
+
+   <!-- Problem Section -->
+  <section class="scroll-section px-4 py-12 md:py-20 bg-surface">
     <div class="max-w-4xl mx-auto">
-      <!-- Tab Navigation -->
-      <div class="flex justify-center overflow-x-auto pb-2 mb-6 scrollbar-hide">
-        <div class="flex space-x-2">
-          {#each tabs as tab, index}
-            <button
-              onclick={() => activeTab = index}
-              class="flex-shrink-0 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 whitespace-nowrap
-                     {activeTab === index
-                       ? 'bg-primary text-white shadow-md'
-                       : 'bg-background text-text-secondary hover:bg-background/80 border border-outline'}"
-            >
-              {tab.title}
-            </button>
-          {/each}
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-semibold text-text-primary mb-6">
+          The Daily Struggle is Real
+        </h2>
+        <p class="text-lg text-text-secondary leading-relaxed max-w-2xl mx-auto mb-8">
+          Millions of adults manage chronic conditions, often feeling:
+        </p>
+      </div>
+
+      <div class="grid gap-6 md:grid-cols-2">
+        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+          <div class="flex items-start gap-3">
+            <div class="w-3 h-3 bg-error rounded-full mt-2 flex-shrink-0"></div>
+            <p class="text-text-secondary text-base leading-relaxed">
+              Fragmented information across apps, paper notes, and memory
+            </p>
+          </div>
+        </div>
+        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+          <div class="flex items-start gap-3">
+            <div class="w-3 h-3 bg-error rounded-full mt-2 flex-shrink-0"></div>
+            <p class="text-text-secondary text-base leading-relaxed">
+              Confused by medical terminology and treatment plans
+            </p>
+          </div>
+        </div>
+        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+          <div class="flex items-start gap-3">
+            <div class="w-3 h-3 bg-error rounded-full mt-2 flex-shrink-0"></div>
+            <p class="text-text-secondary text-base leading-relaxed">
+              Worried about forgetting medications or instructions
+            </p>
+          </div>
+        </div>
+        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+          <div class="flex items-start gap-3">
+            <div class="w-3 h-3 bg-error rounded-full mt-2 flex-shrink-0"></div>
+            <p class="text-text-secondary text-base leading-relaxed">
+              Emotional frustration and exhaustion from it all
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Tab Content -->
-      <div class="transition-all duration-300">
-        {#each tabs as tab, index}
-          {#if activeTab === index}
-            <div class="animate-fade-in">
-              <div class="text-center mb-6">
-                <h2 class="text-2xl md:text-3xl font-semibold text-text-primary mb-3">
-                  {tab.content.heading}
-                </h2>
-                {#if tab.content.subheading}
-                  <p class="text-base text-text-secondary leading-relaxed max-w-2xl mx-auto">
-                    {tab.content.subheading}
-                  </p>
-                {/if}
-              </div>
+      <div class="mt-12 text-center">
+        <p class="text-lg text-text-primary font-medium max-w-3xl mx-auto">
+          As healthcare professionals, we've seen this struggle firsthand. That's why we're building something different.
+        </p>
+      </div>
+    </div>
 
-              <div class="space-y-4">
-                {#if Array.isArray(tab.content.items) && typeof tab.content.items[0] === 'string'}
-                  <!-- Simple list items (Challenge & Solution tabs) -->
-                  {#each tab.content.items as item, itemIndex}
-                    <div class="bg-background p-4 rounded-lg shadow-sm border border-outline">
-                      <div class="flex items-start gap-3">
-                        <div class="w-2 h-2 {index === 0 ? 'bg-primary' : 'bg-tertiary'} rounded-full mt-2 flex-shrink-0"></div>
-                        <p class="text-text-secondary text-sm leading-relaxed">
-                          {#if index === 1}
-                            <strong>{item.split(' ')[0]}</strong> {item.substring(item.indexOf(' ') + 1)}
-                          {:else}
-                            {item}
-                          {/if}
-                        </p>
-                      </div>
-                    </div>
-                  {/each}
-                {:else}
-                  <!-- Card items (Audience & Differentiation tabs) -->
-                  <div class="grid gap-4 {index === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'}">
-                    {#each tab.content.items as item}
-                      <div class="bg-background p-5 rounded-lg shadow-sm border border-outline text-left">
-                        <h3 class="text-lg font-semibold text-text-primary mb-3">
-                          {item.title}
-                        </h3>
-                        <p class="text-text-secondary text-sm leading-relaxed">
-                          {item.description}
-                        </p>
-                      </div>
-                    {/each}
-                  </div>
-                {/if}
-              </div>
+    <!-- Gradient Separator -->
+    <div class="h-12 bg-gradient-to-b from-surface/30 to-white/30"></div>
+  </section>
 
-              {#if tab.content.footer}
-                <div class="mt-6 text-center">
-                  <p class="text-base text-text-primary font-medium">
-                    {tab.content.footer}
-                  </p>
-                </div>
-              {/if}
-            </div>
-          {/if}
-        {/each}
+  <!-- Solution Section -->
+  <section class="scroll-section px-4 py-12 md:py-20">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-semibold text-text-primary mb-6">
+          What if it could be simpler?
+        </h2>
+        <p class="text-lg text-text-secondary leading-relaxed max-w-2xl mx-auto mb-8">
+          ComplyHealth brings structure and clarity to everyday health management by:
+        </p>
+      </div>
+
+      <div class="grid gap-6 md:grid-cols-2">
+        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+          <div class="flex items-start gap-3">
+            <div class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+            <p class="text-text-secondary text-base leading-relaxed">
+              <strong>Centralizing</strong> your medications and conditions in one place
+            </p>
+          </div>
+        </div>
+        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+          <div class="flex items-start gap-3">
+            <div class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+            <p class="text-text-secondary text-base leading-relaxed">
+              <strong>Explaining</strong> everything in plain language that makes sense
+            </p>
+          </div>
+        </div>
+        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+          <div class="flex items-start gap-3">
+            <div class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+            <p class="text-text-secondary text-base leading-relaxed">
+              <strong>Reducing</strong> cognitive burden so you can focus on living
+            </p>
+          </div>
+        </div>
+        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+          <div class="flex items-start gap-3">
+            <div class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+            <p class="text-text-secondary text-base leading-relaxed">
+              <strong>Helping</strong> you feel more confident and in control
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gradient Separator -->
+    <div class="h-12 bg-gradient-to-b from-white/30 to-surface/30"></div>
+  </section>
+
+  <!-- Audience Section -->
+  <section class="scroll-section px-4 py-12 md:py-20 bg-surface">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-semibold text-text-primary mb-12">
+          You're Not Alone in This
+        </h2>
+      </div>
+
+      <div class="grid gap-8 md:grid-cols-2">
+        <div class="bg-background p-8 rounded-lg shadow-sm border border-outline text-center">
+          <h3 class="text-xl font-semibold text-text-primary mb-4">
+            For Adults Managing Chronic Conditions
+          </h3>
+          <p class="text-text-secondary text-base leading-relaxed">
+            If you're 25-65, managing 2+ chronic conditions and taking multiple medications, and feeling overwhelmed - this is for you.
+          </p>
+        </div>
+        <div class="bg-background p-8 rounded-lg shadow-sm border border-outline text-center">
+          <h3 class="text-xl font-semibold text-text-primary mb-4">
+            For Caregivers
+          </h3>
+          <p class="text-text-secondary text-base leading-relaxed">
+            If you're helping a loved one navigate their health journey, we want to support you too.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gradient Separator -->
+    <div class="h-12 bg-gradient-to-b from-surface/30 to-white/30"></div>
+  </section>
+
+  <!-- Differentiation Section -->
+  <section class="scroll-section px-4 py-12 md:py-20">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-semibold text-text-primary mb-12">
+          Built Differently Because It Has to Be
+        </h2>
+      </div>
+
+      <div class="grid gap-6 md:grid-cols-3">
+        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center">
+          <h3 class="text-lg font-semibold text-text-primary mb-4">
+            Healthcare Professional-Founded
+          </h3>
+          <p class="text-text-secondary text-sm leading-relaxed">
+            Built by people with direct patient-care experience who understand the real challenges.
+          </p>
+        </div>
+        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center">
+          <h3 class="text-lg font-semibold text-text-primary mb-4">
+            Plain Language
+          </h3>
+          <p class="text-text-secondary text-sm leading-relaxed">
+            No confusing medical jargon. Just clear explanations that make sense.
+          </p>
+        </div>
+        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center">
+          <h3 class="text-lg font-semibold text-text-primary mb-4">
+            Independent
+          </h3>
+          <p class="text-text-secondary text-sm leading-relaxed">
+            Built for people, not for systems. Your confidence over clinical workflows.
+          </p>
+        </div>
       </div>
     </div>
   </section>
@@ -417,7 +508,7 @@
         &copy; 2025 ComplyHealth. All rights reserved.
       </p>
       <p class="text-text-secondary text-xs">
-        Built by nurses, for people. Your health journey, simplified.
+        ComplyHealth is an independent product and is not affiliated with or endorsed by any healthcare organization.
       </p>
     </div>
   </footer>
@@ -428,3 +519,18 @@
   bind:isOpen={showSurveyModal}
   userEmail={submittedEmail}
 />
+
+<style>
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .scroll-section {
+    animation: fadeIn 1s ease-out;
+  }
+</style>
