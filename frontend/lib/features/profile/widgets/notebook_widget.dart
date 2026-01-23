@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/models/notebook_entry.dart';
 import '../../../core/state/notebook_provider.dart';
+import '../dialogs/note_creation_dialog.dart';
 
 class NotebookWidget extends ConsumerWidget {
   const NotebookWidget({super.key});
@@ -22,10 +23,7 @@ class NotebookWidget extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.menu_book,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.menu_book, color: theme.colorScheme.primary),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -35,6 +33,19 @@ class NotebookWidget extends ConsumerWidget {
                     ),
                   ),
                 ),
+                FilledButton.icon(
+                  onPressed: () => showNoteCreationDialog(context),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Create'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+                const SizedBox(width: 8),
                 DropdownButton<NotebookSortOption>(
                   value: sortOption,
                   underline: const SizedBox(),
@@ -59,7 +70,8 @@ class NotebookWidget extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             notebookAsync.when(
-              data: (entries) => _buildContent(context, ref, entries, sortOption),
+              data: (entries) =>
+                  _buildContent(context, ref, entries, sortOption),
               loading: () => const Center(
                 child: Padding(
                   padding: EdgeInsets.all(24),
@@ -135,7 +147,9 @@ class NotebookWidget extends ConsumerWidget {
     List<NotebookEntry> entries,
   ) {
     return Column(
-      children: entries.map((entry) => _buildNoteCard(context, ref, entry)).toList(),
+      children: entries
+          .map((entry) => _buildNoteCard(context, ref, entry))
+          .toList(),
     );
   }
 
@@ -144,7 +158,9 @@ class NotebookWidget extends ConsumerWidget {
     WidgetRef ref,
     List<NotebookEntry> entries,
   ) {
-    final grouped = ref.read(notebookProvider.notifier).getEntriesGroupedBySource(entries);
+    final grouped = ref
+        .read(notebookProvider.notifier)
+        .getEntriesGroupedBySource(entries);
     final theme = Theme.of(context);
 
     return Column(
@@ -183,7 +199,11 @@ class NotebookWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildNoteCard(BuildContext context, WidgetRef ref, NotebookEntry entry) {
+  Widget _buildNoteCard(
+    BuildContext context,
+    WidgetRef ref,
+    NotebookEntry entry,
+  ) {
     final theme = Theme.of(context);
     final dateStr = DateFormat('dd-MM-yyyy').format(entry.timestamp);
 
@@ -244,7 +264,11 @@ class NotebookWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildNoteListItem(BuildContext context, WidgetRef ref, NotebookEntry entry) {
+  Widget _buildNoteListItem(
+    BuildContext context,
+    WidgetRef ref,
+    NotebookEntry entry,
+  ) {
     final theme = Theme.of(context);
     final dateStr = DateFormat('dd-MM-yyyy').format(entry.timestamp);
 
@@ -275,7 +299,11 @@ class NotebookWidget extends ConsumerWidget {
     );
   }
 
-  void _showNoteDetail(BuildContext context, WidgetRef ref, NotebookEntry entry) {
+  void _showNoteDetail(
+    BuildContext context,
+    WidgetRef ref,
+    NotebookEntry entry,
+  ) {
     final theme = Theme.of(context);
     final dateStr = DateFormat('dd-MM-yyyy HH:mm').format(entry.timestamp);
 
@@ -292,10 +320,7 @@ class NotebookWidget extends ConsumerWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                entry.sourceName,
-                style: theme.textTheme.titleLarge,
-              ),
+              child: Text(entry.sourceName, style: theme.textTheme.titleLarge),
             ),
           ],
         ),
@@ -311,10 +336,7 @@ class NotebookWidget extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
-                entry.content,
-                style: theme.textTheme.bodyLarge,
-              ),
+              Text(entry.content, style: theme.textTheme.bodyLarge),
             ],
           ),
         ),
@@ -338,7 +360,11 @@ class NotebookWidget extends ConsumerWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref, NotebookEntry entry) {
+  void _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    NotebookEntry entry,
+  ) {
     final theme = Theme.of(context);
 
     showDialog(
@@ -356,9 +382,9 @@ class NotebookWidget extends ConsumerWidget {
               Navigator.of(context).pop();
               await ref.read(notebookProvider.notifier).deleteEntry(entry.id);
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Note deleted')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Note deleted')));
               }
             },
             style: FilledButton.styleFrom(

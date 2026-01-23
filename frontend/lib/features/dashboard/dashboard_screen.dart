@@ -60,6 +60,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 data: (meds) {
                   return Stack(
                     children: [
+                      // Background gradient
                       Container(
                         height: MediaQuery.of(context).size.height,
                         decoration: BoxDecoration(
@@ -69,11 +70,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             colors: theme.brightness == Brightness.dark
                                 ? [
                                     theme.colorScheme.primary,
-                                    const Color(0xFF050A15), // Almost black with blue tint
+                                    const Color(0xFF050A15),
                                   ]
                                 : [
                                     theme.colorScheme.primary.withValues(alpha: 0.7),
-                                    const Color(0xFFF5F8FF), // Very subtle blue-tinted white
+                                    const Color(0xFFF5F8FF),
                                   ],
                           ),
                         ),
@@ -92,95 +93,105 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ),
                         ),
                       ),
-                      RefreshIndicator(
-                        onRefresh: _onRefresh,
-                        child: CustomScrollView(
-                          slivers: [
-                            SliverAppBar(
-                              floating: true,
-                              snap: true,
-                              backgroundColor: Colors.transparent,
-                              foregroundColor: Colors.white,
-                              titleTextStyle: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 30,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              iconTheme: const IconThemeData(
-                                color: Colors.white,
-                              ),
-                              elevation: 0,
-                              title: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: profile.firstName.isNotEmpty
-                                    ? Text(
-                                        'Good to see you, ${profile.firstName}',
-                                      )
-                                    : const Text('Welcome'),
-                              ),
-                              actions: [
-                                Consumer(
-                                  builder: (context, ref, child) {
-                                    final themeState = ref.watch(themeProvider);
-                                    final isDark =
-                                        themeState.themeMode ==
-                                            ThemeMode.dark ||
-                                        (themeState.themeMode ==
-                                                ThemeMode.system &&
-                                            MediaQuery.of(
-                                                  context,
-                                                ).platformBrightness ==
-                                                Brightness.dark);
+                      // Main content with fixed AppBar and Calendar
+                      SafeArea(
+                        child: Column(
+                          children: [
+                            // Fixed AppBar area
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                                        child: profile.firstName.isNotEmpty
+                                            ? Text(
+                                                'Good to see you, ${profile.firstName}',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 30,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              )
+                                            : const Text(
+                                                'Welcome',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 30,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+                                  ),
+                                  Consumer(
+                                    builder: (context, ref, child) {
+                                      final themeState = ref.watch(themeProvider);
+                                      final isDark =
+                                          themeState.themeMode == ThemeMode.dark ||
+                                          (themeState.themeMode == ThemeMode.system &&
+                                              MediaQuery.of(context).platformBrightness ==
+                                                  Brightness.dark);
 
-                                    return PopupMenuButton<String>(
-                                      icon: const Icon(Icons.more_vert),
-                                      onSelected: (value) {
-                                        if (value == 'theme') {
-                                          ref
-                                              .read(themeProvider.notifier)
-                                              .toggleTheme();
-                                        }
-                                      },
-                                      itemBuilder: (context) => [
-                                        PopupMenuItem(
-                                          value: 'theme',
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                isDark
-                                                    ? Icons.light_mode
-                                                    : Icons.dark_mode,
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Text(
-                                                isDark
-                                                    ? 'Light mode'
-                                                    : 'Dark mode',
-                                              ),
-                                            ],
-                                          ),
+                                      return PopupMenuButton<String>(
+                                        icon: const Icon(
+                                          Icons.more_vert,
+                                          color: Colors.white,
                                         ),
-                                      ],
-                                    );
-                                  },
+                                        onSelected: (value) {
+                                          if (value == 'theme') {
+                                            ref.read(themeProvider.notifier).toggleTheme();
+                                          }
+                                        },
+                                        itemBuilder: (context) => [
+                                          PopupMenuItem(
+                                            value: 'theme',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  isDark ? Icons.light_mode : Icons.dark_mode,
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Text(
+                                                  isDark ? 'Light mode' : 'Dark mode',
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Fixed Calendar Widget
+                            EnhancedCalendarWidget(
+                              key: ValueKey('adherence_$_refreshKey'),
+                            ),
+                            // Scrollable content
+                            Expanded(
+                              child: RefreshIndicator(
+                                onRefresh: _onRefresh,
+                                child: SingleChildScrollView(
+                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  child: Column(
+                                    children: [
+                                      TodaysMedicationsWidget(
+                                        key: ValueKey('medications_$_refreshKey'),
+                                      ),
+                                      AtAGlanceWidget(
+                                        key: ValueKey('glance_$_refreshKey'),
+                                        conditions: conditions,
+                                        medications: meds,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ],
-                            ),
-                            SliverToBoxAdapter(
-                              child: EnhancedCalendarWidget(
-                                key: ValueKey('adherence_$_refreshKey'),
-                              ),
-                            ),
-                            SliverToBoxAdapter(
-                              child: TodaysMedicationsWidget(
-                                key: ValueKey('medications_$_refreshKey'),
-                              ),
-                            ),
-                            SliverToBoxAdapter(
-                              child: AtAGlanceWidget(
-                                key: ValueKey('glance_$_refreshKey'),
-                                conditions: conditions,
-                                medications: meds,
                               ),
                             ),
                           ],
