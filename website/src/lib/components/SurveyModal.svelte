@@ -110,19 +110,19 @@
             <div class="space-y-3">
               <label class="flex items-center gap-3 p-3 border border-outline rounded-lg hover:border-primary/50 cursor-pointer transition-colors">
                 <input type="radio" bind:group={surveyData.conditions_count} value="0-1" class="w-4 h-4 text-primary" />
-                <span class="text-text-primary">0-1</span>
+                <span class="text-text-primary text-lg">0-1</span>
               </label>
               <label class="flex items-center gap-3 p-3 border border-outline rounded-lg hover:border-primary/50 cursor-pointer transition-colors">
                 <input type="radio" bind:group={surveyData.conditions_count} value="2-3" class="w-4 h-4 text-primary" />
-                <span class="text-text-primary">2-3</span>
+                <span class="text-text-primary text-lg">2-3</span>
               </label>
               <label class="flex items-center gap-3 p-3 border border-outline rounded-lg hover:border-primary/50 cursor-pointer transition-colors">
                 <input type="radio" bind:group={surveyData.conditions_count} value="4-5" class="w-4 h-4 text-primary" />
-                <span class="text-text-primary">4-5</span>
+                <span class="text-text-primary text-lg">4-5</span>
               </label>
               <label class="flex items-center gap-3 p-3 border border-outline rounded-lg hover:border-primary/50 cursor-pointer transition-colors">
                 <input type="radio" bind:group={surveyData.conditions_count} value="6+" class="w-4 h-4 text-primary" />
-                <span class="text-text-primary">6+</span>
+                <span class="text-text-primary text-lg">6+</span>
               </label>
             </div>
           </div>
@@ -132,19 +132,19 @@
             <div class="space-y-3">
               <label class="flex items-center gap-3 p-3 border border-outline rounded-lg hover:border-primary/50 cursor-pointer transition-colors">
                 <input type="radio" bind:group={surveyData.medications_count} value="0-2" class="w-4 h-4 text-primary" />
-                <span class="text-text-primary">0-2</span>
+                <span class="text-text-primary text-lg">0-2</span>
               </label>
               <label class="flex items-center gap-3 p-3 border border-outline rounded-lg hover:border-primary/50 cursor-pointer transition-colors">
                 <input type="radio" bind:group={surveyData.medications_count} value="3-5" class="w-4 h-4 text-primary" />
-                <span class="text-text-primary">3-5</span>
+                <span class="text-text-primary text-lg">3-5</span>
               </label>
               <label class="flex items-center gap-3 p-3 border border-outline rounded-lg hover:border-primary/50 cursor-pointer transition-colors">
                 <input type="radio" bind:group={surveyData.medications_count} value="6-10" class="w-4 h-4 text-primary" />
-                <span class="text-text-primary">6-10</span>
+                <span class="text-text-primary text-lg">6-10</span>
               </label>
               <label class="flex items-center gap-3 p-3 border border-outline rounded-lg hover:border-primary/50 cursor-pointer transition-colors">
                 <input type="radio" bind:group={surveyData.medications_count} value="11+" class="w-4 h-4 text-primary" />
-                <span class="text-text-primary">11+</span>
+                <span class="text-text-primary text-lg">11+</span>
               </label>
             </div>
           </div>

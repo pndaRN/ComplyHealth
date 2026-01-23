@@ -172,7 +172,7 @@
       </h2>
       <div class="grid md:grid-cols-2 gap-8 md:gap-12">
         <div class="bg-background p-6 rounded-xl shadow-lg border border-outline">
-          <h3 class="text-xl font-semibold text-text-primary mb-6 text-center">Before</h3>
+          <h3 class="text-2xl font-semibold text-text-primary mb-6 text-center">Before</h3>
           <ul class="space-y-4">
             <li class="flex items-start gap-3">
               <div class="w-2 h-2 bg-error rounded-full mt-2 flex-shrink-0"></div>
@@ -193,7 +193,7 @@
           </ul>
         </div>
         <div class="bg-background p-6 rounded-xl shadow-lg border border-outline">
-          <h3 class="text-xl font-semibold text-text-primary mb-6 text-center">After</h3>
+          <h3 class="text-2xl font-semibold text-text-primary mb-6 text-center">After</h3>
           <ul class="space-y-4">
             <li class="flex items-start gap-3">
               <div class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
@@ -240,7 +240,7 @@
         <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
           <div class="flex items-start gap-3">
             <div class="w-3 h-3 bg-error rounded-full mt-2 flex-shrink-0"></div>
-            <p class="text-text-secondary text-base leading-relaxed">
+            <p class="text-text-secondary text-lg leading-loose">
               Fragmented information across apps, paper notes, and memory
             </p>
           </div>
@@ -248,7 +248,7 @@
         <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
           <div class="flex items-start gap-3">
             <div class="w-3 h-3 bg-error rounded-full mt-2 flex-shrink-0"></div>
-            <p class="text-text-secondary text-base leading-relaxed">
+            <p class="text-text-secondary text-lg leading-loose">
               Confused by medical terminology and treatment plans
             </p>
           </div>
@@ -256,7 +256,7 @@
         <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
           <div class="flex items-start gap-3">
             <div class="w-3 h-3 bg-error rounded-full mt-2 flex-shrink-0"></div>
-            <p class="text-text-secondary text-base leading-relaxed">
+            <p class="text-text-secondary text-lg leading-loose">
               Worried about forgetting medications or instructions
             </p>
           </div>
@@ -264,7 +264,7 @@
         <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
           <div class="flex items-start gap-3">
             <div class="w-3 h-3 bg-error rounded-full mt-2 flex-shrink-0"></div>
-            <p class="text-text-secondary text-base leading-relaxed">
+            <p class="text-text-secondary text-lg leading-loose">
               Emotional frustration and exhaustion from it all
             </p>
           </div>
@@ -298,7 +298,7 @@
         <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
           <div class="flex items-start gap-3">
             <div class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-            <p class="text-text-secondary text-base leading-relaxed">
+            <p class="text-text-secondary text-lg leading-loose">
               <strong>Centralizing</strong> your medications and conditions in one place
             </p>
           </div>
@@ -306,7 +306,7 @@
         <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
           <div class="flex items-start gap-3">
             <div class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-            <p class="text-text-secondary text-base leading-relaxed">
+            <p class="text-text-secondary text-lg leading-loose">
               <strong>Explaining</strong> everything in plain language that makes sense
             </p>
           </div>
@@ -314,7 +314,7 @@
         <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
           <div class="flex items-start gap-3">
             <div class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-            <p class="text-text-secondary text-base leading-relaxed">
+            <p class="text-text-secondary text-lg leading-loose">
               <strong>Reducing</strong> cognitive burden so you can focus on living
             </p>
           </div>
@@ -322,7 +322,7 @@
         <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
           <div class="flex items-start gap-3">
             <div class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-            <p class="text-text-secondary text-base leading-relaxed">
+            <p class="text-text-secondary text-lg leading-loose">
               <strong>Helping</strong> you feel more confident and in control
             </p>
           </div>
@@ -345,18 +345,18 @@
 
       <div class="grid gap-8 md:grid-cols-2">
         <div class="bg-background p-8 rounded-lg shadow-sm border border-outline text-center">
-          <h3 class="text-xl font-semibold text-text-primary mb-4">
+          <h3 class="text-2xl font-semibold text-text-primary mb-4">
             For Adults Managing Chronic Conditions
           </h3>
-          <p class="text-text-secondary text-base leading-relaxed">
+          <p class="text-text-secondary text-lg leading-loose">
             If you're 25-65, managing 2+ chronic conditions and taking multiple medications, and feeling overwhelmed - this is for you.
           </p>
         </div>
         <div class="bg-background p-8 rounded-lg shadow-sm border border-outline text-center">
-          <h3 class="text-xl font-semibold text-text-primary mb-4">
+          <h3 class="text-2xl font-semibold text-text-primary mb-4">
             For Caregivers
           </h3>
-          <p class="text-text-secondary text-base leading-relaxed">
+          <p class="text-text-secondary text-lg leading-loose">
             If you're helping a loved one navigate their health journey, we want to support you too.
           </p>
         </div>
@@ -378,26 +378,26 @@
 
       <div class="grid gap-6 md:grid-cols-3">
         <div class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center">
-          <h3 class="text-lg font-semibold text-text-primary mb-4">
+          <h3 class="text-xl font-semibold text-text-primary mb-4">
             Healthcare Professional-Founded
           </h3>
-          <p class="text-text-secondary text-sm leading-relaxed">
+          <p class="text-text-secondary text-base leading-loose">
             Built by people with direct patient-care experience who understand the real challenges.
           </p>
         </div>
         <div class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center">
-          <h3 class="text-lg font-semibold text-text-primary mb-4">
+          <h3 class="text-xl font-semibold text-text-primary mb-4">
             Plain Language
           </h3>
-          <p class="text-text-secondary text-sm leading-relaxed">
+          <p class="text-text-secondary text-base leading-loose">
             No confusing medical jargon. Just clear explanations that make sense.
           </p>
         </div>
         <div class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center">
-          <h3 class="text-lg font-semibold text-text-primary mb-4">
+          <h3 class="text-xl font-semibold text-text-primary mb-4">
             Independent
           </h3>
-          <p class="text-text-secondary text-sm leading-relaxed">
+          <p class="text-text-secondary text-base leading-loose">
             Built for people, not for systems. Your confidence over clinical workflows.
           </p>
         </div>
