@@ -10,7 +10,7 @@
     trackSurveyStarted,
     trackPageView,
     trackFormSubmission,
-    trackError
+    trackError,
   } from "$lib/analytics.js";
 
   let email = $state("");
@@ -21,19 +21,24 @@
   let loadingStep = $state(0);
   let validationStartTime = $state(0);
   let submittedEmail = $state("");
+  let visibleSections = $state({
+    problem: false,
+    solution: false,
+    audience: false,
+    differentiation: false,
+    beforeAfter: false,
+  });
 
   const loadingMessages = [
     "Checking email format...",
     "Verifying email domain...",
-    "Almost done..."
+    "Almost done...",
   ];
-
-
 
   // Initialize analytics on component mount
   $effect(() => {
     initAnalytics();
-    trackPageView('landing_page');
+    trackPageView("landing_page");
   });
 
   async function handleSubmit(event) {
@@ -74,7 +79,7 @@
         console.log("Email valid, saving to Firebase");
         // Success flow
         trackEmailValidationSuccess(email, validation.validationTime);
-        
+
         const db = getDb();
         await addDoc(collection(db, "mission_supporters"), {
           email,
@@ -85,12 +90,12 @@
             domain_valid: validation.details?.valid || false,
             is_disposable: validation.details?.disposable || false,
             validation_timestamp: serverTimestamp(),
-            validation_time: validation.validationTime || 0
-          }
+            validation_time: validation.validationTime || 0,
+          },
         });
         console.log("Saved to Firebase successfully");
 
-        trackFormSubmission(email, 'landing_page_phase3');
+        trackFormSubmission(email, "landing_page_phase3");
 
         submitStatus = "success";
         submittedEmail = email;
@@ -111,7 +116,7 @@
     } catch (error) {
       clearInterval(loadingInterval);
       console.error("Error submitting form:", error);
-      trackError(error, 'email_validation');
+      trackError(error, "email_validation");
       submitStatus = "error";
       errorMessage = "Something went wrong. Please try again.";
     } finally {
@@ -125,13 +130,39 @@
     document.getElementById("signup")?.scrollIntoView({ behavior: "smooth" });
   }
 
+  // Intersection Observer action for fade-in on scroll
+  function fadeInOnScroll(node, sectionKey) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            visibleSections[sectionKey] = true;
+            observer.unobserve(node); // Only animate once
+          }
+        });
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(node);
+
+    return {
+      destroy() {
+        observer.disconnect();
+      },
+    };
+  }
+
   function handleSurveyClosed() {
     showSurveyModal = false;
     submittedEmail = "";
   }
 
   function getLoadingMessage() {
-    return loadingMessages[loadingStep] || loadingMessages[loadingMessages.length - 1];
+    return (
+      loadingMessages[loadingStep] ||
+      loadingMessages[loadingMessages.length - 1]
+    );
   }
 </script>
 
@@ -139,9 +170,17 @@
   <!-- Header -->
   <header class="px-4 py-3">
     <!-- Light mode logo -->
-    <img src="/complyhealth-logo.svg" alt="ComplyHealth" class="h-10 dark:hidden" />
+    <img
+      src="/complyhealth-logo.svg"
+      alt="ComplyHealth"
+      class="h-10 dark:hidden"
+    />
     <!-- Dark mode logo -->
-    <img src="/complyhealth-logo-dark.svg" alt="ComplyHealth" class="h-10 hidden dark:block" />
+    <img
+      src="/complyhealth-logo-dark.svg"
+      alt="ComplyHealth"
+      class="h-10 hidden dark:block"
+    />
   </header>
 
   <!-- Hero Section -->
@@ -154,7 +193,9 @@
     <p
       class="text-lg md:text-xl text-text-secondary max-w-2xl mx-auto mb-10 leading-relaxed"
     >
-      We're healthcare professionals building a simple way to track meds and conditions, all in one simple place - without juggling portals or paperwork.
+      We're healthcare professionals building a simple way to track meds and
+      conditions, all in one simple place - without juggling portals or
+      paperwork.
     </p>
     <button
       onclick={scrollToSignup}
@@ -164,80 +205,28 @@
     </button>
   </section>
 
-  <!-- Before/After Section -->
-   <section class="px-4 py-12 md:py-20">
-    <div class="max-w-6xl mx-auto">
-      <h2 class="text-3xl md:text-4xl font-semibold text-text-primary text-center mb-12">
-        From Chaos to Clarity
-      </h2>
-      <div class="grid md:grid-cols-2 gap-8 md:gap-12">
-        <div class="bg-background p-6 rounded-xl shadow-lg border border-outline">
-          <h3 class="text-2xl font-semibold text-text-primary mb-6 text-center">Before</h3>
-          <ul class="space-y-4">
-            <li class="flex items-start gap-3">
-              <div class="w-2 h-2 bg-error rounded-full mt-2 flex-shrink-0"></div>
-              <span class="text-text-secondary">Cluttered instructions</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <div class="w-2 h-2 bg-error rounded-full mt-2 flex-shrink-0"></div>
-              <span class="text-text-secondary">Unorganized information</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <div class="w-2 h-2 bg-error rounded-full mt-2 flex-shrink-0"></div>
-              <span class="text-text-secondary">Miscommunication</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <div class="w-2 h-2 bg-error rounded-full mt-2 flex-shrink-0"></div>
-              <span class="text-text-secondary">Missed medications</span>
-            </li>
-          </ul>
-        </div>
-        <div class="bg-background p-6 rounded-xl shadow-lg border border-outline">
-          <h3 class="text-2xl font-semibold text-text-primary mb-6 text-center">After</h3>
-          <ul class="space-y-4">
-            <li class="flex items-start gap-3">
-              <div class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-              <span class="text-text-secondary">Clear health organization</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <div class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-              <span class="text-text-secondary">Reduced stress</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <div class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-              <span class="text-text-secondary">Promotes medication compliance</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <div class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-              <span class="text-text-secondary">Fewer missed appointments</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <div class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-              <span class="text-text-secondary">Better understanding</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-     </div>
-
-     <!-- Gradient Separator -->
-     <div class="h-12 bg-gradient-to-b from-white/30 to-surface/30"></div>
-   </section>
-
-   <!-- Problem Section -->
-  <section class="scroll-section px-4 py-12 md:py-20 bg-surface">
+  <!-- Problem Section -->
+  <section
+    use:fadeInOnScroll={"problem"}
+    class="scroll-section section-surface-fade px-4 py-12 md:py-20"
+    class:visible={visibleSections.problem}
+  >
     <div class="max-w-4xl mx-auto">
       <div class="text-center mb-12">
         <h2 class="text-3xl md:text-4xl font-semibold text-text-primary mb-6">
           The Daily Struggle is Real
         </h2>
-        <p class="text-lg text-text-secondary leading-relaxed max-w-2xl mx-auto mb-8">
+        <p
+          class="text-lg text-text-secondary leading-relaxed max-w-2xl mx-auto mb-8"
+        >
           Millions of adults manage chronic conditions, often feeling:
         </p>
       </div>
 
       <div class="grid gap-6 md:grid-cols-2">
-        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+        <div
+          class="bg-background p-6 rounded-lg shadow-sm border border-outline"
+        >
           <div class="flex items-start gap-3">
             <div class="w-3 h-3 bg-error rounded-full mt-2 flex-shrink-0"></div>
             <p class="text-text-secondary text-lg leading-loose">
@@ -245,7 +234,9 @@
             </p>
           </div>
         </div>
-        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+        <div
+          class="bg-background p-6 rounded-lg shadow-sm border border-outline"
+        >
           <div class="flex items-start gap-3">
             <div class="w-3 h-3 bg-error rounded-full mt-2 flex-shrink-0"></div>
             <p class="text-text-secondary text-lg leading-loose">
@@ -253,7 +244,9 @@
             </p>
           </div>
         </div>
-        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+        <div
+          class="bg-background p-6 rounded-lg shadow-sm border border-outline"
+        >
           <div class="flex items-start gap-3">
             <div class="w-3 h-3 bg-error rounded-full mt-2 flex-shrink-0"></div>
             <p class="text-text-secondary text-lg leading-loose">
@@ -261,7 +254,9 @@
             </p>
           </div>
         </div>
-        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+        <div
+          class="bg-background p-6 rounded-lg shadow-sm border border-outline"
+        >
           <div class="flex items-start gap-3">
             <div class="w-3 h-3 bg-error rounded-full mt-2 flex-shrink-0"></div>
             <p class="text-text-secondary text-lg leading-loose">
@@ -273,55 +268,78 @@
 
       <div class="mt-12 text-center">
         <p class="text-lg text-text-primary font-medium max-w-3xl mx-auto">
-          As healthcare professionals, we've seen this struggle firsthand. That's why we're building something different.
+          As healthcare professionals, we've seen this struggle firsthand.
+          That's why we're building something different.
         </p>
       </div>
     </div>
-
-    <!-- Gradient Separator -->
-    <div class="h-12 bg-gradient-to-b from-surface/30 to-white/30"></div>
   </section>
 
   <!-- Solution Section -->
-  <section class="scroll-section px-4 py-12 md:py-20">
+  <section
+    use:fadeInOnScroll={"solution"}
+    class="scroll-section section-surface-fade-out px-4 py-12 md:py-20"
+    class:visible={visibleSections.solution}
+  >
     <div class="max-w-4xl mx-auto">
       <div class="text-center mb-12">
         <h2 class="text-3xl md:text-4xl font-semibold text-text-primary mb-6">
           What if it could be simpler?
         </h2>
-        <p class="text-lg text-text-secondary leading-relaxed max-w-2xl mx-auto mb-8">
-          ComplyHealth brings structure and clarity to everyday health management by:
+        <p
+          class="text-lg text-text-secondary leading-relaxed max-w-2xl mx-auto mb-8"
+        >
+          ComplyHealth brings structure and clarity to everyday health
+          management by:
         </p>
       </div>
 
       <div class="grid gap-6 md:grid-cols-2">
-        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+        <div
+          class="bg-background p-6 rounded-lg shadow-sm border border-outline"
+        >
           <div class="flex items-start gap-3">
-            <div class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+            <div
+              class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"
+            ></div>
             <p class="text-text-secondary text-lg leading-loose">
-              <strong>Centralizing</strong> your medications and conditions in one place
+              <strong>Centralizing</strong> your medications and conditions in one
+              place
             </p>
           </div>
         </div>
-        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+        <div
+          class="bg-background p-6 rounded-lg shadow-sm border border-outline"
+        >
           <div class="flex items-start gap-3">
-            <div class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+            <div
+              class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"
+            ></div>
             <p class="text-text-secondary text-lg leading-loose">
-              <strong>Explaining</strong> everything in plain language that makes sense
+              <strong>Explaining</strong> everything in plain language that makes
+              sense
             </p>
           </div>
         </div>
-        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+        <div
+          class="bg-background p-6 rounded-lg shadow-sm border border-outline"
+        >
           <div class="flex items-start gap-3">
-            <div class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+            <div
+              class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"
+            ></div>
             <p class="text-text-secondary text-lg leading-loose">
               <strong>Reducing</strong> cognitive burden so you can focus on living
             </p>
           </div>
         </div>
-        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline">
+        <div
+          class="bg-background p-6 rounded-lg shadow-sm border border-outline"
+        >
           <div class="flex items-start gap-3">
-            <div class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+            <div
+              class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"
+            ></div>
             <p class="text-text-secondary text-lg leading-loose">
               <strong>Helping</strong> you feel more confident and in control
             </p>
@@ -329,46 +347,14 @@
         </div>
       </div>
     </div>
-
-    <!-- Gradient Separator -->
-    <div class="h-12 bg-gradient-to-b from-white/30 to-surface/30"></div>
-  </section>
-
-  <!-- Audience Section -->
-  <section class="scroll-section px-4 py-12 md:py-20 bg-surface">
-    <div class="max-w-4xl mx-auto">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-semibold text-text-primary mb-12">
-          You're Not Alone in This
-        </h2>
-      </div>
-
-      <div class="grid gap-8 md:grid-cols-2">
-        <div class="bg-background p-8 rounded-lg shadow-sm border border-outline text-center">
-          <h3 class="text-2xl font-semibold text-text-primary mb-4">
-            For Adults Managing Chronic Conditions
-          </h3>
-          <p class="text-text-secondary text-lg leading-loose">
-            If you're 25-65, managing 2+ chronic conditions and taking multiple medications, and feeling overwhelmed - this is for you.
-          </p>
-        </div>
-        <div class="bg-background p-8 rounded-lg shadow-sm border border-outline text-center">
-          <h3 class="text-2xl font-semibold text-text-primary mb-4">
-            For Caregivers
-          </h3>
-          <p class="text-text-secondary text-lg leading-loose">
-            If you're helping a loved one navigate their health journey, we want to support you too.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Gradient Separator -->
-    <div class="h-12 bg-gradient-to-b from-surface/30 to-white/30"></div>
   </section>
 
   <!-- Differentiation Section -->
-  <section class="scroll-section px-4 py-12 md:py-20">
+  <section
+    use:fadeInOnScroll={"differentiation"}
+    class="scroll-section section-surface-fade px-4 py-12 md:py-20"
+    class:visible={visibleSections.differentiation}
+  >
     <div class="max-w-4xl mx-auto">
       <div class="text-center mb-12">
         <h2 class="text-3xl md:text-4xl font-semibold text-text-primary mb-12">
@@ -377,42 +363,184 @@
       </div>
 
       <div class="grid gap-6 md:grid-cols-3">
-        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center">
+        <div
+          class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center"
+        >
           <h3 class="text-xl font-semibold text-text-primary mb-4">
             Healthcare Professional-Founded
           </h3>
           <p class="text-text-secondary text-base leading-loose">
-            Built by people with direct patient-care experience who understand the real challenges.
+            Built by people with direct patient-care experience who understand
+            the real challenges.
           </p>
         </div>
-        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center">
+        <div
+          class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center"
+        >
           <h3 class="text-xl font-semibold text-text-primary mb-4">
             Plain Language
           </h3>
           <p class="text-text-secondary text-base leading-loose">
-            No confusing medical jargon. Just clear explanations that make sense.
+            No confusing medical jargon. Just clear explanations that make
+            sense.
           </p>
         </div>
-        <div class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center">
+        <div
+          class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center"
+        >
           <h3 class="text-xl font-semibold text-text-primary mb-4">
             Independent
           </h3>
           <p class="text-text-secondary text-base leading-loose">
-            Built for people, not for systems. Your confidence over clinical workflows.
+            Built for people, not for systems. Your confidence over clinical
+            workflows.
           </p>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- Audience Section -->
+  <section
+    use:fadeInOnScroll={"audience"}
+    class="scroll-section section-surface-fade-out px-4 py-12 md:py-20"
+    class:visible={visibleSections.audience}
+  >
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-semibold text-text-primary mb-12">
+          You're Not Alone in This
+        </h2>
+      </div>
+
+      <div class="grid gap-8 md:grid-cols-2">
+        <div
+          class="bg-background p-8 rounded-lg shadow-sm border border-outline text-center"
+        >
+          <h3 class="text-2xl font-semibold text-text-primary mb-4">
+            For Adults Managing Chronic Conditions
+          </h3>
+          <p class="text-text-secondary text-lg leading-loose">
+            For adults managing chronic health conditions, take daily
+            medications, or feel overwhelmed organizing your health information
+            - This is for you.
+          </p>
+        </div>
+        <div
+          class="bg-background p-8 rounded-lg shadow-sm border border-outline text-center"
+        >
+          <h3 class="text-2xl font-semibold text-text-primary mb-4">
+            For Caregivers
+          </h3>
+          <p class="text-text-secondary text-lg leading-loose">
+            If you're helping a loved one navigate their health journey, we want
+            to support you too.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Before/After Section -->
+  <section
+    use:fadeInOnScroll={"beforeAfter"}
+    class="scroll-section section-surface-fade px-4 py-12 md:py-20"
+    class:visible={visibleSections.beforeAfter}
+  >
+    <div class="max-w-4xl mx-auto">
+      <h2
+        class="text-3xl md:text-4xl font-semibold text-text-primary text-center mb-12"
+      >
+        From Chaos to Clarity
+      </h2>
+      <div class="grid md:grid-cols-2 gap-6 md:gap-8">
+        <div
+          class="bg-background p-4 rounded-xl shadow-lg border border-outline"
+        >
+          <h3 class="text-xl font-semibold text-text-primary mb-4 text-center">
+            Before
+          </h3>
+          <ul class="space-y-3">
+            <li class="flex items-start gap-3">
+              <div
+                class="w-2 h-2 bg-error rounded-full mt-2 flex-shrink-0"
+              ></div>
+              <span class="text-text-secondary">Cluttered instructions</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div
+                class="w-2 h-2 bg-error rounded-full mt-2 flex-shrink-0"
+              ></div>
+              <span class="text-text-secondary">Unorganized information</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div
+                class="w-2 h-2 bg-error rounded-full mt-2 flex-shrink-0"
+              ></div>
+              <span class="text-text-secondary">Miscommunication</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div
+                class="w-2 h-2 bg-error rounded-full mt-2 flex-shrink-0"
+              ></div>
+              <span class="text-text-secondary">Missed medications</span>
+            </li>
+          </ul>
+        </div>
+        <div
+          class="bg-background p-4 rounded-xl shadow-lg border border-outline"
+        >
+          <h3 class="text-xl font-semibold text-text-primary mb-4 text-center">
+            After
+          </h3>
+          <ul class="space-y-3">
+            <li class="flex items-start gap-3">
+              <div
+                class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"
+              ></div>
+              <span class="text-text-secondary">Clear health organization</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div
+                class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"
+              ></div>
+              <span class="text-text-secondary">Reduced stress</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div
+                class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"
+              ></div>
+              <span class="text-text-secondary"
+                >Promotes medication compliance</span
+              >
+            </li>
+            <li class="flex items-start gap-3">
+              <div
+                class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"
+              ></div>
+              <span class="text-text-secondary">Fewer missed appointments</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div
+                class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"
+              ></div>
+              <span class="text-text-secondary">Better understanding</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Join Mission Section -->
-  <section id="signup" class="px-4 py-8 md:py-12">
+  <section id="signup" class="section-surface-fade-out px-4 py-8 md:py-12">
     <div class="max-w-xl mx-auto text-center">
       <h2 class="text-2xl md:text-3xl font-semibold text-text-primary mb-3">
         Join Our Mission
       </h2>
       <p class="text-text-secondary text-sm mb-6 leading-relaxed">
-        We're building this for real people facing real challenges. Your input helps us create the solution you actually need.
+        We're building this for real people facing real challenges. Your input
+        helps us create the solution you actually need.
       </p>
 
       {#if submitStatus === "success"}
@@ -434,7 +562,8 @@
           </svg>
           <p class="font-medium text-lg">Welcome aboard!</p>
           <p class="mt-2 text-tertiary/80">
-            Thanks for joining our mission. We'll be in touch with updates as we build what you need.
+            Thanks for joining our mission. We'll be in touch with updates as we
+            build what you need.
           </p>
         </div>
       {:else}
@@ -508,29 +637,46 @@
         &copy; 2025 ComplyHealth. All rights reserved.
       </p>
       <p class="text-text-secondary text-xs">
-        ComplyHealth is an independent product and is not affiliated with or endorsed by any healthcare organization.
+        ComplyHealth is an independent product and is not affiliated with or
+        endorsed by any healthcare organization.
       </p>
     </div>
   </footer>
 </main>
 
 <!-- Survey Modal -->
-<SurveyModal
-  bind:isOpen={showSurveyModal}
-  userEmail={submittedEmail}
-/>
+<SurveyModal bind:isOpen={showSurveyModal} userEmail={submittedEmail} />
 
 <style>
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+  .scroll-section {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.6s ease-out,
+      transform 0.6s ease-out;
   }
 
-  .scroll-section {
-    animation: fadeIn 1s ease-out;
+  .scroll-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Smooth fade into surface-colored sections */
+  .section-surface-fade {
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      var(--color-surface) 60px,
+      var(--color-surface) 100%
+    );
+  }
+
+  /* Smooth fade out of surface-colored sections */
+  .section-surface-fade-out {
+    background: linear-gradient(
+      to bottom,
+      var(--color-surface) 0%,
+      transparent 60px
+    );
   }
 </style>
