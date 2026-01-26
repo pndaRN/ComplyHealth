@@ -193,9 +193,9 @@
     <p
       class="text-lg md:text-xl text-text-secondary max-w-2xl mx-auto mb-10 leading-relaxed"
     >
-      We're healthcare professionals building a simple way to track meds and
-      conditions, all in one simple place - without juggling portals or
-      paperwork.
+      We're healthcare professionals building a mobile app that simplifies how
+      you track medications and conditions - all in one place, without juggling
+      portals or paperwork.
     </p>
     <button
       onclick={scrollToSignup}
@@ -316,8 +316,8 @@
               class="w-3 h-3 bg-primary rounded-full mt-2 flex-shrink-0"
             ></div>
             <p class="text-text-secondary text-lg leading-loose">
-              <strong>Explaining</strong> everything in plain language that makes
-              sense
+              <strong>Turning</strong> scattered health information into one ogranized
+              view
             </p>
           </div>
         </div>
@@ -362,7 +362,7 @@
         </h2>
       </div>
 
-      <div class="grid gap-6 md:grid-cols-3">
+      <div class="grid gap-6 md:grid-cols-2">
         <div
           class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center"
         >
@@ -394,6 +394,18 @@
           <p class="text-text-secondary text-base leading-loose">
             Built for people, not for systems. Your confidence over clinical
             workflows.
+          </p>
+        </div>
+        <div
+          class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center"
+        >
+          <h3 class="text-xl font-semibold text-text-primary mb-4">
+            Built For Your Privacy
+          </h3>
+          <p class="text-text-secondary text-base leading-loose">
+            Most health apps monetize user data—we don't. Your information is
+            encrypted, protected, and only used to help you stay orginized and
+            informed.
           </p>
         </div>
       </div>
@@ -513,12 +525,6 @@
               <span class="text-text-secondary"
                 >Promotes medication compliance</span
               >
-            </li>
-            <li class="flex items-start gap-3">
-              <div
-                class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"
-              ></div>
-              <span class="text-text-secondary">Fewer missed appointments</span>
             </li>
             <li class="flex items-start gap-3">
               <div
