@@ -212,10 +212,10 @@
     class:visible={visibleSections.problem}
   >
     <div class="max-w-4xl mx-auto">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-semibold text-text-primary mb-6">
-          The Daily Struggle is Real
-        </h2>
+    <div class="text-center mb-12 section-title-spacer">
+      <h2 class="text-3xl md:text-4xl font-semibold text-text-primary mb-6">
+        The Daily Struggle is Real
+      </h2>
         <p
           class="text-lg text-text-secondary leading-relaxed max-w-2xl mx-auto mb-8"
         >
@@ -282,7 +282,7 @@
     class:visible={visibleSections.solution}
   >
     <div class="max-w-4xl mx-auto">
-      <div class="text-center mb-12">
+      <div class="text-center mb-12 section-title-spacer">
         <h2 class="text-3xl md:text-4xl font-semibold text-text-primary mb-6">
           What if it could be simpler?
         </h2>
@@ -356,7 +356,7 @@
     class:visible={visibleSections.differentiation}
   >
     <div class="max-w-4xl mx-auto">
-      <div class="text-center mb-12">
+      <div class="text-center mb-12 section-title-spacer">
         <h2 class="text-3xl md:text-4xl font-semibold text-text-primary mb-12">
           Built Differently Because It Has to Be
         </h2>
@@ -419,7 +419,7 @@
     class:visible={visibleSections.audience}
   >
     <div class="max-w-4xl mx-auto">
-      <div class="text-center mb-12">
+      <div class="text-center mb-12 section-title-spacer">
         <h2 class="text-3xl md:text-4xl font-semibold text-text-primary mb-12">
           You're Not Alone in This
         </h2>
@@ -461,7 +461,7 @@
   >
     <div class="max-w-4xl mx-auto">
       <h2
-        class="text-3xl md:text-4xl font-semibold text-text-primary text-center mb-12"
+        class="text-3xl md:text-4xl font-semibold text-text-primary text-center mb-12 section-title-spacer"
       >
         From Chaos to Clarity
       </h2>
@@ -541,13 +541,14 @@
   <!-- Join Mission Section -->
   <section id="signup" class="section-surface-fade-out px-4 py-8 md:py-12">
     <div class="max-w-xl mx-auto text-center">
-      <h2 class="text-2xl md:text-3xl font-semibold text-text-primary mb-3">
+      <h2 class="text-2xl md:text-3xl font-semibold text-text-primary mb-3 section-title-spacer">
         Join Our Mission
       </h2>
-      <p class="text-text-secondary text-sm mb-6 leading-relaxed">
-        We're building this for real people facing real challenges. Your input
-        helps us create the solution you actually need.
-      </p>
+      <div class="bg-background p-6 rounded-lg shadow-sm border border-outline text-center mb-6">
+        <p class="text-text-secondary text-base md:text-lg leading-relaxed">
+          Get free early access during beta, help shape our product with your feedback, and be a part of something that supports better chronic health management. We're building this for real people facing real challenges, and your input helps us create the solution you actually need.
+        </p>
+      </div>
 
       {#if submitStatus === "success"}
         <div
@@ -684,5 +685,10 @@
       var(--color-surface) 0%,
       transparent 60px
     );
+  }
+
+  /* Add extra spacing before section titles */
+  .section-title-spacer {
+    padding-top: 80px;
   }
 </style>
