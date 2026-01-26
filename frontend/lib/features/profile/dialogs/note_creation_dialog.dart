@@ -176,10 +176,12 @@ class _NoteCreationDialogState extends ConsumerState<NoteCreationDialog> {
                   }
 
                   final sources = snapshot.data!;
-                  final selectedSource = sources.firstWhere(
-                    (source) => source.id == _selectedSourceId,
-                    orElse: () => null,
-                  );
+                  final selectedSource = _selectedSourceId != null
+                      ? sources.cast<Object?>().firstWhere(
+                          (source) => source != null && _getSourceIdentifier(source) == _selectedSourceId,
+                          orElse: () => null,
+                        )
+                      : null;
 
                   return DropdownButtonFormField<dynamic>(
                     initialValue: selectedSource,
@@ -201,7 +203,7 @@ class _NoteCreationDialogState extends ConsumerState<NoteCreationDialog> {
                     onChanged: _isSubmitting
                         ? null
                         : (value) {
-                            setState(() => _selectedSourceId = value?.id);
+                            setState(() => _selectedSourceId = value != null ? _getSourceIdentifier(value) : null);
                           },
                   );
                 },
@@ -274,6 +276,15 @@ class _NoteCreationDialogState extends ConsumerState<NoteCreationDialog> {
     }
   }
 
+  /// Gets the identifier for a source (code for conditions, id for medications)
+  String _getSourceIdentifier(dynamic source) {
+    if (_selectedSourceType == NoteSourceType.condition) {
+      return source.code;
+    } else {
+      return source.id;
+    }
+  }
+
   Future<void> _createNote() async {
     if (_selectedSourceId == null || _contentController.text.trim().isEmpty) {
       return;
@@ -285,7 +296,7 @@ class _NoteCreationDialogState extends ConsumerState<NoteCreationDialog> {
       // Get the selected source
       final sources = await _getSourcesForType();
       final selectedSource = sources.firstWhere(
-        (source) => source.id == _selectedSourceId,
+        (source) => _getSourceIdentifier(source) == _selectedSourceId,
       );
 
       // Create the notebook entry

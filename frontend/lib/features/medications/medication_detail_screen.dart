@@ -26,6 +26,7 @@ class _MedicationDetailScreenState
     extends ConsumerState<MedicationDetailScreen> {
   late TextEditingController _notesController;
   Timer? _debounceTimer;
+  final ValueNotifier<bool> _hasNotesText = ValueNotifier(false);
 
   @override
   void initState() {
@@ -33,12 +34,14 @@ class _MedicationDetailScreenState
     _notesController = TextEditingController(
       text: widget.medication.personalNotes ?? '',
     );
+    _hasNotesText.value = widget.medication.personalNotes?.isNotEmpty ?? false;
   }
 
   @override
   void dispose() {
     _debounceTimer?.cancel();
     _notesController.dispose();
+    _hasNotesText.dispose();
     super.dispose();
   }
 
@@ -60,11 +63,6 @@ class _MedicationDetailScreenState
       conditionNames: currentMed.conditionNames,
       conditions: conditions,
     );
-
-    // Update notes controller if medication notes changed externally
-    if (_notesController.text != (currentMed.personalNotes ?? '')) {
-      _notesController.text = currentMed.personalNotes ?? '';
-    }
 
     return DefaultTabController(
       length: 3,
@@ -122,13 +120,18 @@ class _MedicationDetailScreenState
             _buildScheduleTab(currentMed),
             Scaffold(
               body: _buildNotesTab(currentMed),
-              floatingActionButton: _notesController.text.isNotEmpty
-                  ? FloatingActionButton.extended(
-                      onPressed: () => _saveToNotebook(currentMed),
-                      icon: const Icon(Icons.save),
-                      label: const Text('Save'),
-                    )
-                  : null,
+              floatingActionButton: ValueListenableBuilder<bool>(
+                valueListenable: _hasNotesText,
+                builder: (context, hasText, child) {
+                  return hasText
+                      ? FloatingActionButton.extended(
+                          onPressed: () => _saveToNotebook(currentMed),
+                          icon: const Icon(Icons.save),
+                          label: const Text('Save'),
+                        )
+                      : const SizedBox.shrink();
+                },
+              ),
             ),
           ],
         ),
@@ -618,7 +621,7 @@ class _MedicationDetailScreenState
                       .read(medicationProvider.notifier)
                       .updateMedicationNotes(medication.id, value);
                 });
-                setState(() {}); // Update FAB visibility
+                _hasNotesText.value = value.isNotEmpty;
               },
             ),
           ),
@@ -652,7 +655,7 @@ class _MedicationDetailScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Note saved in notebook in profile')),
       );
-      setState(() {}); // Refresh to hide FAB
+      _hasNotesText.value = false;
     }
   }
 }

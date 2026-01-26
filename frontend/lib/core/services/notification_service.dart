@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -34,6 +34,12 @@ class NotificationService {
   /// Initialize the notification service
   Future<void> initialize() async {
     if (_initialized) return;
+
+    // Skip initialization on web (notifications not supported)
+    if (kIsWeb) {
+      _initialized = true;
+      return;
+    }
 
     // Initialize timezone
     tz.initializeTimeZones();
@@ -83,7 +89,7 @@ class NotificationService {
       await androidPlugin.requestNotificationsPermission();
 
       // Request exact alarm permission for Android 12+ (API 31+)
-      if (Platform.isAndroid) {
+      if (!kIsWeb && Platform.isAndroid) {
         final exactAlarmGranted =
             await androidPlugin.requestExactAlarmsPermission();
         _exactAlarmsPermitted = exactAlarmGranted ?? false;
