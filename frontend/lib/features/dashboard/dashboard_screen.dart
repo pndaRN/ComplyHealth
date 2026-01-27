@@ -37,7 +37,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       _refreshKey++;
     });
   }
-}
+
 
 @override
   Widget build(BuildContext context) {
@@ -216,3 +216,4 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ),
     );
   }
+}
