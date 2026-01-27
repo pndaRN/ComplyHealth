@@ -212,7 +212,7 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
               },
             )
           : Scaffold(
-              body: IndexStack(
+              body: IndexedStack(
                 index: _index,
                 children: _screens,
               ),
