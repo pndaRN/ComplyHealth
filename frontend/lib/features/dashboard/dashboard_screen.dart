@@ -7,6 +7,7 @@ import '../../core/theme/theme_provider.dart';
 import 'widgets/todays_medications_widget.dart';
 import 'widgets/enhanced_calendar_widget.dart';
 import 'widgets/at_a_glance_widget.dart';
+import 'widgets/daily_progress_widget.dart'; // <--- Import your new widget
 import '../../core/state/profile_provider.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -73,7 +74,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                     const Color(0xFF050A15),
                                   ]
                                 : [
-                                    theme.colorScheme.primary.withValues(alpha: 0.7),
+                                    theme.colorScheme.primary
+                                        .withValues(alpha: 0.7),
                                     const Color(0xFFF5F8FF),
                                   ],
                           ),
@@ -107,7 +109,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                       fit: BoxFit.scaleDown,
                                       alignment: Alignment.centerLeft,
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8),
                                         child: profile.firstName.isNotEmpty
                                             ? Text(
                                                 'Good to see you, ${profile.firstName}',
@@ -130,11 +133,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   ),
                                   Consumer(
                                     builder: (context, ref, child) {
-                                      final themeState = ref.watch(themeProvider);
-                                      final isDark =
-                                          themeState.themeMode == ThemeMode.dark ||
-                                          (themeState.themeMode == ThemeMode.system &&
-                                              MediaQuery.of(context).platformBrightness ==
+                                      final themeState =
+                                          ref.watch(themeProvider);
+                                      final isDark = themeState.themeMode ==
+                                              ThemeMode.dark ||
+                                          (themeState.themeMode ==
+                                                  ThemeMode.system &&
+                                              MediaQuery.of(context)
+                                                      .platformBrightness ==
                                                   Brightness.dark);
 
                                       return PopupMenuButton<String>(
@@ -144,7 +150,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                         ),
                                         onSelected: (value) {
                                           if (value == 'theme') {
-                                            ref.read(themeProvider.notifier).toggleTheme();
+                                            ref
+                                                .read(themeProvider.notifier)
+                                                .toggleTheme();
                                           }
                                         },
                                         itemBuilder: (context) => [
@@ -153,11 +161,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                             child: Row(
                                               children: [
                                                 Icon(
-                                                  isDark ? Icons.light_mode : Icons.dark_mode,
+                                                  isDark
+                                                      ? Icons.light_mode
+                                                      : Icons.dark_mode,
                                                 ),
                                                 const SizedBox(width: 12),
                                                 Text(
-                                                  isDark ? 'Light mode' : 'Dark mode',
+                                                  isDark
+                                                      ? 'Light mode'
+                                                      : 'Dark mode',
                                                 ),
                                               ],
                                             ),
@@ -169,7 +181,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 ],
                               ),
                             ),
-                            // Fixed Calendar Widget
                             EnhancedCalendarWidget(
                               key: ValueKey('adherence_$_refreshKey'),
                             ),
@@ -178,11 +189,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               child: RefreshIndicator(
                                 onRefresh: _onRefresh,
                                 child: SingleChildScrollView(
-                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
                                   child: Column(
                                     children: [
+                                      const DailyProgressWidget(), 
                                       TodaysMedicationsWidget(
-                                        key: ValueKey('medications_$_refreshKey'),
+                                        key: ValueKey(
+                                            'medications_$_refreshKey'),
                                       ),
                                       AtAGlanceWidget(
                                         key: ValueKey('glance_$_refreshKey'),
