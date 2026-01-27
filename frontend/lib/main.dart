@@ -202,7 +202,11 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
               },
             )
           : Scaffold(
-              body: _screens[_index],
+              body: IndexStack(
+                index: _index,
+                children: _screens,
+              ),
+              
               bottomNavigationBar: BottomNavigationBar(
                 currentIndex: _index,
                 onTap: (i) => setState(() => _index = i),
