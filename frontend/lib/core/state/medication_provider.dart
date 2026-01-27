@@ -12,7 +12,7 @@ final medicationProvider =
 
 class MedicationNotifier extends AsyncNotifier<List<Medication>> {
   MedicationSortOption _sortOption = MedicationSortOption.alphabetical;
-  bool _hasScheduledInitialNotifications = false;
+  static bool _hasScheduledInitialNotifications = false;
 
   Future<Box<Medication>> _getBox() async {
     if (Hive.isBoxOpen('medications')) return Hive.box('medications');
