@@ -17,6 +17,7 @@ class DailyProgressWidget extends ConsumerWidget {
     // (Assuming adherenceState is the list of instances, or use .when if it's AsyncValue)
     final instances = adherenceState is List ? adherenceState : []; 
     
+    final List<MedicationInstance> typedInstances = instances as List<MedicationInstance>;
     final scheduledInstances = instances.where((i) => !i.isPRN).toList();
     final takenCount = scheduledInstances.where((i) => i.isTaken).length;
     final totalCount = scheduledInstances.length;
