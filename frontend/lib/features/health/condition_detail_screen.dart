@@ -85,8 +85,8 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
           floatingActionButton: isAdded && _notesController.text.isNotEmpty
               ? FloatingActionButton.extended(
                   onPressed: () => _saveToNotebook(),
-                  icon: const Icon(Icons.note_add),
-                  label: const Text('New Note'),
+                  icon: const Icon(Icons.save),
+                  label: const Text('Save'),
                 )
               : null,
         ),

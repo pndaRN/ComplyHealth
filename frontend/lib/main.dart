@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,21 +48,14 @@ void main() async {
   // Init Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  try {
-    await EncryptionMigrationService.migrateAllBoxes();
-  } catch (e) {
-    print('Migration error: $e');
+  // Set up Crashlytics error handlers (not supported on web)
+  if (!kIsWeb) {
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
   }
-
-  // Set up Crashlytics error handlers
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
-
-  // Note: Notification scheduling is handled by the medication provider's build() method
-  // to avoid duplicate scheduling from separate ProviderContainer instances
 
   runApp(const ProviderScope(child: ComplyHealthApp()));
 }
@@ -76,6 +70,8 @@ class ComplyHealthApp extends ConsumerStatefulWidget {
 class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
   int _index = 0;
   bool _showOnboarding = true;
+  bool _isAppReady = false;
+
   StreamSubscription<String>? _notificationSubscription;
   int _dashboardRefreshKey = 0;
 
@@ -105,6 +101,8 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
   @override
   void initState() {
     super.initState();
+
+    _initializeApp();
     // Listen for notification taps to navigate to dashboard
     _notificationSubscription = NotificationService.onNotificationTap.listen((
       payload,
@@ -158,6 +156,21 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
     }
   }
 
+  Future<void> _initializeApp() async {
+    try {
+      // Perform the heavy migration here while the UI is already visible
+      await EncryptionMigrationService.migrateAllBoxes();
+    } catch (e) {
+      print('Migration error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAppReady = true;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeState = ref.watch(themeProvider);
@@ -199,7 +212,11 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
               },
             )
           : Scaffold(
-              body: _screens[_index],
+              body: IndexStack(
+                index: _index,
+                children: _screens,
+              ),
+
               bottomNavigationBar: BottomNavigationBar(
                 currentIndex: _index,
                 onTap: (i) => setState(() => _index = i),

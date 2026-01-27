@@ -17,17 +17,14 @@ class EnhancedCalendarWidget extends ConsumerStatefulWidget {
 class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
     with TickerProviderStateMixin<EnhancedCalendarWidget> {
   DateTime _currentWeekStart;
-  DateTime _selectedDate;
   final Map<DateTime, List<MedicationLog>> _weekLogs = {};
   bool _isLoading = true;
-  bool _isExpanded = false;
   bool _isAnimating = false;
   late AnimationController _slideController;
   late Animation<Offset> _slideAnimation;
 
   _EnhancedCalendarWidgetState()
-    : _currentWeekStart = _getWeekStart(DateTime.now()),
-      _selectedDate = DateTime.now();
+    : _currentWeekStart = _getWeekStart(DateTime.now());
 
   static DateTime _getWeekStart(DateTime date) {
     final startOfWeek = date.subtract(Duration(days: date.weekday % 7));
@@ -41,23 +38,13 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
     });
   }
 
-  String _formatDateForDisplay(DateTime date) {
-    final now = DateTime.now();
-    if (date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day) {
-      return 'Today, ${DateFormat('MMM d, y').format(date)}';
-    }
-    return DateFormat('EEEE, MMM d, y').format(date);
-  }
-
   String _getWeekRangeDisplay() {
     final weekEnd = _currentWeekStart.add(const Duration(days: 6));
 
     if (_currentWeekStart.month == weekEnd.month) {
-      return 'Week of ${DateFormat('MMM d').format(_currentWeekStart)}-${DateFormat('d, y').format(weekEnd)}';
+      return '${DateFormat('MMM d').format(_currentWeekStart)} - ${DateFormat('d').format(weekEnd)}';
     } else {
-      return 'Week of ${DateFormat('MMM d').format(_currentWeekStart)} - ${DateFormat('MMM d, y').format(weekEnd)}';
+      return '${DateFormat('MMM d').format(_currentWeekStart)} - ${DateFormat('MMM d').format(weekEnd)}';
     }
   }
 
@@ -76,7 +63,6 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
 
     _loadWeekData();
 
-    // Listen for adherence state changes to refresh data
     ref.listenManual(adherenceProvider, (previous, next) {
       _loadWeekData();
     });
@@ -114,7 +100,6 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
     if (_isAnimating) return;
     setState(() => _isAnimating = true);
 
-    // Slide out to the right
     _slideAnimation =
         Tween<Offset>(begin: Offset.zero, end: const Offset(1.0, 0.0)).animate(
           CurvedAnimation(parent: _slideController, curve: Curves.easeInOut),
@@ -122,15 +107,12 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
 
     await _slideController.forward();
 
-    // Update data
     final newWeekStart = _currentWeekStart.subtract(const Duration(days: 7));
     setState(() {
       _currentWeekStart = newWeekStart;
-      _selectedDate = newWeekStart;
     });
     await _loadWeekData();
 
-    // Slide in from the left
     _slideAnimation =
         Tween<Offset>(begin: const Offset(-1.0, 0.0), end: Offset.zero).animate(
           CurvedAnimation(parent: _slideController, curve: Curves.easeInOut),
@@ -146,7 +128,6 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
     if (_isAnimating) return;
     setState(() => _isAnimating = true);
 
-    // Slide out to the left
     _slideAnimation =
         Tween<Offset>(begin: Offset.zero, end: const Offset(-1.0, 0.0)).animate(
           CurvedAnimation(parent: _slideController, curve: Curves.easeInOut),
@@ -154,15 +135,12 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
 
     await _slideController.forward();
 
-    // Update data
     final newWeekStart = _currentWeekStart.add(const Duration(days: 7));
     setState(() {
       _currentWeekStart = newWeekStart;
-      _selectedDate = newWeekStart;
     });
     await _loadWeekData();
 
-    // Slide in from the right
     _slideAnimation =
         Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero).animate(
           CurvedAnimation(parent: _slideController, curve: Curves.easeInOut),
@@ -181,7 +159,6 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
     final targetWeekStart = _getWeekStart(DateTime.now());
     final isGoingForward = targetWeekStart.isAfter(_currentWeekStart);
 
-    // Slide out in the appropriate direction
     _slideAnimation =
         Tween<Offset>(
           begin: Offset.zero,
@@ -192,14 +169,11 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
 
     await _slideController.forward();
 
-    // Update data
     setState(() {
       _currentWeekStart = targetWeekStart;
-      _selectedDate = DateTime.now();
     });
     await _loadWeekData();
 
-    // Slide in from the opposite direction
     _slideAnimation =
         Tween<Offset>(
           begin: Offset(isGoingForward ? 1.0 : -1.0, 0.0),
@@ -224,16 +198,12 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
     if (selectedWeek != null) {
       setState(() {
         _currentWeekStart = selectedWeek;
-        _selectedDate = selectedWeek;
       });
       _loadWeekData();
     }
   }
 
   void _selectDate(DateTime date) {
-    setState(() {
-      _selectedDate = date;
-    });
     _showDayDetails(date);
   }
 
@@ -373,297 +343,153 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     if (_isLoading) {
-      return const Card(
-        margin: EdgeInsets.all(16),
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Center(child: CircularProgressIndicator()),
-        ),
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: const Center(child: CircularProgressIndicator()),
       );
     }
 
     final weekDays = _getCurrentWeekDays();
     final now = DateTime.now();
-    final theme = Theme.of(context);
 
-    return Card(
-      margin: const EdgeInsets.all(16),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InkWell(
-            onTap: () => setState(() => _isExpanded = !_isExpanded),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Icon(
-                    _isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: theme.textTheme.titleLarge?.color,
-                    size: 28,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
+          // Navigation row
+          Row(
+            children: [
+              IconButton(
+                onPressed: _isAnimating ? null : _navigateToPreviousWeek,
+                icon: const Icon(Icons.chevron_left),
+                tooltip: 'Previous week',
+                style: IconButton.styleFrom(
+                  foregroundColor: Colors.white.withValues(alpha: 0.9),
+                ),
+              ),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: _showWeekPicker,
                       child: Text(
-                        '7-Day Adherence Calendar',
-                        maxLines: 1,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                        _getWeekRangeDisplay(),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          AnimatedCrossFade(
-            duration: const Duration(milliseconds: 200),
-            crossFadeState: _isExpanded
-                ? CrossFadeState.showFirst
-                : CrossFadeState.showSecond,
-            firstChild: Column(
-              children: [
-                const Divider(height: 1),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _formatDateForDisplay(_selectedDate),
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                    if (!_isViewingCurrentWeek()) ...[
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: _navigateToCurrentWeek,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'Today',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          IconButton(
-                            onPressed: _isAnimating
-                                ? null
-                                : _navigateToPreviousWeek,
-                            icon: const Icon(Icons.arrow_back_ios),
-                            tooltip: 'Previous week',
-                            style: IconButton.styleFrom(
-                              foregroundColor: _isAnimating
-                                  ? theme.colorScheme.outline
-                                  : theme.colorScheme.onSurface,
-                            ),
-                          ),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: _showWeekPicker,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: theme
-                                          .colorScheme
-                                          .surfaceContainerHighest,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      _getWeekRangeDisplay(),
-                                      style: theme.textTheme.labelLarge
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                            color: theme
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                                if (!_isViewingCurrentWeek()) ...[
-                                  const SizedBox(width: 8),
-                                  IconButton.filledTonal(
-                                    onPressed: _navigateToCurrentWeek,
-                                    icon: const Icon(
-                                      Icons.calendar_today,
-                                      size: 18,
-                                    ),
-                                    tooltip:
-                                        'Today', // Good for accessibility since text is gone
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: _isAnimating
-                                ? null
-                                : _navigateToNextWeek,
-                            icon: const Icon(Icons.arrow_forward_ios),
-                            tooltip: 'Next week',
-                            style: IconButton.styleFrom(
-                              foregroundColor: _isAnimating
-                                  ? theme.colorScheme.outline
-                                  : theme.colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
                       ),
                     ],
-                  ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                // Calendar grid with slide animation
-                ClipRect(
-                  child: SlideTransition(
-                    position: _slideAnimation,
+              ),
+              IconButton(
+                onPressed: _isAnimating ? null : _navigateToNextWeek,
+                icon: const Icon(Icons.chevron_right),
+                tooltip: 'Next week',
+                style: IconButton.styleFrom(
+                  foregroundColor: Colors.white.withValues(alpha: 0.9),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Calendar grid with slide animation
+          ClipRect(
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: weekDays.map((date) {
+                  final isToday =
+                      date.year == now.year &&
+                      date.month == now.month &&
+                      date.day == now.day;
+                  final color = _getDayColor(date, theme);
+                  final adherence = _getDayAdherence(date);
+
+                  return GestureDetector(
+                    onTap: () => _selectDate(date),
                     child: Column(
                       children: [
-                        // Day headers
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: weekDays.map((date) {
-                            return SizedBox(
-                              width: 40,
-                              child: Text(
-                                DateFormat('E').format(date),
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            );
-                          }).toList(),
+                        Text(
+                          DateFormat('E').format(date),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.white.withValues(alpha: 0.7),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        // Calendar days
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: weekDays.map((date) {
-                            final isToday =
-                                date.year == now.year &&
-                                date.month == now.month &&
-                                date.day == now.day;
-                            final isSelected =
-                                date.year == _selectedDate.year &&
-                                date.month == _selectedDate.month &&
-                                date.day == _selectedDate.day;
-                            final color = _getDayColor(date, theme);
-                            final adherence = _getDayAdherence(date);
-
-                            return GestureDetector(
-                              onTap: () => _selectDate(date),
-                              child: Column(
-                                children: [
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: color,
-                                      shape: BoxShape.circle,
-                                      border: isToday
-                                          ? Border.all(
-                                              color: theme.statusColors.info,
-                                              width: 2,
-                                            )
-                                          : isSelected
-                                          ? Border.all(
-                                              color: theme.colorScheme.primary,
-                                              width: 2,
-                                            )
-                                          : null,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        DateFormat('d').format(date),
-                                        style: TextStyle(
-                                          color: theme.colorScheme.onPrimary,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${adherence.toStringAsFixed(0)}%',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
+                        const SizedBox(height: 4),
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: isToday
+                                ? Border.all(
+                                    color: theme.statusColors.info,
+                                    width: 2,
+                                  )
+                                : null,
+                          ),
+                          child: Center(
+                            child: Text(
+                              DateFormat('d').format(date),
+                              style: TextStyle(
+                                color: theme.colorScheme.onPrimary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
-                            );
-                          }).toList(),
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 16),
-                        // Legend
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildLegendItem(
-                              theme.statusColors.success,
-                              'Perfect',
-                              theme,
-                            ),
-                            const SizedBox(width: 12),
-                            _buildLegendItem(
-                              theme.statusColors.success.withValues(alpha: 0.7),
-                              'Good',
-                              theme,
-                            ),
-                            const SizedBox(width: 12),
-                            _buildLegendItem(
-                              theme.statusColors.warning,
-                              'Fair',
-                              theme,
-                            ),
-                            const SizedBox(width: 12),
-                            _buildLegendItem(
-                              theme.statusColors.error,
-                              'Poor',
-                              theme,
-                            ),
-                          ],
+                        const SizedBox(height: 4),
+                        Text(
+                          '${adherence.toStringAsFixed(0)}%',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.white.withValues(alpha: 0.7),
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-              ],
+                  );
+                }).toList(),
+              ),
             ),
-            secondChild: const SizedBox.shrink(),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildLegendItem(Color color, String label, ThemeData theme) {
-    return Row(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
     );
   }
 }

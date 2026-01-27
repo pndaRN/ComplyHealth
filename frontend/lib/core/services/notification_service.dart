@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -8,21 +10,36 @@ import 'package:complyhealth/core/models/medication.dart';
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
-  NotificationService._internal();
+  NotificationService._internal() : _notifications = FlutterLocalNotificationsPlugin();
 
-  final FlutterLocalNotificationsPlugin _notifications =
-      FlutterLocalNotificationsPlugin();
+  /// Testing constructor that accepts a mock plugin
+  @visibleForTesting
+  NotificationService.withPlugin(this._notifications);
+
+  final FlutterLocalNotificationsPlugin _notifications;
 
   bool _initialized = false;
+  bool _exactAlarmsPermitted = true;
+
+  /// Setter for testing to bypass initialization
+  @visibleForTesting
+  set initialized(bool value) => _initialized = value;
 
   // Stream controller for notification tap events
   static final StreamController<String> _notificationTapController =
       StreamController<String>.broadcast();
-  static Stream<String> get onNotificationTap => _notificationTapController.stream;
+  static Stream<String> get onNotificationTap =>
+      _notificationTapController.stream;
 
   /// Initialize the notification service
   Future<void> initialize() async {
     if (_initialized) return;
+
+    // Skip initialization on web (notifications not supported)
+    if (kIsWeb) {
+      _initialized = true;
+      return;
+    }
 
     // Initialize timezone
     tz.initializeTimeZones();
@@ -70,6 +87,13 @@ class NotificationService {
 
     if (androidPlugin != null) {
       await androidPlugin.requestNotificationsPermission();
+
+      // Request exact alarm permission for Android 12+ (API 31+)
+      if (!kIsWeb && Platform.isAndroid) {
+        final exactAlarmGranted =
+            await androidPlugin.requestExactAlarmsPermission();
+        _exactAlarmsPermitted = exactAlarmGranted ?? false;
+      }
     }
 
     final iosPlugin = _notifications
@@ -171,13 +195,18 @@ class NotificationService {
       iOS: iosDetails,
     );
 
+    // Use exact alarms if permitted, otherwise fall back to inexact
+    final scheduleMode = _exactAlarmsPermitted
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.inexactAllowWhileIdle;
+
     await _notifications.zonedSchedule(
       id,
       title,
       body,
       scheduledDate,
       details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: scheduleMode,
       matchDateTimeComponents: DateTimeComponents.time,
       payload: payload,
     );
@@ -209,13 +238,16 @@ class NotificationService {
   }
 
   /// Generate a unique notification ID from medication ID and time index
-  int _generateNotificationId(String medicationId, int timeIndex) {
-    // Use a larger range to reduce collision risk
-    // Combine hash with timeIndex in a way that supports more scheduled times
+  @visibleForTesting
+  static int generateNotificationId(String medicationId, int timeIndex) {
+    // Use hash directly to minimize collision risk, offset by time index
     final hash = medicationId.hashCode.abs();
-    // Use modulo with larger number and shift for time index
-    return (hash % 10000000) + (timeIndex * 10000000);
+    // Large multiplier to separate time indices
+    return hash + (timeIndex * 10000000);
   }
+
+  int _generateNotificationId(String medicationId, int timeIndex) =>
+      generateNotificationId(medicationId, timeIndex);
 
   /// Format time for display
   String _formatTime(int hour, int minute) {

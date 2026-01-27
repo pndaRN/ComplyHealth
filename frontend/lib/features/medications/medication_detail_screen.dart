@@ -15,10 +15,7 @@ import 'dialogs/medication_edit_dialog.dart';
 class MedicationDetailScreen extends ConsumerStatefulWidget {
   final Medication medication;
 
-  const MedicationDetailScreen({
-    super.key,
-    required this.medication,
-  });
+  const MedicationDetailScreen({super.key, required this.medication});
 
   @override
   ConsumerState<MedicationDetailScreen> createState() =>
@@ -29,6 +26,7 @@ class _MedicationDetailScreenState
     extends ConsumerState<MedicationDetailScreen> {
   late TextEditingController _notesController;
   Timer? _debounceTimer;
+  final ValueNotifier<bool> _hasNotesText = ValueNotifier(false);
 
   @override
   void initState() {
@@ -36,12 +34,14 @@ class _MedicationDetailScreenState
     _notesController = TextEditingController(
       text: widget.medication.personalNotes ?? '',
     );
+    _hasNotesText.value = widget.medication.personalNotes?.isNotEmpty ?? false;
   }
 
   @override
   void dispose() {
     _debounceTimer?.cancel();
     _notesController.dispose();
+    _hasNotesText.dispose();
     super.dispose();
   }
 
@@ -63,11 +63,6 @@ class _MedicationDetailScreenState
       conditionNames: currentMed.conditionNames,
       conditions: conditions,
     );
-
-    // Update notes controller if medication notes changed externally
-    if (_notesController.text != (currentMed.personalNotes ?? '')) {
-      _notesController.text = currentMed.personalNotes ?? '';
-    }
 
     return DefaultTabController(
       length: 3,
@@ -125,13 +120,18 @@ class _MedicationDetailScreenState
             _buildScheduleTab(currentMed),
             Scaffold(
               body: _buildNotesTab(currentMed),
-              floatingActionButton: _notesController.text.isNotEmpty
-                  ? FloatingActionButton.extended(
-                      onPressed: () => _saveToNotebook(currentMed),
-                      icon: const Icon(Icons.note_add),
-                      label: const Text('New Note'),
-                    )
-                  : null,
+              floatingActionButton: ValueListenableBuilder<bool>(
+                valueListenable: _hasNotesText,
+                builder: (context, hasText, child) {
+                  return hasText
+                      ? FloatingActionButton.extended(
+                          onPressed: () => _saveToNotebook(currentMed),
+                          icon: const Icon(Icons.save),
+                          label: const Text('Save'),
+                        )
+                      : const SizedBox.shrink();
+                },
+              ),
             ),
           ],
         ),
@@ -139,7 +139,10 @@ class _MedicationDetailScreenState
     );
   }
 
-  Widget _buildOverviewTab(Medication medication, List<String> conditionDisplayNames) {
+  Widget _buildOverviewTab(
+    Medication medication,
+    List<String> conditionDisplayNames,
+  ) {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
@@ -231,23 +234,22 @@ class _MedicationDetailScreenState
                       ),
                     )
                   else
-                    ...conditionDisplayNames.map((name) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.healing,
-                            size: 20,
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            name,
-                            style: theme.textTheme.bodyLarge,
-                          ),
-                        ],
+                    ...conditionDisplayNames.map(
+                      (name) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.healing,
+                              size: 20,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(name, style: theme.textTheme.bodyLarge),
+                          ],
+                        ),
                       ),
-                    )),
+                    ),
                 ],
               ),
             ),
@@ -277,7 +279,9 @@ class _MedicationDetailScreenState
                   _buildSummaryRow(
                     context,
                     icon: Icons.schedule,
-                    label: medication.isPRN ? 'Max daily doses' : 'Times per day',
+                    label: medication.isPRN
+                        ? 'Max daily doses'
+                        : 'Times per day',
                     value: medication.isPRN
                         ? '${medication.maxDailyDoses ?? "Not set"}'
                         : '${medication.scheduledTimes.length}',
@@ -404,14 +408,17 @@ class _MedicationDetailScreenState
                             children: [
                               OutlinedButton.icon(
                                 onPressed: medication.currentDoseCount > 0
-                                    ? () => notifier.decrementDoseCount(medication)
+                                    ? () => notifier.decrementDoseCount(
+                                        medication,
+                                      )
                                     : null,
                                 icon: const Icon(Icons.remove),
                                 label: const Text('Decrease'),
                               ),
                               const SizedBox(width: 12),
                               FilledButton.icon(
-                                onPressed: () => notifier.incrementDoseCount(medication),
+                                onPressed: () =>
+                                    notifier.incrementDoseCount(medication),
                                 icon: const Icon(Icons.add),
                                 label: const Text('Add dose'),
                               ),
@@ -442,10 +449,7 @@ class _MedicationDetailScreenState
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.schedule,
-                          color: theme.colorScheme.primary,
-                        ),
+                        Icon(Icons.schedule, color: theme.colorScheme.primary),
                         const SizedBox(width: 12),
                         Text(
                           'Scheduled Times',
@@ -503,10 +507,13 @@ class _MedicationDetailScreenState
                                 child: Center(
                                   child: Text(
                                     '${index + 1}',
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      color: theme.colorScheme.onPrimaryContainer,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(
+                                          color: theme
+                                              .colorScheme
+                                              .onPrimaryContainer,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                   ),
                                 ),
                               ),
@@ -535,9 +542,7 @@ class _MedicationDetailScreenState
   void _showEditDialog(Medication medication) {
     showDialog(
       context: context,
-      builder: (context) => MedicationEditDialog(
-        medication: medication,
-      ),
+      builder: (context) => MedicationEditDialog(medication: medication),
     );
   }
 
@@ -554,7 +559,9 @@ class _MedicationDetailScreenState
           ),
           FilledButton(
             onPressed: () async {
-              await ref.read(medicationProvider.notifier).deleteMeds(medication);
+              await ref
+                  .read(medicationProvider.notifier)
+                  .deleteMeds(medication);
               if (!context.mounted) return;
               Navigator.of(context).pop(); // Close dialog
               if (!context.mounted) return;
@@ -614,7 +621,7 @@ class _MedicationDetailScreenState
                       .read(medicationProvider.notifier)
                       .updateMedicationNotes(medication.id, value);
                 });
-                setState(() {}); // Update FAB visibility
+                _hasNotesText.value = value.isNotEmpty;
               },
             ),
           ),
@@ -648,7 +655,7 @@ class _MedicationDetailScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Note saved in notebook in profile')),
       );
-      setState(() {}); // Refresh to hide FAB
+      _hasNotesText.value = false;
     }
   }
 }

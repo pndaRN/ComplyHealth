@@ -17,7 +17,7 @@
     "code": "F32.9",
     "name": "Major depressive disorder, single episode, unspecified",
     "category": "Psychiatric",
-    "commonName": "Depression",
+    "commonName": "Depression (MDD)",
     "description": "Major depressive disorder is when sadness and loss of interest stick around so long and so deeply that they start affecting how you think, sleep, and live day-to-day. It’s like your brain’s “brightness dial” gets turned way down—everything feels dimmer, heavier, and harder to move through. The lights still work, but it takes real effort (and often help) to turn them back up again."
   },
   {
@@ -43,7 +43,7 @@
   },
   {
     "code": "F41.9",
-    "name": "Anxiety",
+    "name": "Unspecified Anxiety Disorder",
     "category": "Psychiatric",
     "commonName": "Anxiety",
     "description": "Anxiety is a mental and physical response characterized by excessive worry, nervousness, or fear that is out of proportion to a situation. Our brain has a tiny helper that rings a bell when it thinks something scary might happen.When you have anxiety, that helper rings the bell too much, even when you’re safe.\nIt’s like having a fire alarm that keeps going off just because you made toast — it’s trying to protect you, but it’s too sensitive."
@@ -71,9 +71,9 @@
   },
   {
     "code": "G47.33",
-    "name": "Obstructive Sleep Apnea",
+    "name": "Obstructive Sleep Apnea (Adults and Children)",
     "category": "Respiratory",
-    "commonName": "OSA",
+    "commonName": "Sleep Apnea",
     "description": "OSA is a condition where the throat muscles relax too much during sleep, blocking the airway and causing short pauses in breathing. The body wakes up slightly each time to reopen the airway, which can happen dozens of times a night. This repeated disruption prevents deep, restful sleep, leaving the person tired during the day. Think of it like a garden hose that keeps getting pinched—water can’t flow smoothly until the kink is released. Treatment, like CPAP machines or lifestyle changes, helps keep the airway open so the “water” flows freely"
   },
   {
@@ -94,7 +94,7 @@
     "code": "R07.9",
     "name": "Chest pain, unspecified",
     "category": "Cardiovascular",
-    "commonName": "Angina",
+    "commonName": "Chest Pain",
     "description": "Chest pain is discomfort, pressure, or tightness in the chest that can happen for many reasons. Sometimes it’s minor, like a pulled muscle or heartburn, and sometimes it’s serious, like a heart or lung problem. It can feel like a heavy weight, squeezing, or burning. Think of chest pain like a car’s warning light—it signals that something may need attention. If it’s sudden, severe, or unusual, it’s important to get checked immediately."
   },
   {
@@ -148,16 +148,16 @@
   },
   {
     "code": "I73.9",
-    "name": "Peripheral Arterial Disease, unspecified",
+    "name": "Peripheral Vascular Disease",
     "category": "Cardiovascular",
-    "commonName": "PAD",
-    "description": "PAD happens when blood vessels in the legs are narrowed by plaque, reducing blood flow to the muscles. People may feel pain, cramping, or tiredness in the legs while walking, which improves with rest. It’s like a garden hose with kinks—the water struggles to get through until you stop and let it rest. PAD can also increase the risk of heart problems. Exercise, healthy habits, and medicine help keep the “hose” flowing properly."
+    "commonName": "PVD",
+    "description": "nan"
   },
   {
     "code": "I48.0",
     "name": "Paroxysmal Atrial Fibrillation",
     "category": "Cardiovascular",
-    "commonName": "Afib",
+    "commonName": "pAfib",
     "description": "Paroxysmal AFib is when the heart suddenly starts beating irregularly and fast, but the episodes stop on their own within minutes to days. People may feel a racing heart, palpitations, dizziness, or shortness of breath during an episode. It’s like a sudden traffic jam on a highway that clears up on its own. Between episodes, the heart beats normally. Treatment and monitoring help prevent complications and reduce episodes."
   },
   {
@@ -171,7 +171,7 @@
     "code": "E11.40",
     "name": "Type 2 diabetes mellitus with diabetic neuropathy, unspecified",
     "category": "Endocrine",
-    "commonName": "Neuropathy",
+    "commonName": "Diabetic Neuropathy",
     "description": "Diabetic neuropathy is nerve damage that happens when high blood sugar slowly harms the nerves, often in the feet, legs, or hands. This can cause numbness, tingling, burning, or sharp pain, and sometimes injuries go unnoticed because the nerves don’t send signals properly. Think of it like electrical wires getting frayed—the signals don’t travel clearly, so the body can’t feel things right. Over time, this can make balance tricky and increase the risk of infections or sores. Controlling blood sugar and taking care of the feet are crucial to prevent the damage from getting worse."
   },
   {
@@ -183,10 +183,10 @@
   },
   {
     "code": "E55.9",
-    "name": "Vitamin D Deficiency, unspecified",
+    "name": "Vitamin D deficiency, unspecified",
     "category": "Other",
-    "commonName": "Vitamin D Deficiency",
-    "description": "Vitamin D deficiency happens when the body doesn’t have enough vitamin D, which is vital for strong bones and a healthy immune system. People may feel weak, tired, or experience bone and muscle pain. Think of it like a house missing sunlight—without it, the structure becomes weaker and fragile. Vitamin D helps calcium build strong bones, so low levels can make fractures more likely. Supplements, fortified foods, and moderate sun exposure help rebuild strength and improve overall health."
+    "commonName": "Vitamine D deficiency",
+    "description": "nan"
   },
   {
     "code": "J45.4",
@@ -246,7 +246,7 @@
   },
   {
     "code": "K86.1",
-    "name": "Chronic Pancreatitis",
+    "name": "Other Chronic Pancreatitis",
     "category": "Gastrointestinal",
     "commonName": "Chronic pancretitis",
     "description": "Chronic pancreatitis is long-term inflammation of the pancreas, often caused by alcohol use or other diseases. The pancreas makes digestive enzymes and hormones like insulin, so inflammation can lead to pain, poor digestion, and diabetes. Think of it like a factory with broken machinery—the work slows down, and some products are made incorrectly or not at all. People may have repeated abdominal pain, nausea, or weight loss. Treatment includes managing pain, supporting digestion with enzymes, and controlling blood sugar."
@@ -537,5 +537,411 @@
     "category": "General",
     "commonName": "General Health",
     "description": "Coming soon"
+  },
+  {
+    "code": "E11",
+    "name": "Type 2 Diabetes",
+    "category": "Endocrine",
+    "commonName": "T2DM",
+    "description": "nan"
+  },
+  {
+    "code": "E78",
+    "name": "High Cholesterol",
+    "category": "Metabolic",
+    "commonName": "High Cholesterol",
+    "description": "High cholesterol means there’s too much fat—like cholesterol—floating around in your blood. It’s like having too much grease in your plumbing; things still flow, but over time that buildup can start to clog the pipes. You might not feel it day-to-day, but it quietly raises the risk of heart disease and stroke if left unchecked."
+  },
+  {
+    "code": "J44",
+    "name": "Chronic obstructive pulmonary disease",
+    "category": "Respiratory",
+    "commonName": "COPD",
+    "description": "Chronic obstructive pulmonary disease (COPD) means the airways in your lungs are damaged and narrowed, making it hard to breathe over time. It’s like trying to breathe through a straw that’s partly clogged—air still moves, but it takes more effort and never feels like quite enough. The damage builds up slowly, usually from smoking or long-term irritation, and can’t be fully undone once it’s there."
+  },
+  {
+    "code": "K21",
+    "name": "Gastroesophageal Reflux Disease",
+    "category": "Gastrointestinal",
+    "commonName": "GERD",
+    "description": "GERD is a chronic condition in which stomach acid or contents flow backward from the stomach into the esophagus, causing symptoms such as heartburn, regurgitation, and possible injury to the esophageal lining. Your stomach makes acid to help break down food, but sometimes that acid sneaks up into the tube (your esophagus) that connects your mouth to your stomach.When that happens, it can burn or taste sour in your throat.\nIt’s like when you shake a soda can too much and the bubbles shoot out the top — your stomach acid is the bubbles, and your esophagus gets messy from the splash."
+  },
+  {
+    "code": "M19",
+    "name": "Other and unspecified osteoarthritis",
+    "category": "Musculoskeletal",
+    "commonName": "Osteoarthritis",
+    "description": "Osteoarthritis is a degenerative joint disease characterized by the breakdown of articular cartilage and changes in the underlying bone, leading to pain, stiffness, decreased mobility, and sometimes swelling. It is the most common form of arthritis and is typically caused by aging, joint injury, or repetitive stress. Your joints are like door hinges that help your body move smoothly.\nInside those hinges is a soft, slippery padding called cartilage that keeps the bones from rubbing together.\nWhen you get osteoarthritis, that padding wears down — like a rusty door hinge that squeaks and grinds when you open it."
+  },
+  {
+    "code": "E66",
+    "name": "Overweight and Obesity",
+    "category": "Other",
+    "commonName": "Obesity",
+    "description": "Obesity is defined as an excessive accumulation of body fat that poses a health risk, typically identified by a body mass index of 30.0 or higher. Obesity means your body is carrying more fat than it needs to stay healthy.\nIt can make your heart, joints, and other organs work harder than they should.\nIt’s like a car built to carry four people that’s always loaded with eight — it still runs, but the engine and tires wear out faster."
+  },
+  {
+    "code": "J45",
+    "name": "Asthma",
+    "category": "Respiratory",
+    "commonName": "Asthma",
+    "description": "Asthma is a chronic inflammatory disease of the airways characterized by episodes of wheezing, shortness of breath, chest tightness, and coughing. Asthma means your breathing tubes inside your lungs sometimes get tight and irritated, making it hard to breathe.You might cough, wheeze, or feel like you can’t get enough air, especially when you’re sick, exercising, or around things like smoke or dust.\nIt’s like trying to breathe through a straw that keeps shrinking whenever the air gets dusty or cold — medicine helps open it back up so air can flow easily again."
+  },
+  {
+    "code": "K58",
+    "name": "Irritable Bowel Syndrome",
+    "category": "Gastrointestinal",
+    "commonName": "IBS",
+    "description": "IBS is when the stomach and intestines are overly sensitive, causing belly pain, cramping, gas, diarrhea, or constipation. It doesn’t damage the intestines but can make everyday life uncomfortable. Certain foods, stress, or changes in routine can trigger symptoms. Imagine your intestines are like a highway: sometimes traffic moves too fast, sometimes it slows down, causing jams or delays. Managing diet, stress, and sometimes medicine helps keep the “traffic” running smoothly."
+  },
+  {
+    "code": "L20",
+    "name": "Atopic Dermatitis",
+    "category": "Integumentary",
+    "commonName": "Eczema",
+    "description": "Atopic dermatitis is a skin condition that makes the skin dry, itchy, red, or bumpy because it doesn’t hold moisture well. Scratching can make the skin worse and sometimes lead to infection. It’s not contagious, but it can flare up with irritants, allergens, or stress. Think of the skin as a sponge that has cracks—water leaks out and irritants get in. Moisturizers, gentle care, and sometimes medicine help patch the “sponge” so it can protect the body better."
+  },
+  {
+    "code": "N18",
+    "name": "Chronic Kidney Disease",
+    "category": "Renal",
+    "commonName": "CKD",
+    "description": "CKD is when the kidneys gradually lose their ability to filter waste and extra water from the blood. Waste can build up in the body, causing tiredness, swelling, high blood pressure, or other health issues. Think of the kidneys as a water filter that gets clogged over time—the water (blood) isn’t cleaned as well. CKD usually progresses slowly, so early detection and treatment with medicine, diet changes, and sometimes dialysis are important. Keeping blood pressure and blood sugar under control helps protect the kidneys."
+  },
+  {
+    "code": "I11",
+    "name": "Hypertensive Heart Disease",
+    "category": "Cardiovascular",
+    "commonName": "Hypertensive Heart Disease",
+    "description": "This condition occurs when high blood pressure forces the heart to work harder than normal over time. The heart can become enlarged or weaker, making it harder to pump blood efficiently. Think of it like a pump pushing water through a pipe with extra pressure—it eventually wears out. People may experience fatigue, shortness of breath, or irregular heart rhythms. Controlling blood pressure through lifestyle changes and medication helps protect the heart from further damage."
+  },
+  {
+    "code": "I20.89",
+    "name": "Other forms of angina pectoris, including stable angina/angina on effort",
+    "category": "Cardiovascular",
+    "commonName": "Stable Angina",
+    "description": "Stable angina is chest pain or discomfort caused by reduced blood flow to the heart due to narrowed arteries. It usually happens with activity, stress, or excitement and goes away with rest or medicine. Think of it like a car engine struggling uphill—it works harder to get the blood (fuel) through the narrow arteries. People may feel pressure, squeezing, or heaviness in the chest, often in a predictable pattern. Managing diet, exercise, and medication helps keep the “engine” running safely."
+  },
+  {
+    "code": "I25",
+    "name": "Chronic Ischemic Heart Disease",
+    "category": "Cardiovascular",
+    "commonName": "CAD",
+    "description": "CAD without angina means the heart’s arteries are narrowed but don’t yet cause chest pain or noticeable symptoms. Blood flow is partially blocked, which can increase the risk of heart attacks in the future. Think of it like a river with narrow channels—water still flows, but a blockage could cause flooding later. Lifestyle changes, medicine, and regular check-ups help keep the river flowing smoothly. Even without pain, the heart needs protection."
+  },
+  {
+    "code": "E05",
+    "name": "Thyrotoxicosis (Hyperthyroidism)",
+    "category": "Endocrine",
+    "commonName": "Hyperthyroidism",
+    "description": "Hyperthyroidism occurs when the thyroid gland produces too many hormones, causing the body to speed up. People may feel restless, anxious, lose weight, have a rapid heartbeat, or sweat excessively. It’s like a car engine stuck in high gear—the body is constantly running faster than normal. This overactivity can make daily tasks feel exhausting even though the person appears “hyperactive.” Treatment with medicines, radioactive therapy, or surgery helps slow the engine down and restore balance."
+  },
+  {
+    "code": "E55",
+    "name": "Vitamin D Deficiency",
+    "category": "Other",
+    "commonName": "Vitamin D Deficiency",
+    "description": "Vitamin D deficiency happens when the body doesn’t have enough vitamin D, which is vital for strong bones and a healthy immune system. People may feel weak, tired, or experience bone and muscle pain. Think of it like a house missing sunlight—without it, the structure becomes weaker and fragile. Vitamin D helps calcium build strong bones, so low levels can make fractures more likely. Supplements, fortified foods, and moderate sun exposure help rebuild strength and improve overall health."
+  },
+  {
+    "code": "I12",
+    "name": "Hypertensive Chronic Kidney Disease",
+    "category": "Renal",
+    "commonName": "Hypertensive Kidney Disease",
+    "description": "Hypertensive CKD happens when long-term high blood pressure damages the kidneys, slowly reducing their ability to filter blood. Over time, waste products build up, causing tiredness, swelling, and higher risk of heart problems. Think of it like a garden hose that has been under too much pressure for years—it starts to weaken, leak, and doesn’t work as well. Controlling blood pressure with medication and lifestyle changes is key to slowing the damage. Early detection and regular monitoring help protect the kidneys and overall health."
+  },
+  {
+    "code": "K74",
+    "name": "Fibrosis and Cirrhosis of the Liver",
+    "category": "Gastrointestinal",
+    "commonName": "Cirrhosis",
+    "description": "Cirrhosis is when the liver becomes scarred and cannot work properly, often due to long-term damage from alcohol, hepatitis, or fatty liver disease. The liver is like a sponge that filters and cleans the blood, but scar tissue makes it stiff and less effective. Symptoms can include fatigue, swelling in the legs or belly, jaundice (yellow skin), and easy bruising. Over time, cirrhosis can lead to serious complications like internal bleeding or liver failure. Treating the cause, avoiding alcohol, and regular monitoring can slow the damage and protect liver function."
+  },
+  {
+    "code": "M54",
+    "name": "Dorsalgia",
+    "category": "Musculoskeletal",
+    "commonName": "Back Pain",
+    "description": "Chronic low back pain is pain in the lower back lasting more than three months. It can be caused by muscle strain, spinal changes, or nerve issues. Think of it like a door hinge that is rusted or misaligned—it makes movement stiff, painful, and less smooth. Pain can affect daily activities, sleep, and overall quality of life. Treatment may include physical therapy, exercise, pain management, and posture improvements to “oil the hinge” and restore smoother motion."
+  },
+  {
+    "code": "M32",
+    "name": "Systemic Lupus Erythematosus",
+    "category": "Autoimmune",
+    "commonName": "Lupus",
+    "description": "SLE is an autoimmune disease where the immune system mistakenly attacks healthy tissues in the body, causing inflammation. It can affect the skin, joints, kidneys, heart, and other organs. Think of it like an overactive security system that sets off alarms and damages the house itself. Symptoms may include fatigue, joint pain, rashes, and organ problems. Treatments like medicines and lifestyle adjustments help calm the immune system and protect the organs."
+  },
+  {
+    "code": "F90",
+    "name": "Attention Deficit Hyperactivity Disorder",
+    "category": "Psychiatric",
+    "commonName": "ADHD",
+    "description": "ADHD is a condition that affects focus, attention, and self-control, often causing restlessness or impulsive behavior. Think of it like trying to watch multiple TV channels at once—your attention keeps flipping around and it’s hard to stay on one task. People with ADHD may struggle at school, work, or in relationships. Treatment includes therapy, lifestyle strategies, and sometimes medicine to help improve focus and organization. With support, people can use their energy and creativity effectively."
+  },
+  {
+    "code": "M35.00",
+    "name": "Sjogren syndrome, unspecified",
+    "category": "Autoimmune",
+    "commonName": "Sjorgens",
+    "description": "nan"
+  },
+  {
+    "code": "E23.2",
+    "name": "Diabetes insipidus",
+    "category": "Endocrine",
+    "commonName": "DI",
+    "description": "nan"
+  },
+  {
+    "code": "I1A.0",
+    "name": "Resistant hypertension",
+    "category": "Cardiovascular",
+    "commonName": "Hypertension",
+    "description": "nan"
+  },
+  {
+    "code": "I27.20",
+    "name": "Pulmonary hypertension, unspecified",
+    "category": "Respiratory",
+    "commonName": "Pulmnary Hypertension",
+    "description": "nan"
+  },
+  {
+    "code": "I21.3",
+    "name": "ST elevation (STEMI) myocardial infarction of unspecified site",
+    "category": "Cardiovascular",
+    "commonName": "STEMI",
+    "description": "nan"
+  },
+  {
+    "code": "I21.4",
+    "name": "Non-ST elevation (NSTEMI) myocardial infarction",
+    "category": "Cardiovascular",
+    "commonName": "NSTEMI",
+    "description": "nan"
+  },
+  {
+    "code": "J20.9",
+    "name": "Acute bronchitis, unspecified",
+    "category": "Respiratory",
+    "commonName": "Bronchitis",
+    "description": "nan"
+  },
+  {
+    "code": "K29.70",
+    "name": "Gastritis, unspecified, without bleeding",
+    "category": "Gastrointestinal",
+    "commonName": "Gastritis",
+    "description": "nan"
+  },
+  {
+    "code": "K29.71",
+    "name": "Gastritis, unspecified, with bleeding",
+    "category": "Gastrointestinal",
+    "commonName": "Gastritis",
+    "description": "nan"
+  },
+  {
+    "code": "N41.1",
+    "name": "Chronic Prostatitis",
+    "category": "Reproductive",
+    "commonName": "Chronic Prostatitis",
+    "description": "nan"
+  },
+  {
+    "code": "N80.9",
+    "name": "Endometriosis, unspecified",
+    "category": "Reproductive",
+    "commonName": "Endometrosis",
+    "description": "nan"
+  },
+  {
+    "code": "D51.9",
+    "name": "Vitamin B12 deficiency anemia, unspecified",
+    "category": "Hematological",
+    "commonName": "Anemia from B12 deficiency",
+    "description": "nan"
+  },
+  {
+    "code": "D52.9",
+    "name": "Folate deficiency anemia, unspecified",
+    "category": "Hematological",
+    "commonName": "Anemia from folate deficiency",
+    "description": "nan"
+  },
+  {
+    "code": "D55.0",
+    "name": "Anemia due to glucose-6-phosphate dehydrogenase [G6PD] deficiency",
+    "category": "Hematological",
+    "commonName": "G6PD Deficiency",
+    "description": "nan"
+  },
+  {
+    "code": "U09.9",
+    "name": "Post COVID-19 condition, unspecified",
+    "category": "Other",
+    "commonName": "Long COVID",
+    "description": "nan"
+  },
+  {
+    "code": "E78.01",
+    "name": "Familial hypercholesterolemia",
+    "category": "Cardiovascular",
+    "commonName": "nan",
+    "description": "nan"
+  },
+  {
+    "code": "F01.54",
+    "name": "Vascular dementia, unspecified severity, with anxiety",
+    "category": "Neurological",
+    "commonName": "Vascular Dementia",
+    "description": "nan"
+  },
+  {
+    "code": "E10",
+    "name": "Type 1 Diabetes",
+    "category": "Endocrine",
+    "commonName": "T1DM",
+    "description": "nan"
+  },
+  {
+    "code": "G44",
+    "name": "Other headahce syndrome",
+    "category": "Neurological",
+    "commonName": "Headahce",
+    "description": "nan"
+  },
+  {
+    "code": "M255",
+    "name": "Pain in Joint",
+    "category": "Musculoskeletal",
+    "commonName": "Joint Pain",
+    "description": "nan"
+  },
+  {
+    "code": "M25551",
+    "name": "Pain in right hip",
+    "category": "Musculoskeletal",
+    "commonName": "Right Hip Pain",
+    "description": "nan"
+  },
+  {
+    "code": "M25552",
+    "name": "Pain in left thip",
+    "category": "Musculoskeletal",
+    "commonName": "Left Hip Pain",
+    "description": "nan"
+  },
+  {
+    "code": "M25561",
+    "name": "Pain in right knee",
+    "category": "Musculoskeletal",
+    "commonName": "Right Knee Pain",
+    "description": "nan"
+  },
+  {
+    "code": "M25562",
+    "name": "Pain in left knee",
+    "category": "Musculoskeletal",
+    "commonName": "Left Knee Pain",
+    "description": "nan"
+  },
+  {
+    "code": "M545",
+    "name": "Low back pain",
+    "category": "Musculoskeletal",
+    "commonName": "Back Pain",
+    "description": "nan"
+  },
+  {
+    "code": "R51",
+    "name": "Headache",
+    "category": "Neurological",
+    "commonName": "Headahce",
+    "description": "nan"
+  },
+  {
+    "code": "G89",
+    "name": "Chronic Pain Syndrome",
+    "category": "Other",
+    "commonName": "Chronic Pain",
+    "description": "nan"
+  },
+  {
+    "code": "L65.9",
+    "name": "Alopecia, unspecified",
+    "category": "Dermatological",
+    "commonName": "Alopecia",
+    "description": "nan"
+  },
+  {
+    "code": "M45",
+    "name": "Ankylosing Spondylitis",
+    "category": "Musculoskeletal",
+    "commonName": "Ankylosing Spondylitis",
+    "description": "nan"
+  },
+  {
+    "code": "H40.9",
+    "name": "Glaucoma, unspecified",
+    "category": "HEENT",
+    "commonName": "Glaucoma",
+    "description": "nan"
+  },
+  {
+    "code": "H66.90",
+    "name": "Chronic Otitis Media",
+    "category": "HEENT",
+    "commonName": "Chronic ear infection",
+    "description": "nan"
+  },
+  {
+    "code": "J37.0",
+    "name": "Chronic Laryngitis",
+    "category": "HEENT",
+    "commonName": "Laryngitis",
+    "description": "nan"
+  },
+  {
+    "code": "E66.2",
+    "name": "Obesity Hypoventilation Syndrome",
+    "category": "Respiratory",
+    "commonName": "OHS",
+    "description": "nan"
+  },
+  {
+    "code": "F41",
+    "name": "Anxiety Disorder",
+    "category": "Pscyhiatric",
+    "commonName": "Anxiety",
+    "description": "nan"
+  },
+  {
+    "code": "R06.02",
+    "name": "Shortness of breath",
+    "category": "Respiratory",
+    "commonName": "SOB",
+    "description": "nan"
+  },
+  {
+    "code": "I70",
+    "name": "Atherosclerosis",
+    "category": "Cardiovascular",
+    "commonName": "Atherosclerosis",
+    "description": "nan"
+  },
+  {
+    "code": "I48",
+    "name": "Atrial fibrillation and flutter",
+    "category": "Cardiovascular",
+    "commonName": "Afib",
+    "description": "nan"
+  },
+  {
+    "code": "nan",
+    "name": "Abnormal Uterine Bleeding",
+    "category": "Reproductive",
+    "commonName": "AUB",
+    "description": "nan"
   }
 ]
