@@ -7,10 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-01-27
+
+### Added
+
+- Added progress bar to dashboard to help medication tracking
+- Create button on notebook on profile
+
 ### Fixed
 
 - Fixed Android 12+ crash caused by missing exact alarm permission (SCHEDULE_EXACT_ALARM)
 - Added graceful fallback to inexact alarms when user denies exact alarm permission
+- Notebook on medication tab's slow response
+
+### Changed
+
+- Seven day adherence no longer under widget
 
 ## [1.3.0] - 2026-01-17
 
