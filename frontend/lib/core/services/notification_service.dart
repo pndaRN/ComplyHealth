@@ -10,7 +10,8 @@ import 'package:complyhealth/core/models/medication.dart';
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
-  NotificationService._internal() : _notifications = FlutterLocalNotificationsPlugin();
+  NotificationService._internal()
+    : _notifications = FlutterLocalNotificationsPlugin();
 
   /// Testing constructor that accepts a mock plugin
   @visibleForTesting
@@ -35,18 +36,22 @@ class NotificationService {
   Future<void> initialize() async {
     if (_initialized) return;
 
-    // Skip initialization on web (notifications not supported)
+    // Initialize timezone
+    try {
+      tz.initializeTimeZones();
+      final String timezoneName = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(timezoneName));
+    } catch (e) {
+      debugPrint('Failed to get local timezone: $e. Falling back to UTC.');
+      // Fallback to UTC to prevent crash
+      tz.setLocalLocation(tz.UTC);
+    }
+
+    // Skip platform-specific initialization on web
     if (kIsWeb) {
       _initialized = true;
       return;
     }
-
-    // Initialize timezone
-    tz.initializeTimeZones();
-
-    // Set local timezone from device
-    final String timezoneName = await FlutterTimezone.getLocalTimezone();
-    tz.setLocalLocation(tz.getLocation(timezoneName));
 
     // Android initialization settings
     const androidSettings = AndroidInitializationSettings(
@@ -90,8 +95,8 @@ class NotificationService {
 
       // Request exact alarm permission for Android 12+ (API 31+)
       if (!kIsWeb && Platform.isAndroid) {
-        final exactAlarmGranted =
-            await androidPlugin.requestExactAlarmsPermission();
+        final exactAlarmGranted = await androidPlugin
+            .requestExactAlarmsPermission();
         _exactAlarmsPermitted = exactAlarmGranted ?? false;
       }
     }

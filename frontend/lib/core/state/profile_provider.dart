@@ -14,7 +14,22 @@ class ProfileNotifier extends AsyncNotifier<Profile> {
   static const int baseXpPerDay = 100;
 
   Future<Box<Profile>> _getBox() async {
-    if (Hive.isBoxOpen('profile')) return Hive.box('profile');
+    if (Hive.isBoxOpen('profile')) {
+      try {
+        try {
+          final box = Hive.box<Profile>('profile');
+          return box;
+        } catch (_) {
+          final box = Hive.box('profile');
+          await box.close();
+        }
+      } catch (_) {
+        try {
+          final box = await Hive.openBox('profile');
+          await box.close();
+        } catch (_) {}
+      }
+    }
     final key = await EncryptionMigrationService.getEncryptionKey();
     return await Hive.openBox<Profile>(
       'profile',
@@ -109,11 +124,11 @@ class ProfileNotifier extends AsyncNotifier<Profile> {
     final adherenceStreak = await adherenceNotifier.getCurrentStreak();
     final streakMultiplier = 1.0 + (0.01 * adherenceStreak);
     final finalXp = (baseXp * streakMultiplier).round();
-    
+
     await addXP(finalXp, newStreak: adherenceStreak);
 
     final currentProfile = state.value;
-    if(currentProfile == null) return;
+    if (currentProfile == null) return;
 
     final updated = currentProfile.copyWith(
       lastXpAwardDate: date,
@@ -129,7 +144,7 @@ class ProfileNotifier extends AsyncNotifier<Profile> {
     int newXP = profile.xp + amount;
     int newLevel = getCurrentLevel(newXP);
     double newProgress = 0.0;
-    
+
     if (newLevel < maxLevel) {
       int xpForCurrentLevel = getXpForLevel(newLevel);
       int xpForNextLevel = getXpForNextLevel(newLevel);
@@ -150,7 +165,7 @@ class ProfileNotifier extends AsyncNotifier<Profile> {
   Future<void> resetProgress() async {
     final profile = state.value;
     if (profile == null) return;
-    
+
     final updated = profile.copyWith(
       streak: 0,
       xp: 0,

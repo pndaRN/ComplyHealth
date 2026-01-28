@@ -4,7 +4,6 @@ import '../../core/state/adherence_provider.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/theme/theme_provider.dart';
-import 'widgets/todays_medications_widget.dart';
 import 'widgets/enhanced_calendar_widget.dart';
 import 'widgets/at_a_glance_widget.dart';
 import 'widgets/daily_progress_widget.dart'; // <--- Import your new widget
@@ -38,14 +37,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     });
   }
 
-
-@override
+  @override
   Widget build(BuildContext context) {
     // Watch all providers at the top level
     final conditionsAsync = ref.watch(conditionsProvider);
     final medsAsync = ref.watch(medicationProvider);
     final profileAsync = ref.watch(profileProvider);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final onBackgroundContentColor = isDark
+        ? Colors.white
+        : theme.colorScheme.onSurface;
 
     // Render the Scaffold immediately, without waiting for data
     return Scaffold(
@@ -59,11 +61,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               gradient: LinearGradient(
                 begin: const Alignment(0.985, -0.174),
                 end: const Alignment(-0.985, 0.174),
-                colors: theme.brightness == Brightness.dark
-                    ? [
-                        theme.colorScheme.primary,
-                        const Color(0xFF050A15),
-                      ]
+                colors: isDark
+                    ? [theme.colorScheme.primary, const Color(0xFF050A15)]
                     : [
                         theme.colorScheme.primary.withValues(alpha: 0.7),
                         const Color(0xFFF5F8FF),
@@ -77,10 +76,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  theme.scaffoldBackgroundColor,
-                ],
+                colors: [Colors.transparent, theme.scaffoldBackgroundColor],
                 stops: const [0.3, 0.95],
               ),
             ),
@@ -106,25 +102,25 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 profile.firstName.isNotEmpty
                                     ? 'Good to see you, ${profile.firstName}'
                                     : 'Welcome',
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: onBackgroundContentColor,
                                   fontSize: 30,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                               // Show generic "Welcome" while loading or on error
-                              loading: () => const Text(
+                              loading: () => Text(
                                 'Welcome',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: onBackgroundContentColor,
                                   fontSize: 30,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              error: (_, __) => const Text(
+                              error: (err, stack) => Text(
                                 'Welcome',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: onBackgroundContentColor,
                                   fontSize: 30,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -136,15 +132,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       Consumer(
                         builder: (context, ref, child) {
                           final themeState = ref.watch(themeProvider);
-                          final isDark = themeState.themeMode == ThemeMode.dark ||
+                          final isSystemDark =
+                              MediaQuery.of(context).platformBrightness ==
+                              Brightness.dark;
+                          final isCurrentlyDark =
+                              themeState.themeMode == ThemeMode.dark ||
                               (themeState.themeMode == ThemeMode.system &&
-                                  MediaQuery.of(context).platformBrightness ==
-                                      Brightness.dark);
+                                  isSystemDark);
 
                           return PopupMenuButton<String>(
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.more_vert,
-                              color: Colors.white,
+                              color: onBackgroundContentColor,
                             ),
                             onSelected: (value) {
                               if (value == 'theme') {
@@ -157,13 +156,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 child: Row(
                                   children: [
                                     Icon(
-                                      isDark
+                                      isCurrentlyDark
                                           ? Icons.light_mode
                                           : Icons.dark_mode,
                                     ),
                                     const SizedBox(width: 12),
                                     Text(
-                                      isDark ? 'Light mode' : 'Dark mode',
+                                      isCurrentlyDark
+                                          ? 'Light mode'
+                                          : 'Dark mode',
                                     ),
                                   ],
                                 ),
@@ -175,9 +176,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ],
                   ),
                 ),
-                EnhancedCalendarWidget(
-                  key: ValueKey('adherence_$_refreshKey'),
-                ),
+                EnhancedCalendarWidget(key: ValueKey('adherence_$_refreshKey')),
                 // Scrollable content
                 Expanded(
                   child: RefreshIndicator(
@@ -187,9 +186,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       child: Column(
                         children: [
                           const DailyProgressWidget(),
-                          TodaysMedicationsWidget(
-                            key: ValueKey('medications_$_refreshKey'),
-                          ),
                           // Only block the "At A Glance" section if data is missing
                           // This allows daily progress and today's meds to function independently
                           if (conditionsAsync.hasValue && medsAsync.hasValue)

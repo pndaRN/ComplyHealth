@@ -21,52 +21,126 @@ class NotebookWidget extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Icon(Icons.menu_book, color: theme.colorScheme.primary),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Notebook',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                FilledButton.icon(
-                  onPressed: () => showNoteCreationDialog(context),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Create'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                DropdownButton<NotebookSortOption>(
-                  value: sortOption,
-                  underline: const SizedBox(),
-                  icon: const Icon(Icons.sort),
-                  items: const [
-                    DropdownMenuItem(
-                      value: NotebookSortOption.chronological,
-                      child: Text('By Date'),
-                    ),
-                    DropdownMenuItem(
-                      value: NotebookSortOption.bySource,
-                      child: Text('By Condition'),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      ref.read(notebookProvider.notifier).setSortOption(value);
-                    }
-                  },
-                ),
-              ],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isSmallScreen = constraints.maxWidth < 400;
+
+                if (isSmallScreen) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Line 1: Icon and Title
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.menu_book,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Notebook',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      // Line 2: Create Button (Left) and Sort Dropdown (Right)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          FilledButton.icon(
+                            onPressed: () => showNoteCreationDialog(context),
+                            icon: const Icon(Icons.add, size: 18),
+                            label: const Text('Create'),
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                          DropdownButton<NotebookSortOption>(
+                            value: sortOption,
+                            underline: const SizedBox(),
+                            icon: const Icon(Icons.sort),
+                            items: const [
+                              DropdownMenuItem(
+                                value: NotebookSortOption.chronological,
+                                child: Text('By Date'),
+                              ),
+                              DropdownMenuItem(
+                                value: NotebookSortOption.bySource,
+                                child: Text('By Condition'),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                ref
+                                    .read(notebookProvider.notifier)
+                                    .setSortOption(value);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                } else {
+                  // Original Single Line Layout
+                  return Row(
+                    children: [
+                      Icon(Icons.menu_book, color: theme.colorScheme.primary),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Notebook',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      FilledButton.icon(
+                        onPressed: () => showNoteCreationDialog(context),
+                        icon: const Icon(Icons.add, size: 18),
+                        label: const Text('Create'),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      DropdownButton<NotebookSortOption>(
+                        value: sortOption,
+                        underline: const SizedBox(),
+                        icon: const Icon(Icons.sort),
+                        items: const [
+                          DropdownMenuItem(
+                            value: NotebookSortOption.chronological,
+                            child: Text('By Date'),
+                          ),
+                          DropdownMenuItem(
+                            value: NotebookSortOption.bySource,
+                            child: Text('By Condition'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            ref
+                                .read(notebookProvider.notifier)
+                                .setSortOption(value);
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                }
+              },
             ),
             const SizedBox(height: 16),
             notebookAsync.when(

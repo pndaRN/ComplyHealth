@@ -48,6 +48,13 @@ void main() async {
   // Init Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // Perform data encryption migration before app starts
+  try {
+    await EncryptionMigrationService.migrateAllBoxes();
+  } catch (e) {
+    debugPrint('Startup migration error: $e');
+  }
+
   // Set up Crashlytics error handlers (not supported on web)
   if (!kIsWeb) {
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
@@ -70,7 +77,6 @@ class ComplyHealthApp extends ConsumerStatefulWidget {
 class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
   int _index = 0;
   bool _showOnboarding = true;
-  bool _isAppReady = false;
 
   StreamSubscription<String>? _notificationSubscription;
   int _dashboardRefreshKey = 0;
@@ -102,7 +108,6 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
   void initState() {
     super.initState();
 
-    _initializeApp();
     // Listen for notification taps to navigate to dashboard
     _notificationSubscription = NotificationService.onNotificationTap.listen((
       payload,
@@ -156,21 +161,6 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
     }
   }
 
-  Future<void> _initializeApp() async {
-    try {
-      // Perform the heavy migration here while the UI is already visible
-      await EncryptionMigrationService.migrateAllBoxes();
-    } catch (e) {
-      print('Migration error: $e');
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isAppReady = true;
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final themeState = ref.watch(themeProvider);
@@ -212,10 +202,7 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
               },
             )
           : Scaffold(
-              body: IndexedStack(
-                index: _index,
-                children: _screens,
-              ),
+              body: IndexedStack(index: _index, children: _screens),
 
               bottomNavigationBar: BottomNavigationBar(
                 currentIndex: _index,

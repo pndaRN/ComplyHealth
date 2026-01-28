@@ -8,8 +8,8 @@ import '../../core/services/encryption_migration_service.dart';
 /// Provider for medication adherence tracking
 final adherenceProvider =
     AsyncNotifierProvider<AdherenceNotifier, List<MedicationLog>>(
-  AdherenceNotifier.new,
-);
+      AdherenceNotifier.new,
+    );
 
 class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
   static const String boxName = 'medication_logs';
@@ -19,6 +19,25 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     if (_box != null && _box!.isOpen) {
       return _box!;
     }
+
+    if (Hive.isBoxOpen(boxName)) {
+      try {
+        try {
+          final box = Hive.box<MedicationLog>(boxName);
+          _box = box;
+          return box;
+        } catch (_) {
+          final box = Hive.box(boxName);
+          await box.close();
+        }
+      } catch (_) {
+        try {
+          final box = await Hive.openBox(boxName);
+          await box.close();
+        } catch (_) {}
+      }
+    }
+
     final key = await EncryptionMigrationService.getEncryptionKey();
     _box = await Hive.openBox<MedicationLog>(
       boxName,
@@ -35,7 +54,9 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
 
   /// Get all medication instances scheduled for today
   Future<List<MedicationInstance>> getTodayInstances() async {
-    final medications = await ref.read(medicationProvider.future); // Access data from AsyncValue
+    final medications = await ref.read(
+      medicationProvider.future,
+    ); // Access data from AsyncValue
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
@@ -191,16 +212,22 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     final allLogs = box.values.toList();
 
     // Only proceed if user has at least one taken log (they're actively tracking)
-    final takenLogs =
-        allLogs.where((log) => log.status == DoseStatus.taken).toList();
+    final takenLogs = allLogs
+        .where((log) => log.status == DoseStatus.taken)
+        .toList();
     if (takenLogs.isEmpty) {
       return; // User hasn't started tracking yet, don't auto-mark anything
     }
 
     // Find the earliest taken log date - only mark missed after that date
     final firstTakenDate = takenLogs
-        .map((log) => DateTime(
-            log.scheduledTime.year, log.scheduledTime.month, log.scheduledTime.day))
+        .map(
+          (log) => DateTime(
+            log.scheduledTime.year,
+            log.scheduledTime.month,
+            log.scheduledTime.day,
+          ),
+        )
         .reduce((a, b) => a.isBefore(b) ? a : b);
 
     for (int i = 1; i <= daysToCheck; i++) {
@@ -230,9 +257,12 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
           );
 
           // Check if log exists for this dose (within 5-minute tolerance)
-          final hasLog = existingLogs.any((log) =>
-              log.medicationId == med.id &&
-              (log.scheduledTime.difference(scheduledTime)).abs().inMinutes < 5);
+          final hasLog = existingLogs.any(
+            (log) =>
+                log.medicationId == med.id &&
+                (log.scheduledTime.difference(scheduledTime)).abs().inMinutes <
+                    5,
+          );
 
           if (!hasLog) {
             await logDoseMissed(
@@ -489,7 +519,9 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
         break; // No logs for this day means streak breaks
       }
 
-      final takenCount = dayLogs.where((log) => log.status == DoseStatus.taken).length;
+      final takenCount = dayLogs
+          .where((log) => log.status == DoseStatus.taken)
+          .length;
       final adherence = (takenCount / dayLogs.length) * 100;
 
       if (adherence >= 100.0) {

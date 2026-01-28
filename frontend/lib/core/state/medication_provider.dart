@@ -15,7 +15,22 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
   static bool _hasScheduledInitialNotifications = false;
 
   Future<Box<Medication>> _getBox() async {
-    if (Hive.isBoxOpen('medications')) return Hive.box('medications');
+    if (Hive.isBoxOpen('medications')) {
+      try {
+        try {
+          final box = Hive.box<Medication>('medications');
+          return box;
+        } catch (_) {
+          final box = Hive.box('medications');
+          await box.close();
+        }
+      } catch (_) {
+        try {
+          final box = await Hive.openBox('medications');
+          await box.close();
+        } catch (_) {}
+      }
+    }
     final key = await EncryptionMigrationService.getEncryptionKey();
     return await Hive.openBox<Medication>(
       'medications',

@@ -3,15 +3,12 @@ import 'package:hive/hive.dart';
 import '../models/notebook_entry.dart';
 import '../services/encryption_migration_service.dart';
 
-enum NotebookSortOption {
-  chronological,
-  bySource,
-}
+enum NotebookSortOption { chronological, bySource }
 
 final notebookProvider =
     AsyncNotifierProvider<NotebookNotifier, List<NotebookEntry>>(
-  NotebookNotifier.new,
-);
+      NotebookNotifier.new,
+    );
 
 class NotebookNotifier extends AsyncNotifier<List<NotebookEntry>> {
   NotebookSortOption _sortOption = NotebookSortOption.chronological;
@@ -21,7 +18,20 @@ class NotebookNotifier extends AsyncNotifier<List<NotebookEntry>> {
   Future<Box<NotebookEntry>> _getBox() async {
     final key = await EncryptionMigrationService.getEncryptionKey();
     if (Hive.isBoxOpen('notebook')) {
-      return Hive.box('notebook');
+      try {
+        try {
+          final box = Hive.box<NotebookEntry>('notebook');
+          return box;
+        } catch (_) {
+          final box = Hive.box('notebook');
+          await box.close();
+        }
+      } catch (_) {
+        try {
+          final box = await Hive.openBox('notebook');
+          await box.close();
+        } catch (_) {}
+      }
     }
     return await Hive.openBox<NotebookEntry>(
       'notebook',
@@ -80,7 +90,8 @@ class NotebookNotifier extends AsyncNotifier<List<NotebookEntry>> {
   }
 
   Map<String, List<NotebookEntry>> getEntriesGroupedBySource(
-      List<NotebookEntry> entries) {
+    List<NotebookEntry> entries,
+  ) {
     final grouped = <String, List<NotebookEntry>>{};
     for (final entry in entries) {
       final key = '${entry.sourceType}:${entry.sourceName}';

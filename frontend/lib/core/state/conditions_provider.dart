@@ -5,16 +5,36 @@ import '../../core/services/encryption_migration_service.dart';
 
 final conditionsProvider =
     AsyncNotifierProvider<ConditionsNotifier, List<Disease>>(
-  ConditionsNotifier.new,
-);
+      ConditionsNotifier.new,
+    );
 
 class ConditionsNotifier extends AsyncNotifier<List<Disease>> {
   Future<Box<Disease>> _getBox() async {
     final key = await EncryptionMigrationService.getEncryptionKey();
-    // The box might already be open from a previous operation.
+
     if (Hive.isBoxOpen('conditions')) {
-      return Hive.box('conditions');
+      try {
+        // Try to get the box with the expected type first
+        try {
+          final box = Hive.box<Disease>('conditions');
+          return box;
+        } catch (_) {
+          // Type mismatch or other error, try to get as dynamic to close it
+          final box = Hive.box('conditions');
+          await box.close();
+        }
+      } catch (_) {
+        // If even getting as dynamic failed, try opening as dynamic to get handle and close
+        try {
+          // This handles the "already open" case by getting the existing instance
+          final box = await Hive.openBox('conditions');
+          await box.close();
+        } catch (_) {
+          // If all else fails, ignore and try to open fresh below
+        }
+      }
     }
+
     return await Hive.openBox<Disease>(
       'conditions',
       encryptionCipher: HiveAesCipher(key),

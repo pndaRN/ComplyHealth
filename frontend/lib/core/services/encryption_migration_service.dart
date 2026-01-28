@@ -39,12 +39,13 @@ class EncryptionMigrationService {
     bool isTypeBox = false,
   }) async {
     try {
-      final Box oldBox;
-      if (isTypeBox) {
-        oldBox = await Hive.openBox(boxName);
-      } else {
-        oldBox = await Hive.openBox(boxName);
+      // If the box is already open, it's either already migrated or in use.
+      // We should close it first to ensure we can delete/migrate it.
+      if (Hive.isBoxOpen(boxName)) {
+        await Hive.box(boxName).close();
       }
+
+      final Box oldBox = await Hive.openBox(boxName);
 
       if (oldBox.isEmpty) {
         await oldBox.close();

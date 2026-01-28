@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-01-28
+
+### Added
+- Added "Daily MAR" tab to Medications screen with "Focus & Flow" layout (Next Due card + Daily Timeline).
+- Refactored Medications screen to separate daily tracking from medication management.
+
+### Changed
+- Dashboard percentage text color updated to white for better visibility.
+- Reorganized dashboard layout to place "At A Glance" summary below "Today's Medications".
+- Improved Notebook widget responsiveness: Header layout now adapts to small screens (width < 400px) by stacking the Create button and Sort options on a second line.
+- Updated Daily MAR "Next Due" card to use a right-aligned checkmark button for consistency with dashboard.
+- Daily MAR "quick take" action now skips the confirmation dialog for scheduled doses, streamlining the workflow.
+- Added checkmark animation to "Next Due" card in Daily MAR tab.
+- Removed "Today's Medications" widget from Dashboard (functionality moved to Daily MAR tab).
+- Fixed late dose logging in Daily MAR to prompt for time when medication is overdue.
+
+### Fixed
+- Resolved Hive "box already open with dynamic type" error by synchronizing encryption migration and adding robust provider type checks.
+- Fixed "LateInitializationError: Field '_local' has not been initialized" by adding robust timezone initialization with UTC fallback.
+- Fixed "unexpected null value error" in Daily MAR tab by safely handling pending medication logs.
+
 ## [1.4.0] - 2026-01-27
 
 ### Added

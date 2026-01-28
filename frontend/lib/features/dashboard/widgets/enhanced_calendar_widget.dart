@@ -344,11 +344,18 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final onBackgroundContentColor =
+        isDark ? Colors.white : theme.colorScheme.onSurface;
 
     if (_isLoading) {
       return Container(
         padding: const EdgeInsets.symmetric(vertical: 24),
-        child: const Center(child: CircularProgressIndicator()),
+        child: Center(
+          child: CircularProgressIndicator(
+            color: onBackgroundContentColor,
+          ),
+        ),
       );
     }
 
@@ -367,7 +374,9 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
                 icon: const Icon(Icons.chevron_left),
                 tooltip: 'Previous week',
                 style: IconButton.styleFrom(
-                  foregroundColor: Colors.white.withValues(alpha: 0.9),
+                  foregroundColor: onBackgroundContentColor.withValues(
+                    alpha: 0.9,
+                  ),
                 ),
               ),
               Expanded(
@@ -380,7 +389,7 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
                         _getWeekRangeDisplay(),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: onBackgroundContentColor,
                         ),
                       ),
                     ),
@@ -394,13 +403,15 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
+                            color: onBackgroundContentColor.withValues(
+                              alpha: 0.2,
+                            ),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             'Today',
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.white,
+                              color: onBackgroundContentColor,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -415,7 +426,9 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
                 icon: const Icon(Icons.chevron_right),
                 tooltip: 'Next week',
                 style: IconButton.styleFrom(
-                  foregroundColor: Colors.white.withValues(alpha: 0.9),
+                  foregroundColor: onBackgroundContentColor.withValues(
+                    alpha: 0.9,
+                  ),
                 ),
               ),
             ],
@@ -443,7 +456,9 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
                           DateFormat('E').format(date),
                           style: TextStyle(
                             fontSize: 11,
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: onBackgroundContentColor.withValues(
+                              alpha: 0.7,
+                            ),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -456,7 +471,9 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
                             shape: BoxShape.circle,
                             border: isToday
                                 ? Border.all(
-                                    color: theme.statusColors.info,
+                                    color: isDark
+                                        ? theme.statusColors.info
+                                        : theme.colorScheme.primary,
                                     width: 2,
                                   )
                                 : null,
@@ -465,7 +482,9 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
                             child: Text(
                               DateFormat('d').format(date),
                               style: TextStyle(
-                                color: theme.colorScheme.onPrimary,
+                                color: color == theme.colorScheme.outlineVariant
+                                    ? onBackgroundContentColor
+                                    : Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
@@ -477,7 +496,9 @@ class _EnhancedCalendarWidgetState extends ConsumerState<EnhancedCalendarWidget>
                           '${adherence.toStringAsFixed(0)}%',
                           style: TextStyle(
                             fontSize: 10,
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: onBackgroundContentColor.withValues(
+                              alpha: 0.7,
+                            ),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
