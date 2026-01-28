@@ -251,19 +251,25 @@ class _AllMedicationsTabState extends ConsumerState<AllMedicationsTab> {
     if (keyA != 'As Needed (PRN)' && keyB == 'As Needed (PRN)') return -1;
     if (keyA == 'No Schedule' &&
         keyB != 'No Schedule' &&
-        keyB != 'As Needed (PRN)')
+        keyB != 'As Needed (PRN)') {
       return 1;
+    }
     if (keyA != 'No Schedule' &&
         keyA != 'As Needed (PRN)' &&
-        keyB == 'No Schedule')
+        keyB == 'No Schedule') {
       return -1;
+    }
 
     final timeA = TimeFormattingUtils.parseTimeGroupToMinutes(keyA);
     final timeB = TimeFormattingUtils.parseTimeGroupToMinutes(keyB);
 
     if (timeA == null && timeB == null) return 0;
-    if (timeA == null) return 1;
-    if (timeB == null) return -1;
+    if (timeA == null) {
+      return 1;
+    }
+    if (timeB == null) {
+      return -1;
+    }
 
     return timeA.compareTo(timeB);
   }

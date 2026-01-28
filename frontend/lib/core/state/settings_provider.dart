@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
+import 'package:flutter/foundation.dart';
 import '../../core/services/encryption_migration_service.dart';
 
 /// Settings state class
@@ -105,7 +106,9 @@ class SettingsNotifier extends Notifier<SettingsState> {
         } catch (innerError) {
           // Box doesn't exist or can't be opened - log for debugging
           assert(() {
-            print('clearAllData: Could not clear box "$name": $innerError');
+            debugPrint(
+              'clearAllData: Could not clear box "$name": $innerError',
+            );
             return true;
           }());
         }

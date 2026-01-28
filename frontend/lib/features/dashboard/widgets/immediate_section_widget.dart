@@ -43,9 +43,9 @@ class ImmediateSectionWidget extends ConsumerWidget {
           child: Text(
             hasOverdue ? 'Overdue & Due Now' : 'Due Now',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red[700],
-                ),
+              fontWeight: FontWeight.bold,
+              color: Colors.red[700],
+            ),
           ),
         ),
         ...instances.map(
@@ -65,11 +65,7 @@ class ImmediateSectionWidget extends ConsumerWidget {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          Icon(
-            Icons.check_circle_outline,
-            size: 48,
-            color: Colors.green[400],
-          ),
+          Icon(Icons.check_circle_outline, size: 48, color: Colors.green[400]),
           const SizedBox(height: 8),
           const Text(
             'All caught up!',
@@ -130,13 +126,13 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    _slideAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(1.5, 0),
-    ).animate(CurvedAnimation(
-      parent: _slideAnimationController,
-      curve: Curves.easeInOut,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: Offset.zero, end: const Offset(1.5, 0)).animate(
+          CurvedAnimation(
+            parent: _slideAnimationController,
+            curve: Curves.easeInOut,
+          ),
+        );
   }
 
   @override
@@ -188,7 +184,9 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
     if (reason != null) {
       HapticFeedback.lightImpact();
       try {
-        await ref.read(adherenceProvider.notifier).logDoseSkipped(
+        await ref
+            .read(adherenceProvider.notifier)
+            .logDoseSkipped(
               medicationId: instance.medication.id,
               medicationName: instance.medication.name,
               dosage: instance.medication.dosage,
@@ -198,9 +196,9 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
         onRefresh();
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to skip dose: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to skip dose: $e')));
         }
       }
     }
@@ -216,133 +214,140 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
     return SlideTransition(
       position: _slideAnimation,
       child: Dismissible(
-      key: Key(
-        'dismiss_${instance.medication.id}_${instance.scheduledTime.millisecondsSinceEpoch}',
-      ),
-      direction: DismissDirection.endToStart,
-      confirmDismiss: (direction) => _handleSkipSwipe(context, ref),
-      background: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.orange,
-          borderRadius: BorderRadius.circular(8),
+        key: Key(
+          'dismiss_${instance.medication.id}_${instance.scheduledTime.millisecondsSinceEpoch}',
         ),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Text(
-              'Skip',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            SizedBox(width: 8),
-            Icon(Icons.skip_next, color: Colors.white),
-          ],
-        ),
-      ),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          border: Border(left: getUrgencyBorder(instance, theme)),
-          color: theme.colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
+        direction: DismissDirection.endToStart,
+        confirmDismiss: (direction) => _handleSkipSwipe(context, ref),
+        background: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.orange,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              // Medication icon
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.medication,
-                  color: theme.colorScheme.primary,
+              Text(
+                'Skip',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
               ),
-              const SizedBox(width: 12),
-              // Medication info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            instance.medication.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      instance.medication.dosage,
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      formatMedicationTime(instance.scheduledTime),
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Action button
-              if (isOverdue)
-                _buildOverdueActionsMenu(context, ref)
-              else
-                AnimatedBuilder(
-                  animation: _checkAnimation,
-                  builder: (context, child) {
-                    final animValue = _checkAnimation.value;
-                    // Transition from grey (outline) to green (primary)
-                    final greyColor = theme.colorScheme.outline;
-                    final greenColor = theme.colorScheme.primary;
-                    final currentColor = Color.lerp(greyColor, greenColor, animValue)!;
-                    return IconButton(
-                      onPressed: _isAnimating ? null : _onCheckTapped,
-                      icon: Icon(
-                        animValue > 0.5
-                            ? Icons.check_circle
-                            : Icons.check_circle_outline,
-                        color: currentColor,
-                        size: 28 + (animValue * 4), // Slight size increase during animation
-                      ),
-                      tooltip: 'Mark as taken',
-                    );
-                  },
-                ),
+              SizedBox(width: 8),
+              Icon(Icons.skip_next, color: Colors.white),
             ],
           ),
         ),
-      ),
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            border: Border(left: getUrgencyBorder(instance, theme)),
+            color: theme.colorScheme.surface,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                // Medication icon
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.medication,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Medication info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              instance.medication.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        instance.medication.dosage,
+                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        formatMedicationTime(instance.scheduledTime),
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Action button
+                if (isOverdue)
+                  _buildOverdueActionsMenu(context, ref)
+                else
+                  AnimatedBuilder(
+                    animation: _checkAnimation,
+                    builder: (context, child) {
+                      final animValue = _checkAnimation.value;
+                      // Transition from grey (outline) to green (primary)
+                      final greyColor = theme.colorScheme.outline;
+                      final greenColor = theme.colorScheme.primary;
+                      final currentColor = Color.lerp(
+                        greyColor,
+                        greenColor,
+                        animValue,
+                      )!;
+                      return IconButton(
+                        onPressed: _isAnimating ? null : _onCheckTapped,
+                        icon: Icon(
+                          animValue > 0.5
+                              ? Icons.check_circle
+                              : Icons.check_circle_outline,
+                          color: currentColor,
+                          size:
+                              28 +
+                              (animValue *
+                                  4), // Slight size increase during animation
+                        ),
+                        tooltip: 'Mark as taken',
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -388,8 +393,12 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
       );
 
       try {
-        await ref.read(medicationProvider.notifier).incrementDoseCount(latestMed);
-        await ref.read(adherenceProvider.notifier).logDoseTaken(
+        await ref
+            .read(medicationProvider.notifier)
+            .incrementDoseCount(latestMed);
+        await ref
+            .read(adherenceProvider.notifier)
+            .logDoseTaken(
               medicationId: latestMed.id,
               medicationName: latestMed.name,
               dosage: latestMed.dosage,
@@ -397,17 +406,21 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
               actualTakenTime: takenTime,
             );
       } catch (e) {
-        await ref.read(medicationProvider.notifier).decrementDoseCount(latestMed);
+        await ref
+            .read(medicationProvider.notifier)
+            .decrementDoseCount(latestMed);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to log dose: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to log dose: $e')));
         }
         return false;
       }
     } else {
       try {
-        await ref.read(adherenceProvider.notifier).logDoseTaken(
+        await ref
+            .read(adherenceProvider.notifier)
+            .logDoseTaken(
               medicationId: instance.medication.id,
               medicationName: instance.medication.name,
               dosage: instance.medication.dosage,
@@ -416,9 +429,9 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
             );
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to log dose: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to log dose: $e')));
         }
         return false;
       }
@@ -443,7 +456,9 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
   }
 
   Future<void> _markAsSkippedNoRefresh(WidgetRef ref) async {
-    await ref.read(adherenceProvider.notifier).logDoseSkipped(
+    await ref
+        .read(adherenceProvider.notifier)
+        .logDoseSkipped(
           medicationId: instance.medication.id,
           medicationName: instance.medication.name,
           dosage: instance.medication.dosage,
@@ -539,7 +554,7 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
                   context: context,
                   instance: instance,
                 );
-                if (selectedTime != null) {
+                if (selectedTime != null && context.mounted) {
                   await _markAsTakenAtTimeNoRefresh(context, ref, selectedTime);
                   shouldAnimate = true;
                 }

@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 
 class EncryptionMigrationService {
@@ -69,9 +70,9 @@ class EncryptionMigrationService {
 
       await newBox.close();
 
-      print('Migrated box: $boxName (${data.length} items)');
+      debugPrint('Migrated box: $boxName (${data.length} items)');
     } catch (e) {
-      print('Error migrating box $boxName: $e');
+      debugPrint('Error migrating box $boxName: $e');
       rethrow;
     }
   }
@@ -96,11 +97,11 @@ class EncryptionMigrationService {
       try {
         await migrateBox(boxName);
       } catch (e) {
-        print("Failed to migrate $boxName: $e");
+        debugPrint("Failed to migrate $boxName: $e");
       }
     }
 
     await markMigrationCompleted();
-    print('Migration completed successfully');
+    debugPrint('Migration completed successfully');
   }
 }

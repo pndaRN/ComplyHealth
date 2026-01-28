@@ -227,11 +227,18 @@ class _DailyProgressWidgetState extends ConsumerState<DailyProgressWidget> {
   }
 
   Color _getProgressColor(ThemeData theme, double progress) {
-    if (progress >= 1.0) return theme.statusColors.success;
-    if (progress >= 0.75)
+    if (progress >= 1.0) {
+      return theme.statusColors.success;
+    }
+    if (progress >= 0.75) {
       return theme.statusColors.success.withValues(alpha: 0.85);
-    if (progress >= 0.5) return theme.statusColors.info;
-    if (progress >= 0.25) return theme.statusColors.warning;
+    }
+    if (progress >= 0.5) {
+      return theme.statusColors.info;
+    }
+    if (progress >= 0.25) {
+      return theme.statusColors.warning;
+    }
     return theme.brightness == Brightness.dark
         ? Colors.white
         : theme.colorScheme.primary;
