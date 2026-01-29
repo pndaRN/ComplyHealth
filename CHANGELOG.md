@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Standardized AppBars across all tabs for global UI consistency.
+- Creation of shared `AppMoreMenu` and `AppSearchBar` widgets to unify header actions and search experiences.
+- Refactored Dashboard header to use a standard Material 3 AppBar with optimized font sizes.
+
+### Fixed
+- Resolved "ScrollController has no ScrollPosition attached" exception in medication add/edit forms.
+- Fixed visibility issues in late-dose logging and medication detail dialogs for dark mode users.
+- Improved auto-selected condition visibility by using theme-aware primary colors.
+- Added actual taken time display to the MAR tab timeline for better dose tracking clarity.
+
 ## [1.4.1] - 2026-01-28
 
 ### Added

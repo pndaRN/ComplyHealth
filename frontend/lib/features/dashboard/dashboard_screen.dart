@@ -4,6 +4,7 @@ import '../../core/state/adherence_provider.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/theme/theme_provider.dart';
+import '../../core/widgets/app_bar_widgets.dart';
 import 'widgets/enhanced_calendar_widget.dart';
 import 'widgets/at_a_glance_widget.dart';
 import 'widgets/daily_progress_widget.dart'; // <--- Import your new widget
@@ -52,6 +53,37 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     // Render the Scaffold immediately, without waiting for data
     return Scaffold(
       extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: profileAsync.when(
+          data: (profile) => Text(
+            profile.firstName.isNotEmpty
+                ? 'Good to see you, ${profile.firstName}'
+                : 'Welcome',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: onBackgroundContentColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          loading: () => Text(
+            'Welcome',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: onBackgroundContentColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          error: (err, stack) => Text(
+            'Welcome',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: onBackgroundContentColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        actions: [AppMoreMenu(iconColor: onBackgroundContentColor)],
+      ),
       body: Stack(
         children: [
           // Background gradient
@@ -81,101 +113,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
             ),
           ),
-          // Main content with fixed AppBar and Calendar
+          // Main content with fixed Calendar
           SafeArea(
+            bottom: false,
             child: Column(
               children: [
-                // Fixed AppBar area
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: profileAsync.when(
-                              // Show personalized greeting when loaded
-                              data: (profile) => Text(
-                                profile.firstName.isNotEmpty
-                                    ? 'Good to see you, ${profile.firstName}'
-                                    : 'Welcome',
-                                style: TextStyle(
-                                  color: onBackgroundContentColor,
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              // Show generic "Welcome" while loading or on error
-                              loading: () => Text(
-                                'Welcome',
-                                style: TextStyle(
-                                  color: onBackgroundContentColor,
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              error: (err, stack) => Text(
-                                'Welcome',
-                                style: TextStyle(
-                                  color: onBackgroundContentColor,
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Consumer(
-                        builder: (context, ref, child) {
-                          final themeState = ref.watch(themeProvider);
-                          final isSystemDark =
-                              MediaQuery.of(context).platformBrightness ==
-                              Brightness.dark;
-                          final isCurrentlyDark =
-                              themeState.themeMode == ThemeMode.dark ||
-                              (themeState.themeMode == ThemeMode.system &&
-                                  isSystemDark);
-
-                          return PopupMenuButton<String>(
-                            icon: Icon(
-                              Icons.more_vert,
-                              color: onBackgroundContentColor,
-                            ),
-                            onSelected: (value) {
-                              if (value == 'theme') {
-                                ref.read(themeProvider.notifier).toggleTheme();
-                              }
-                            },
-                            itemBuilder: (context) => [
-                              PopupMenuItem(
-                                value: 'theme',
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      isCurrentlyDark
-                                          ? Icons.light_mode
-                                          : Icons.dark_mode,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      isCurrentlyDark
-                                          ? 'Light mode'
-                                          : 'Dark mode',
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
                 EnhancedCalendarWidget(key: ValueKey('adherence_$_refreshKey')),
                 // Scrollable content
                 Expanded(

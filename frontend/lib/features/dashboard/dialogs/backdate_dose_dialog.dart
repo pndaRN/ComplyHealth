@@ -7,10 +7,7 @@ import 'package:complyhealth/features/dashboard/utils/todays_medications_utils.d
 class BackdateDoseDialog extends StatefulWidget {
   final MedicationInstance instance;
 
-  const BackdateDoseDialog({
-    super.key,
-    required this.instance,
-  });
+  const BackdateDoseDialog({super.key, required this.instance});
 
   @override
   State<BackdateDoseDialog> createState() => _BackdateDoseDialogState();
@@ -45,6 +42,7 @@ class _BackdateDoseDialogState extends State<BackdateDoseDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AlertDialog(
       title: const Text('Mark as Taken (Late)'),
       content: Column(
@@ -53,22 +51,25 @@ class _BackdateDoseDialogState extends State<BackdateDoseDialog> {
         children: [
           Text(
             widget.instance.medication.name,
-            style: const TextStyle(
-              fontSize: 18,
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'Scheduled: ${formatMedicationTime(widget.instance.scheduledTime)}',
-            style: TextStyle(color: Colors.grey[600]),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'When did you actually take it?',
-            style: TextStyle(fontWeight: FontWeight.w500),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 12),
           InkWell(
@@ -76,23 +77,30 @@ class _BackdateDoseDialogState extends State<BackdateDoseDialog> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
                 borderRadius: BorderRadius.circular(8),
-                color: Colors.grey[50],
+                color: theme.colorScheme.surfaceContainerLow,
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.access_time, size: 20),
+                  Icon(
+                    Icons.access_time,
+                    size: 20,
+                    color: theme.colorScheme.primary,
+                  ),
                   const SizedBox(width: 12),
                   Text(
                     formatMedicationTime(_selectedTime),
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const Spacer(),
-                  Icon(Icons.edit, size: 18, color: Colors.grey[600]),
+                  Icon(
+                    Icons.edit,
+                    size: 18,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ],
               ),
             ),
@@ -101,19 +109,22 @@ class _BackdateDoseDialogState extends State<BackdateDoseDialog> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.blue[50],
+              color: theme.colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, size: 16, color: Colors.blue[700]),
+                Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'This will mark the dose as taken at the time you specify',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.blue[900],
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer,
                     ),
                   ),
                 ),
@@ -130,8 +141,8 @@ class _BackdateDoseDialogState extends State<BackdateDoseDialog> {
         ElevatedButton(
           onPressed: () => Navigator.pop(context, _selectedTime),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            foregroundColor: Colors.white,
+            backgroundColor: theme.colorScheme.primary,
+            foregroundColor: theme.colorScheme.onPrimary,
           ),
           child: const Text('Confirm'),
         ),

@@ -10,6 +10,7 @@ import '../../core/state/conditions_provider.dart';
 import '../../core/state/notebook_provider.dart';
 import '../../core/utils/condition_helper.dart';
 import '../../core/utils/time_formatting_utils.dart';
+import '../../core/widgets/app_bar_widgets.dart';
 import 'dialogs/medication_edit_dialog.dart';
 
 class MedicationDetailScreen extends ConsumerStatefulWidget {
@@ -70,8 +71,29 @@ class _MedicationDetailScreenState
         appBar: AppBar(
           title: Text(currentMed.name),
           actions: [
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert),
+            AppMoreMenu(
+              additionalItems: [
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit_outlined, size: 20),
+                      SizedBox(width: 12),
+                      Text('Edit'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_outline, size: 20),
+                      SizedBox(width: 12),
+                      Text('Delete'),
+                    ],
+                  ),
+                ),
+              ],
               onSelected: (value) {
                 switch (value) {
                   case 'edit':
@@ -82,28 +104,6 @@ class _MedicationDetailScreenState
                     break;
                 }
               },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit_outlined),
-                      SizedBox(width: 12),
-                      Text('Edit'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_outline),
-                      SizedBox(width: 12),
-                      Text('Delete'),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ],
           bottom: const TabBar(

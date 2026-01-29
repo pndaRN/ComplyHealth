@@ -8,10 +8,7 @@ import 'package:complyhealth/core/models/medication_log.dart';
 class DoseLoggingDialog extends ConsumerStatefulWidget {
   final MedicationInstance instance;
 
-  const DoseLoggingDialog({
-    super.key,
-    required this.instance,
-  });
+  const DoseLoggingDialog({super.key, required this.instance});
 
   @override
   ConsumerState<DoseLoggingDialog> createState() => _DoseLoggingDialogState();
@@ -48,44 +45,56 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
 
       try {
         // Increment dose count first
-        await ref.read(medicationProvider.notifier).incrementDoseCount(latestMed);
+        await ref
+            .read(medicationProvider.notifier)
+            .incrementDoseCount(latestMed);
 
         // Then log the dose
-        await ref.read(adherenceProvider.notifier).logDoseTaken(
-          medicationId: latestMed.id,
-          medicationName: latestMed.name,
-          dosage: latestMed.dosage,
-          scheduledTime: widget.instance.scheduledTime,
-          actualTakenTime: _customTime,
-          notes: _notesController.text.isEmpty ? null : _notesController.text,
-        );
+        await ref
+            .read(adherenceProvider.notifier)
+            .logDoseTaken(
+              medicationId: latestMed.id,
+              medicationName: latestMed.name,
+              dosage: latestMed.dosage,
+              scheduledTime: widget.instance.scheduledTime,
+              actualTakenTime: _customTime,
+              notes: _notesController.text.isEmpty
+                  ? null
+                  : _notesController.text,
+            );
       } catch (e) {
         // Rollback dose count on error
-        await ref.read(medicationProvider.notifier).decrementDoseCount(latestMed);
+        await ref
+            .read(medicationProvider.notifier)
+            .decrementDoseCount(latestMed);
         // Show error to user
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to log dose: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to log dose: $e')));
         }
         return; // Don't close dialog on error
       }
     } else {
       // For scheduled medications, just log the dose
       try {
-        await ref.read(adherenceProvider.notifier).logDoseTaken(
-          medicationId: widget.instance.medication.id,
-          medicationName: widget.instance.medication.name,
-          dosage: widget.instance.medication.dosage,
-          scheduledTime: widget.instance.scheduledTime,
-          actualTakenTime: _customTime,
-          notes: _notesController.text.isEmpty ? null : _notesController.text,
-        );
+        await ref
+            .read(adherenceProvider.notifier)
+            .logDoseTaken(
+              medicationId: widget.instance.medication.id,
+              medicationName: widget.instance.medication.name,
+              dosage: widget.instance.medication.dosage,
+              scheduledTime: widget.instance.scheduledTime,
+              actualTakenTime: _customTime,
+              notes: _notesController.text.isEmpty
+                  ? null
+                  : _notesController.text,
+            );
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to log dose: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to log dose: $e')));
         }
         return; // Don't close dialog on error
       }
@@ -96,7 +105,9 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
 
   Future<void> _markAsSkipped() async {
     try {
-      await ref.read(adherenceProvider.notifier).logDoseSkipped(
+      await ref
+          .read(adherenceProvider.notifier)
+          .logDoseSkipped(
             medicationId: widget.instance.medication.id,
             medicationName: widget.instance.medication.name,
             dosage: widget.instance.medication.dosage,
@@ -107,9 +118,9 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to skip dose: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to skip dose: $e')));
       }
     }
   }
@@ -122,22 +133,24 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
         // Delete the log first
         await ref.read(adherenceProvider.notifier).deleteLog(log.id);
 
-                  // Decrement dose count for PRN medications if the log was for a taken dose
-                  if (widget.instance.isPRN && log.status == DoseStatus.taken) {
-                    // Get the latest medication state from provider
-                    final medicationsAsync = ref.read(medicationProvider);
-                    final latestMed = (medicationsAsync.value ?? []).firstWhere(
-                      (m) => m.id == widget.instance.medication.id,
-                      orElse: () => widget.instance.medication,
-                    );
-                    await ref.read(medicationProvider.notifier).decrementDoseCount(latestMed);
-                  }
+        // Decrement dose count for PRN medications if the log was for a taken dose
+        if (widget.instance.isPRN && log.status == DoseStatus.taken) {
+          // Get the latest medication state from provider
+          final medicationsAsync = ref.read(medicationProvider);
+          final latestMed = (medicationsAsync.value ?? []).firstWhere(
+            (m) => m.id == widget.instance.medication.id,
+            orElse: () => widget.instance.medication,
+          );
+          await ref
+              .read(medicationProvider.notifier)
+              .decrementDoseCount(latestMed);
+        }
         if (mounted) Navigator.of(context).pop(true);
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to delete log: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to delete log: $e')));
         }
       }
     }
@@ -175,6 +188,7 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
   Widget build(BuildContext context) {
     final instance = widget.instance;
     final log = instance.log;
+    final theme = Theme.of(context);
 
     return Dialog(
       child: SingleChildScrollView(
@@ -187,38 +201,49 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
               // Header
               Text(
                 instance.medication.name,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 instance.medication.dosage,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 16,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 8),
               if (!instance.isPRN)
                 Row(
                   children: [
-                    Icon(Icons.schedule, size: 16, color: Colors.grey[600]),
+                    Icon(
+                      Icons.schedule,
+                      size: 16,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       'Scheduled: ${_formatTime(instance.scheduledTime)}',
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
               if (instance.isPRN)
                 Row(
                   children: [
-                    Icon(Icons.medical_services, size: 16, color: Colors.grey[600]),
+                    Icon(
+                      Icons.medical_services,
+                      size: 16,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       'PRN (As Needed)',
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -230,17 +255,17 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: log.status == DoseStatus.taken
-                        ? Colors.green.shade50
+                        ? theme.colorScheme.tertiaryContainer
                         : log.status == DoseStatus.skipped
-                            ? Colors.orange.shade50
-                            : Colors.red.shade50,
+                        ? theme.colorScheme.secondaryContainer
+                        : theme.colorScheme.errorContainer,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: log.status == DoseStatus.taken
-                          ? Colors.green
+                          ? theme.colorScheme.tertiary
                           : log.status == DoseStatus.skipped
-                              ? Colors.orange
-                              : Colors.red,
+                          ? theme.colorScheme.secondary
+                          : theme.colorScheme.error,
                     ),
                   ),
                   child: Column(
@@ -252,24 +277,28 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
                             log.status == DoseStatus.taken
                                 ? Icons.check_circle
                                 : log.status == DoseStatus.skipped
-                                    ? Icons.cancel
-                                    : Icons.error,
+                                ? Icons.cancel
+                                : Icons.error,
                             color: log.status == DoseStatus.taken
-                                ? Colors.green
+                                ? theme.colorScheme.onTertiaryContainer
                                 : log.status == DoseStatus.skipped
-                                    ? Colors.orange
-                                    : Colors.red,
+                                ? theme.colorScheme.onSecondaryContainer
+                                : theme.colorScheme.onErrorContainer,
                           ),
                           const SizedBox(width: 8),
                           Text(
                             log.status == DoseStatus.taken
                                 ? 'Taken'
                                 : log.status == DoseStatus.skipped
-                                    ? 'Skipped'
-                                    : 'Missed',
-                            style: const TextStyle(
+                                ? 'Skipped'
+                                : 'Missed',
+                            style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              color: log.status == DoseStatus.taken
+                                  ? theme.colorScheme.onTertiaryContainer
+                                  : log.status == DoseStatus.skipped
+                                  ? theme.colorScheme.onSecondaryContainer
+                                  : theme.colorScheme.onErrorContainer,
                             ),
                           ),
                         ],
@@ -278,21 +307,39 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
                         const SizedBox(height: 8),
                         Text(
                           'At: ${_formatDateTime(log.actualTakenTime!)}',
-                          style: TextStyle(color: Colors.grey[700]),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: log.status == DoseStatus.taken
+                                ? theme.colorScheme.onTertiaryContainer
+                                : log.status == DoseStatus.skipped
+                                ? theme.colorScheme.onSecondaryContainer
+                                : theme.colorScheme.onErrorContainer,
+                          ),
                         ),
                       ],
                       if (log.skipReason != null) ...[
                         const SizedBox(height: 8),
                         Text(
                           'Reason: ${log.skipReason}',
-                          style: TextStyle(color: Colors.grey[700]),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: log.status == DoseStatus.taken
+                                ? theme.colorScheme.onTertiaryContainer
+                                : log.status == DoseStatus.skipped
+                                ? theme.colorScheme.onSecondaryContainer
+                                : theme.colorScheme.onErrorContainer,
+                          ),
                         ),
                       ],
                       if (log.notes != null && log.notes!.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         Text(
                           'Notes: ${log.notes}',
-                          style: TextStyle(color: Colors.grey[700]),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: log.status == DoseStatus.taken
+                                ? theme.colorScheme.onTertiaryContainer
+                                : log.status == DoseStatus.skipped
+                                ? theme.colorScheme.onSecondaryContainer
+                                : theme.colorScheme.onErrorContainer,
+                          ),
                         ),
                       ],
                     ],
@@ -303,10 +350,10 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     onPressed: _deleteLog,
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    label: const Text(
+                    icon: Icon(Icons.delete, color: theme.colorScheme.error),
+                    label: Text(
                       'Delete Log',
-                      style: TextStyle(color: Colors.red),
+                      style: TextStyle(color: theme.colorScheme.error),
                     ),
                   ),
                 ),
@@ -354,8 +401,8 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
                     icon: const Icon(Icons.check),
                     label: const Text('Mark as Taken'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: theme.colorScheme.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                   ),
@@ -364,16 +411,13 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
 
                 // Skip reason dropdown
                 DropdownButtonFormField<String>(
-                  initialValue: _selectedSkipReason,
+                  value: _selectedSkipReason,
                   decoration: const InputDecoration(
                     labelText: 'Skip Reason',
                     border: OutlineInputBorder(),
                   ),
                   items: _skipReasons.map((reason) {
-                    return DropdownMenuItem(
-                      value: reason,
-                      child: Text(reason),
-                    );
+                    return DropdownMenuItem(value: reason, child: Text(reason));
                   }).toList(),
                   onChanged: (value) {
                     setState(() => _selectedSkipReason = value);
@@ -385,12 +429,13 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed:
-                        _selectedSkipReason != null ? _markAsSkipped : null,
+                    onPressed: _selectedSkipReason != null
+                        ? _markAsSkipped
+                        : null,
                     icon: const Icon(Icons.cancel),
                     label: const Text('Mark as Skipped'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.orange,
+                      foregroundColor: theme.colorScheme.secondary,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                   ),

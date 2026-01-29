@@ -8,6 +8,7 @@ import '../../core/models/notebook_entry.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/state/notebook_provider.dart';
+import '../../core/widgets/app_bar_widgets.dart';
 
 class ConditionDetailScreen extends ConsumerStatefulWidget {
   final Disease condition;
@@ -50,6 +51,7 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(displayName),
+          actions: const [AppMoreMenu()],
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Overview'),

@@ -40,12 +40,14 @@ class MedicationFormContent extends StatefulWidget {
 class _MedicationFormContentState extends State<MedicationFormContent>
     with TickerProviderStateMixin {
   bool _showScrollbar = true;
+  late final ScrollController _scrollController;
   late AnimationController _autoSelectAnimationController;
   late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
     _autoSelectAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -68,6 +70,7 @@ class _MedicationFormContentState extends State<MedicationFormContent>
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _autoSelectAnimationController.dispose();
     super.dispose();
   }
@@ -84,9 +87,12 @@ class _MedicationFormContentState extends State<MedicationFormContent>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scrollbar(
+      controller: _scrollController,
       thumbVisibility: _showScrollbar,
       child: SingleChildScrollView(
+        controller: _scrollController,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -209,15 +215,27 @@ class _MedicationFormContentState extends State<MedicationFormContent>
                                 child: Chip(
                                   label: Text(
                                     displayName,
-                                    style: const TextStyle(fontSize: 12),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: isAutoSelected
+                                          ? theme.colorScheme.onPrimaryContainer
+                                          : null,
+                                    ),
                                   ),
-                                  deleteIcon: const Icon(Icons.close, size: 16),
+                                  deleteIcon: Icon(
+                                    Icons.close,
+                                    size: 16,
+                                    color: isAutoSelected
+                                        ? theme.colorScheme.onPrimaryContainer
+                                        : null,
+                                  ),
                                   backgroundColor: isAutoSelected
-                                      ? Colors.blue.shade50
+                                      ? theme.colorScheme.primaryContainer
                                       : null,
                                   side: isAutoSelected
                                       ? BorderSide(
-                                          color: Colors.blue.shade200,
+                                          color: theme.colorScheme.primary
+                                              .withValues(alpha: 0.5),
                                           width: 1.5,
                                         )
                                       : null,
@@ -225,7 +243,9 @@ class _MedicationFormContentState extends State<MedicationFormContent>
                                       ? Icon(
                                           Icons.auto_awesome,
                                           size: 12,
-                                          color: Colors.blue.shade600,
+                                          color: theme
+                                              .colorScheme
+                                              .onPrimaryContainer,
                                         )
                                       : null,
                                   onDeleted: () {

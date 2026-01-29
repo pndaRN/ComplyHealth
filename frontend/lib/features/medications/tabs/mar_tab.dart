@@ -402,12 +402,28 @@ class _MarTabState extends ConsumerState<MarTab> {
                         ),
                       ),
                       if (isDone)
-                        Text(
-                          instance.isTaken ? 'Taken' : 'Skipped',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: statusColor,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              instance.isTaken ? 'Taken' : 'Skipped',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: statusColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (instance.isTaken &&
+                                instance.log?.actualTakenTime != null)
+                              Text(
+                                DateFormat(
+                                  'h:mm a',
+                                ).format(instance.log!.actualTakenTime!),
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontSize: 10,
+                                ),
+                              ),
+                          ],
                         ),
                     ],
                   ),

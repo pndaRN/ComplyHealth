@@ -6,6 +6,7 @@ import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../core/utils/condition_helper.dart';
+import '../../core/widgets/app_bar_widgets.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import 'condition_detail_screen.dart';
 import 'widgets/condition_card.dart';
@@ -24,7 +25,7 @@ class HealthScreen extends ConsumerStatefulWidget {
 class _HealthScreenState extends ConsumerState<HealthScreen>
     with SingleTickerProviderStateMixin {
   // UI sizing constants
-  static const double _appBarBottomHeight = 128.0;
+  static const double _appBarBottomHeight = 112.0;
 
   late TabController _tabController;
   HealthViewMode _viewMode = HealthViewMode.myConditions;
@@ -77,38 +78,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Health'),
-        actions: [
-          Consumer(
-            builder: (context, ref, child) {
-              final themeState = ref.watch(themeProvider);
-              final isDark = themeState.themeMode == ThemeMode.dark ||
-                  (themeState.themeMode == ThemeMode.system &&
-                      MediaQuery.of(context).platformBrightness ==
-                          Brightness.dark);
-
-              return PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert),
-                onSelected: (value) {
-                  if (value == 'theme') {
-                    ref.read(themeProvider.notifier).toggleTheme();
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'theme',
-                    child: Row(
-                      children: [
-                        Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                        const SizedBox(width: 12),
-                        Text(isDark ? 'Light mode' : 'Dark mode'),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
+        actions: const [AppMoreMenu()],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(_appBarBottomHeight),
           child: Column(
@@ -128,34 +98,16 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
                   const Tab(text: 'Browse All'),
                 ],
               ),
-              const SizedBox(height: 8),
               // Search bar
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search conditions...',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              setState(() => _searchQuery = '');
-                            },
-                          )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Theme.of(context).brightness == Brightness.light
-                        ? const Color(0xFFF0F7FF)
-                        : const Color(0xFF1E3A5F),
-                  ),
-                  onChanged: (value) {
-                    setState(() => _searchQuery = value.toLowerCase());
-                  },
-                ),
+              AppSearchBar(
+                searchQuery: _searchQuery,
+                hintText: 'Search conditions...',
+                onChanged: (value) {
+                  setState(() => _searchQuery = value.toLowerCase());
+                },
+                onClear: () {
+                  setState(() => _searchQuery = '');
+                },
               ),
             ],
           ),
@@ -165,9 +117,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
         data: (userConditions) =>
             _buildBody(userConditions, medications.asData?.value ?? []),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Error: $error'),
-        ),
+        error: (error, stack) => Center(child: Text('Error: $error')),
       ),
     );
   }
@@ -326,8 +276,8 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
             final isAdded = userConditions.any((c) => c.code == condition.code);
             final medCount = isAdded
                 ? medications
-                    .where((m) => m.conditionNames.contains(condition.name))
-                    .length
+                      .where((m) => m.conditionNames.contains(condition.name))
+                      .length
                 : 0;
 
             return ConditionCard(
@@ -359,9 +309,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Added ${ConditionHelper.getDisplayName(condition)}',
-          ),
+          content: Text('Added ${ConditionHelper.getDisplayName(condition)}'),
         ),
       );
     }
@@ -373,9 +321,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Removed ${ConditionHelper.getDisplayName(condition)}',
-          ),
+          content: Text('Removed ${ConditionHelper.getDisplayName(condition)}'),
         ),
       );
     }
