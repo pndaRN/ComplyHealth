@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added checkmark animation to "Next Due" card in Daily MAR tab.
 - Removed "Today's Medications" widget from Dashboard (functionality moved to Daily MAR tab).
 - Fixed late dose logging in Daily MAR to prompt for time when medication is overdue.
+- Refactored MedicationsScreen for better separation of concerns and maintainability.
+- Cleaned up lint warnings and improved logging practices across the app.
 
 ### Fixed
 - Resolved Hive "box already open with dynamic type" error by synchronizing encryption migration and adding robust provider type checks.
