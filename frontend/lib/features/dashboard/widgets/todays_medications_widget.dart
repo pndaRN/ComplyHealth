@@ -176,6 +176,7 @@ class _TodaysMedicationsWidgetState
               medicationName: latestMed.name,
               dosage: latestMed.dosage,
               scheduledTime: instance.scheduledTime,
+              isPRN: true,
             );
       } catch (e) {
         // Rollback dose count on error

@@ -61,6 +61,7 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
               notes: _notesController.text.isEmpty
                   ? null
                   : _notesController.text,
+              isPRN: true,
             );
       } catch (e) {
         // Rollback dose count on error
@@ -114,6 +115,7 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
             scheduledTime: widget.instance.scheduledTime,
             skipReason: _selectedSkipReason,
             notes: _notesController.text.isEmpty ? null : _notesController.text,
+            isPRN: widget.instance.isPRN,
           );
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {

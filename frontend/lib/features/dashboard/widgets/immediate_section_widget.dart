@@ -404,6 +404,7 @@ class _ImmediateItemState extends ConsumerState<_ImmediateItem>
               dosage: latestMed.dosage,
               scheduledTime: instance.scheduledTime,
               actualTakenTime: takenTime,
+              isPRN: true,
             );
       } catch (e) {
         await ref

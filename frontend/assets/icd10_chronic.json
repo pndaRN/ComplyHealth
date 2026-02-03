@@ -458,7 +458,7 @@
     "code": "B18.2",
     "name": "Chronic Viral Hepatitis C",
     "category": "Gastrointestinal",
-    "commonName": "Hep C",
+    "commonName": "Hepatitis C",
     "description": "Chronic hepatitis C is a viral infection that slowly damages the liver over years. It often causes fatigue, mild nausea, and sometimes jaundice (yellow skin), but many people feel fine at first. Think of it like rust slowly spreading through a machine—the liver gradually loses function if untreated. Over time, it can lead to cirrhosis or liver cancer. Modern antiviral medicines can cure most people, stopping the “rust” and protecting liver health."
   },
   {
@@ -939,9 +939,9 @@
   },
   {
     "code": "nan",
-    "name": "Abnormal Uterine Bleeding",
-    "category": "Reproductive",
-    "commonName": "AUB",
+    "name": "Insulin Resistance",
+    "category": "nan",
+    "commonName": "nan",
     "description": "nan"
   }
 ]

@@ -79,6 +79,7 @@ class _MarTabState extends ConsumerState<MarTab> {
               medicationName: med.name,
               dosage: med.dosage,
               scheduledTime: instance.scheduledTime,
+              isPRN: true,
             );
         _loadInstances();
       } catch (e) {

@@ -46,29 +46,28 @@ class _PRNSectionWidgetState extends ConsumerState<PRNSectionWidget> {
 
     try {
       // Increment dose count first
-      await ref
-          .read(medicationProvider.notifier)
-          .incrementDoseCount(latestMed);
+      await ref.read(medicationProvider.notifier).incrementDoseCount(latestMed);
 
       // Then log the dose
-      await ref.read(adherenceProvider.notifier).logDoseTaken(
+      await ref
+          .read(adherenceProvider.notifier)
+          .logDoseTaken(
             medicationId: latestMed.id,
             medicationName: latestMed.name,
             dosage: latestMed.dosage,
             scheduledTime: instance.scheduledTime,
+            isPRN: true,
           );
 
       widget.onRefresh();
     } catch (e) {
       // Rollback dose count on error
-      await ref
-          .read(medicationProvider.notifier)
-          .decrementDoseCount(latestMed);
+      await ref.read(medicationProvider.notifier).decrementDoseCount(latestMed);
       // Show error to user
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to log dose: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to log dose: $e')));
       }
     }
   }

@@ -100,18 +100,60 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     for (final instance in instances) {
       final matchingLogs = todayLogs.where((log) {
         if (log.medicationId != instance.medication.id) return false;
-        if (instance.isPRN) return true;
+        if (instance.isPRN) {
+          // For PRN, we only match if it's the same day (already handled by getLogsForDate)
+          return true;
+        }
 
         final diff = log.scheduledTime.difference(instance.scheduledTime);
         return diff.abs().inMinutes < 5;
       }).toList();
 
-      instance.log = matchingLogs.isNotEmpty ? matchingLogs.first : null;
+      if (matchingLogs.isNotEmpty) {
+        if (instance.isPRN) {
+          // For PRN, we don't attach a single log to the instance in this view
+          // as one PRN medication can have multiple logs.
+          // The UI handles PRN logs differently.
+          instance.log = matchingLogs.first;
+        } else {
+          // For scheduled meds, prioritize: Taken > Skipped > Missed
+          matchingLogs.sort((a, b) {
+            final priority = {
+              DoseStatus.taken: 0,
+              DoseStatus.skipped: 1,
+              DoseStatus.missed: 2,
+            };
+            return (priority[a.status] ?? 3).compareTo(priority[b.status] ?? 3);
+          });
+          instance.log = matchingLogs.first;
+        }
+      } else {
+        instance.log = null;
+      }
     }
 
     instances.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
 
     return instances;
+  }
+
+  /// Finds an existing log ID for a medication at a specific scheduled time.
+  /// Used for deduplication of scheduled doses.
+  String? _findExistingLogId(
+    List<MedicationLog> logs,
+    String medicationId,
+    DateTime scheduledTime,
+  ) {
+    try {
+      final existing = logs.firstWhere((log) {
+        if (log.medicationId != medicationId) return false;
+        final diff = log.scheduledTime.difference(scheduledTime);
+        return diff.abs().inMinutes < 5;
+      });
+      return existing.id;
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Log a dose as taken
@@ -122,9 +164,20 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     required DateTime scheduledTime,
     DateTime? actualTakenTime,
     String? notes,
+    bool isPRN = false,
   }) async {
     state = await AsyncValue.guard(() async {
+      final box = await _getBox();
+      final logs = box.values.toList();
+
+      // For scheduled medications, check for existing log to update
+      String? existingId;
+      if (!isPRN) {
+        existingId = _findExistingLogId(logs, medicationId, scheduledTime);
+      }
+
       final log = MedicationLog(
+        id: existingId,
         medicationId: medicationId,
         medicationName: medicationName,
         dosage: dosage,
@@ -134,7 +187,6 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
         notes: notes,
       );
 
-      final box = await _getBox();
       await box.put(log.id, log);
       return box.values.toList();
     });
@@ -153,9 +205,20 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     required DateTime scheduledTime,
     String? skipReason,
     String? notes,
+    bool isPRN = false,
   }) async {
     state = await AsyncValue.guard(() async {
+      final box = await _getBox();
+      final logs = box.values.toList();
+
+      // For scheduled medications, check for existing log to update
+      String? existingId;
+      if (!isPRN) {
+        existingId = _findExistingLogId(logs, medicationId, scheduledTime);
+      }
+
       final log = MedicationLog(
+        id: existingId,
         medicationId: medicationId,
         medicationName: medicationName,
         dosage: dosage,
@@ -165,7 +228,6 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
         notes: notes,
       );
 
-      final box = await _getBox();
       await box.put(log.id, log);
       return box.values.toList();
     });
@@ -292,7 +354,14 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     required DateTime scheduledTime,
   }) async {
     state = await AsyncValue.guard(() async {
+      final box = await _getBox();
+      final logs = box.values.toList();
+
+      // Check for existing log to update
+      final existingId = _findExistingLogId(logs, medicationId, scheduledTime);
+
       final log = MedicationLog(
+        id: existingId,
         medicationId: medicationId,
         medicationName: medicationName,
         dosage: dosage,
@@ -300,7 +369,6 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
         status: DoseStatus.missed,
       );
 
-      final box = await _getBox();
       await box.put(log.id, log);
       return box.values.toList();
     });
