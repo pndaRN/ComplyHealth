@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-02-03
+
 ### Changed
 - Standardized AppBars across all tabs for global UI consistency.
 - Creation of shared `AppMoreMenu` and `AppSearchBar` widgets to unify header actions and search experiences.

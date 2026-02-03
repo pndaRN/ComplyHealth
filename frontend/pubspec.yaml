@@ -17,7 +17,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # To run the Flutter app with the pre-update script, use:
 # ./run_with_update.sh
 
-version: 1.4.1+10
+version: 1.5.0+11
 
 environment:
   sdk: ^3.9.2
