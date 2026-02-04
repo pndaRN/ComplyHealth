@@ -5,6 +5,7 @@ class MedicationCard extends StatelessWidget {
   final Medication medication;
   final List<String> conditionDisplayNames;
   final String timingSummary;
+  final int noteCount;
   final Color? doseColor;
   final VoidCallback onTap;
 
@@ -13,6 +14,7 @@ class MedicationCard extends StatelessWidget {
     required this.medication,
     required this.conditionDisplayNames,
     required this.timingSummary,
+    this.noteCount = 0,
     this.doseColor,
     required this.onTap,
   });
@@ -77,23 +79,52 @@ class MedicationCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
-                    // Timing and conditions
+                    // Timing and notes
                     Row(
                       children: [
                         Icon(
-                          medication.isPRN ? Icons.warning_amber : Icons.schedule,
+                          medication.isPRN
+                              ? Icons.warning_amber
+                              : Icons.schedule,
                           size: 16,
-                          color: doseColor ?? theme.colorScheme.onSurfaceVariant,
+                          color:
+                              doseColor ?? theme.colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
                         Expanded(
-                          child: Text(
-                            timingSummary,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: doseColor ?? theme.colorScheme.onSurfaceVariant,
-                              fontWeight: medication.isPRN ? FontWeight.bold : null,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  timingSummary,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color:
+                                        doseColor ??
+                                        theme.colorScheme.onSurfaceVariant,
+                                    fontWeight: medication.isPRN
+                                        ? FontWeight.bold
+                                        : null,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (noteCount > 0) ...[
+                                const SizedBox(width: 12),
+                                Icon(
+                                  Icons.note_alt_outlined,
+                                  size: 14,
+                                  color: theme.colorScheme.secondary,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '$noteCount',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.secondary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                       ],

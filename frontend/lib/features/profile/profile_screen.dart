@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/profile.dart';
 import '../../core/state/profile_provider.dart';
-import '../../core/theme/theme_provider.dart';
 import '../../core/widgets/app_bar_widgets.dart';
 import '../dashboard/widgets/adherence_metrics_widget.dart';
 import '../settings/settings_screen.dart';

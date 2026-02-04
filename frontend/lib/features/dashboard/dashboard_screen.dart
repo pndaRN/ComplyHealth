@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/state/adherence_provider.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
-import '../../core/theme/theme_provider.dart';
 import '../../core/widgets/app_bar_widgets.dart';
 import 'widgets/enhanced_calendar_widget.dart';
 import 'widgets/at_a_glance_widget.dart';

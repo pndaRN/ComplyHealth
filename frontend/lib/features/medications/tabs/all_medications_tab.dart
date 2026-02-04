@@ -4,6 +4,7 @@ import '../../../../core/models/medication.dart';
 import '../../../../core/models/disease.dart';
 import '../../../../core/state/medication_provider.dart';
 import '../../../../core/state/conditions_provider.dart';
+import '../../../../core/state/notebook_provider.dart';
 import '../../../../core/theme/status_colors.dart';
 import '../../../../core/utils/condition_helper.dart';
 import '../../../../core/utils/time_formatting_utils.dart';
@@ -59,6 +60,7 @@ class _AllMedicationsTabState extends ConsumerState<AllMedicationsTab> {
   Widget build(BuildContext context) {
     final medsAsync = ref.watch(medicationProvider);
     final conditionsAsync = ref.watch(conditionsProvider);
+    final notebookAsync = ref.watch(notebookProvider);
     final notifier = ref.read(medicationProvider.notifier);
     final currentSortOption = notifier.sortOption;
 
@@ -67,6 +69,7 @@ class _AllMedicationsTabState extends ConsumerState<AllMedicationsTab> {
       error: (err, stack) => Center(child: Text('Error: $err')),
       data: (meds) {
         final conditions = conditionsAsync.asData?.value ?? [];
+        final notebookEntries = notebookAsync.asData?.value ?? [];
 
         final filteredMeds = widget.searchQuery.isEmpty
             ? meds
@@ -102,6 +105,7 @@ class _AllMedicationsTabState extends ConsumerState<AllMedicationsTab> {
           filteredMeds,
           currentSortOption,
           conditions,
+          notebookEntries,
         );
       },
     );
@@ -112,13 +116,19 @@ class _AllMedicationsTabState extends ConsumerState<AllMedicationsTab> {
     List<Medication> meds,
     MedicationSortOption sortOption,
     List<Disease> conditions,
+    List notebookEntries,
   ) {
     if (sortOption == MedicationSortOption.groupedByCondition) {
-      return _buildGroupedList(context, meds, conditions);
+      return _buildGroupedList(context, meds, conditions, notebookEntries);
     } else if (sortOption == MedicationSortOption.dueTime) {
-      return _buildDueTimeGroupedList(context, meds, conditions);
+      return _buildDueTimeGroupedList(
+        context,
+        meds,
+        conditions,
+        notebookEntries,
+      );
     } else {
-      return _buildSimpleList(context, meds, conditions);
+      return _buildSimpleList(context, meds, conditions, notebookEntries);
     }
   }
 
@@ -126,6 +136,7 @@ class _AllMedicationsTabState extends ConsumerState<AllMedicationsTab> {
     BuildContext context,
     List<Medication> meds,
     List<Disease> conditions,
+    List notebookEntries,
   ) {
     return ListView.builder(
       itemCount: meds.length,
@@ -145,11 +156,20 @@ class _AllMedicationsTabState extends ConsumerState<AllMedicationsTab> {
               )
             : null;
 
+        final noteCount =
+            notebookEntries
+                .where(
+                  (e) => e.sourceCode == medication.id && e.sourceType == 1,
+                )
+                .length +
+            (medication.personalNotes?.isNotEmpty == true ? 1 : 0);
+
         return MedicationCard(
           medication: medication,
           conditionDisplayNames: conditionDisplayNames,
           timingSummary: timingSummary,
           doseColor: doseColor,
+          noteCount: noteCount,
           onTap: () => _navigateToDetail(medication),
         );
       },
@@ -168,6 +188,7 @@ class _AllMedicationsTabState extends ConsumerState<AllMedicationsTab> {
     BuildContext context,
     List<Medication> meds,
     List<Disease> conditions,
+    List notebookEntries,
   ) {
     final conditionGroupedMeds = _createConditionGroupedMedications(meds);
     conditionGroupedMeds.sort(
@@ -216,12 +237,19 @@ class _AllMedicationsTabState extends ConsumerState<AllMedicationsTab> {
             )
           : null;
 
+      final noteCount =
+          notebookEntries
+              .where((e) => e.sourceCode == medication.id && e.sourceType == 1)
+              .length +
+          (medication.personalNotes?.isNotEmpty == true ? 1 : 0);
+
       items.add(
         MedicationCard(
           medication: medication,
           conditionDisplayNames: conditionDisplayNames,
           timingSummary: timingSummary,
           doseColor: doseColor,
+          noteCount: noteCount,
           onTap: () => _navigateToDetail(medication),
         ),
       );
@@ -317,6 +345,7 @@ class _AllMedicationsTabState extends ConsumerState<AllMedicationsTab> {
     BuildContext context,
     List<Medication> meds,
     List<Disease> conditions,
+    List notebookEntries,
   ) {
     final now = DateTime.now();
     final currentTime =
@@ -363,12 +392,19 @@ class _AllMedicationsTabState extends ConsumerState<AllMedicationsTab> {
             )
           : null;
 
+      final noteCount =
+          notebookEntries
+              .where((e) => e.sourceCode == medication.id && e.sourceType == 1)
+              .length +
+          (medication.personalNotes?.isNotEmpty == true ? 1 : 0);
+
       items.add(
         MedicationCard(
           medication: medication,
           conditionDisplayNames: conditionDisplayNames,
           timingSummary: timingSummary,
           doseColor: doseColor,
+          noteCount: noteCount,
           onTap: () => _navigateToDetail(medication),
         ),
       );
