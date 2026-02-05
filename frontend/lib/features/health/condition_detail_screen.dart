@@ -48,7 +48,7 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
         : widget.condition.name;
 
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: Text(displayName),
@@ -56,7 +56,6 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Overview'),
-              Tab(text: 'Medications'),
               Tab(text: 'Notes'),
             ],
           ),
@@ -82,7 +81,6 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
           body: _buildOverviewTab(),
           floatingActionButton: _buildFloatingActionButton(isAdded),
         ),
-        Scaffold(body: _buildMedicationsTab()),
         Scaffold(
           body: _buildNotesTab(isAdded),
           floatingActionButton: isAdded && _notesController.text.isNotEmpty
@@ -99,6 +97,9 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
 
   Widget _buildOverviewTab() {
     final theme = Theme.of(context);
+    final displayName = widget.condition.commonName.isNotEmpty
+        ? widget.condition.commonName
+        : widget.condition.name;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -113,57 +114,28 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Medical Name',
-                    style: theme.textTheme.labelLarge?.copyWith(
+                    displayName,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.condition.name,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  if (widget.condition.commonName.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      'Common Name',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: theme.colorScheme.primary,
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      widget.condition.category,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.condition.commonName,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          widget.condition.category,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'ICD-10: ${widget.condition.code}',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -172,7 +144,7 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
           const SizedBox(height: 16),
           // Description
           Text(
-            'Description',
+            'About this condition',
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -189,12 +161,22 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 24),
+          // Medications section
+          Text(
+            'Current Medications',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildMedicationsSection(),
         ],
       ),
     );
   }
 
-  Widget _buildMedicationsTab() {
+  Widget _buildMedicationsSection() {
     final theme = Theme.of(context);
     final medicationsAsync = ref.watch(medicationProvider);
 
@@ -205,39 +187,32 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
             .toList();
 
         if (linkedMedications.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.medication_outlined,
-                  size: 64,
-                  color: theme.colorScheme.outline,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'No medications for this condition',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.medication_outlined,
+                    color: theme.colorScheme.outline,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Add medications from the Medications tab',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'No medications linked to this condition.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         }
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: linkedMedications.length,
-          itemBuilder: (context, index) {
-            final med = linkedMedications[index];
+        return Column(
+          children: linkedMedications.map((med) {
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
               child: Padding(
@@ -306,11 +281,11 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
                 ),
               ),
             );
-          },
+          }).toList(),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => Center(child: Text('Error: $err')),
+      error: (err, stack) => Text('Error loading medications: $err'),
     );
   }
 

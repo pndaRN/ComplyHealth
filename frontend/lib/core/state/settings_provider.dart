@@ -7,20 +7,36 @@ import '../../core/services/encryption_migration_service.dart';
 class SettingsState {
   final bool notificationsEnabled;
   final bool hasCompletedOnboarding;
+  final String morningTime;
+  final String noonTime;
+  final String eveningTime;
+  final String nightTime;
 
   const SettingsState({
     this.notificationsEnabled = true,
     this.hasCompletedOnboarding = false,
+    this.morningTime = '07:00',
+    this.noonTime = '12:00',
+    this.eveningTime = '17:00',
+    this.nightTime = '21:00',
   });
 
   SettingsState copyWith({
     bool? notificationsEnabled,
     bool? hasCompletedOnboarding,
+    String? morningTime,
+    String? noonTime,
+    String? eveningTime,
+    String? nightTime,
   }) {
     return SettingsState(
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       hasCompletedOnboarding:
           hasCompletedOnboarding ?? this.hasCompletedOnboarding,
+      morningTime: morningTime ?? this.morningTime,
+      noonTime: noonTime ?? this.noonTime,
+      eveningTime: eveningTime ?? this.eveningTime,
+      nightTime: nightTime ?? this.nightTime,
     );
   }
 }
@@ -61,9 +77,38 @@ class SettingsNotifier extends Notifier<SettingsState> {
         box.get('notificationsEnabled', defaultValue: true) as bool;
     final hasCompletedOnboarding =
         box.get('hasCompletedOnboarding', defaultValue: false) as bool;
+    final morningTime = box.get('morningTime', defaultValue: '07:00') as String;
+    final noonTime = box.get('noonTime', defaultValue: '12:00') as String;
+    final eveningTime = box.get('eveningTime', defaultValue: '17:00') as String;
+    final nightTime = box.get('nightTime', defaultValue: '21:00') as String;
+
     state = SettingsState(
       notificationsEnabled: notificationsEnabled,
       hasCompletedOnboarding: hasCompletedOnboarding,
+      morningTime: morningTime,
+      noonTime: noonTime,
+      eveningTime: eveningTime,
+      nightTime: nightTime,
+    );
+  }
+
+  Future<void> setDefaultTimes({
+    String? morning,
+    String? noon,
+    String? evening,
+    String? night,
+  }) async {
+    final box = await _getBox();
+    if (morning != null) await box.put('morningTime', morning);
+    if (noon != null) await box.put('noonTime', noon);
+    if (evening != null) await box.put('eveningTime', evening);
+    if (night != null) await box.put('nightTime', night);
+
+    state = state.copyWith(
+      morningTime: morning,
+      noonTime: noon,
+      eveningTime: evening,
+      nightTime: night,
     );
   }
 

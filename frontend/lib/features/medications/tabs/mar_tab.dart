@@ -213,11 +213,15 @@ class _MarTabState extends ConsumerState<MarTab> {
 
           // Determine if this slot is "late" or has unlogged doses
           final bool hasLateOrUnlogged = instances.any((i) {
+            // Only consider missed if time sensitive
             final isMissed = i.isMissed && !(i.log?.isDismissed ?? false);
             final isPending = i.log == null;
-            final isPast = now.isAfter(
-              i.scheduledTime.add(const Duration(minutes: 60)),
-            );
+            // Use isInstanceOverdue to respect isTimeSensitive logic
+            final isPast = isInstanceOverdue(i);
+
+            // If not time sensitive, we don't flag as action needed (red) unless explicitly missed (which shouldn't happen automatically)
+            if (!i.medication.isTimeSensitive && isPending) return false;
+
             return isMissed || (isPending && isPast);
           });
 

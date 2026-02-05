@@ -17,6 +17,8 @@ class MedicationFormContent extends StatefulWidget {
   final ValueChanged<List<TimeOfDay>> onTimesChanged;
   final TextEditingController maxDosesController;
   final Set<String> autoSelectedConditions;
+  final bool isTimeSensitive;
+  final ValueChanged<bool> onTimeSensitiveChanged;
 
   const MedicationFormContent({
     super.key,
@@ -31,6 +33,8 @@ class MedicationFormContent extends StatefulWidget {
     required this.onTimesChanged,
     required this.maxDosesController,
     this.autoSelectedConditions = const {},
+    this.isTimeSensitive = true,
+    required this.onTimeSensitiveChanged,
   });
 
   @override
@@ -42,7 +46,6 @@ class _MedicationFormContentState extends State<MedicationFormContent>
   bool _showScrollbar = true;
   late final ScrollController _scrollController;
   late AnimationController _autoSelectAnimationController;
-  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
@@ -51,12 +54,6 @@ class _MedicationFormContentState extends State<MedicationFormContent>
     _autoSelectAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _autoSelectAnimationController,
-        curve: Curves.elasticOut,
-      ),
     );
 
     Future.delayed(const Duration(seconds: 2), () {
@@ -88,64 +85,209 @@ class _MedicationFormContentState extends State<MedicationFormContent>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return Scrollbar(
       controller: _scrollController,
       thumbVisibility: _showScrollbar,
       child: SingleChildScrollView(
         controller: _scrollController,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Basics Section
+            Text(
+              'Basics',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 16),
             TextField(
               controller: widget.nameController,
-              decoration: const InputDecoration(labelText: 'Medication Name'),
+              decoration: const InputDecoration(
+                labelText: 'Medication Name',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.medication),
+              ),
               textCapitalization: TextCapitalization.sentences,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             TextField(
               controller: widget.dosageController,
-              decoration: const InputDecoration(labelText: 'Dosage'),
+              decoration: const InputDecoration(
+                labelText: 'Dosage',
+                hintText: 'e.g. 10mg, 1 pill',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.scale),
+              ),
             ),
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 16),
-            TimingPresetButtons(
-              scheduledTimes: widget.scheduledTimes,
-              isPRN: widget.isPRN,
-              onTimeAdded: (time) {
-                // Add time if it doesn't exist
-                final exists = widget.scheduledTimes.any(
-                  (t) => t.hour == time.hour && t.minute == time.minute,
-                );
-                if (!exists) {
-                  widget.onTimesChanged([...widget.scheduledTimes, time]);
-                }
-              },
-              onTimeRemoved: (time) {
-                // Remove time
-                final updated = widget.scheduledTimes
-                    .where(
-                      (t) => !(t.hour == time.hour && t.minute == time.minute),
-                    )
-                    .toList();
-                widget.onTimesChanged(updated);
-              },
-              onPRNChanged: widget.onPRNChanged,
+
+            const SizedBox(height: 24),
+
+            // Conditions Section
+            Text(
+              'Conditions',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.primary,
+              ),
             ),
-            if (widget.isPRN) ...[
-              const SizedBox(height: 16),
-              TextField(
-                controller: widget.maxDosesController,
-                decoration: const InputDecoration(
-                  labelText: 'Maximum doses per day',
-                  hintText: 'e.g., 4',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.medical_services),
+            const SizedBox(height: 8),
+            if (widget.conditions.isEmpty)
+              Text(
+                'No conditions added yet.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              )
+            else
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: widget.conditions.map((condition) {
+                  final isSelected = widget.selectedConditions.contains(
+                    condition.name,
+                  );
+                  final isAutoSelected = widget.autoSelectedConditions.contains(
+                    condition.name,
+                  );
+
+                  return FilterChip(
+                    label: Text(
+                      condition.commonName.isNotEmpty
+                          ? condition.commonName
+                          : condition.name,
+                    ),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      final updated = List<String>.from(
+                        widget.selectedConditions,
+                      );
+                      if (selected) {
+                        updated.add(condition.name);
+                      } else {
+                        updated.remove(condition.name);
+                      }
+                      widget.onConditionsChanged(updated);
+                    },
+                    avatar: isAutoSelected
+                        ? Icon(
+                            Icons.auto_awesome,
+                            size: 16,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          )
+                        : null,
+                  );
+                }).toList(),
+              ),
+
+            const SizedBox(height: 24),
+
+            // Schedule Section
+            Text(
+              'Schedule',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Schedule Type Toggle
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<bool>(
+                segments: const [
+                  ButtonSegment<bool>(
+                    value: false,
+                    label: Text('Scheduled'),
+                    icon: Icon(Icons.access_time),
+                  ),
+                  ButtonSegment<bool>(
+                    value: true,
+                    label: Text('As Needed'),
+                    icon: Icon(Icons.healing),
+                  ),
+                ],
+                selected: {widget.isPRN},
+                onSelectionChanged: (Set<bool> newSelection) {
+                  widget.onPRNChanged(newSelection.first);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            if (widget.isPRN) ...[
+              // PRN Details
+              Card(
+                elevation: 0,
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.3,
+                ),
+                margin: EdgeInsets.zero,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                    children: [
+                      Text(
+                        'As Needed (PRN)',
+                        style: theme.textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'This medication will appear in the "As Needed" section and won\'t trigger scheduled reminders.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: widget.maxDosesController,
+                        decoration: const InputDecoration(
+                          labelText: 'Max doses per day (Optional)',
+                          hintText: 'e.g., 4',
+                          border: OutlineInputBorder(),
+                          filled: true,
+                        ),
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ] else ...[
+              // Scheduled Details
+              TimingPresetButtons(
+                scheduledTimes: widget.scheduledTimes,
+                isPRN: false, // Always false in this branch
+                onTimeAdded: (time) {
+                  final exists = widget.scheduledTimes.any(
+                    (t) => t.hour == time.hour && t.minute == time.minute,
+                  );
+                  if (!exists) {
+                    widget.onTimesChanged([...widget.scheduledTimes, time]);
+                  }
+                },
+                onTimeRemoved: (time) {
+                  final updated = widget.scheduledTimes
+                      .where(
+                        (t) =>
+                            !(t.hour == time.hour && t.minute == time.minute),
+                      )
+                      .toList();
+                  widget.onTimesChanged(updated);
+                },
+                onPRNChanged:
+                    (_) {}, // No-op as we handle toggle externally now
+              ),
               const SizedBox(height: 16),
               TimePickerSection(
                 selectedTimes: widget.scheduledTimes,
@@ -167,195 +309,25 @@ class _MedicationFormContentState extends State<MedicationFormContent>
                   widget.onTimesChanged(updated);
                 },
               ),
-            ],
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 12),
-            InkWell(
-              onTap: () => _showConditionSelector(context),
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Conditions',
-                  border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+
+              // Time Sensitive Toggle
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Time Sensitive'),
+                subtitle: const Text(
+                  'Mark as late if missed. Turn off for flexible timing.',
                 ),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: widget.selectedConditions.isEmpty
-                      ? [
-                          const Text(
-                            'Tap to select conditions',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ]
-                      : widget.selectedConditions.map((conditionName) {
-                          final condition = widget.conditions.firstWhere(
-                            (c) => c.name == conditionName,
-                            orElse: () => Disease(
-                              code: '',
-                              name: conditionName,
-                              category: '',
-                              commonName: '',
-                              description: '',
-                            ),
-                          );
-                          final displayName = condition.commonName.isNotEmpty
-                              ? condition.commonName
-                              : condition.name;
-                          return AnimatedBuilder(
-                            animation: _scaleAnimation,
-                            builder: (context, child) {
-                              final isAutoSelected = widget
-                                  .autoSelectedConditions
-                                  .contains(conditionName);
-                              return Transform.scale(
-                                scale: isAutoSelected
-                                    ? _scaleAnimation.value
-                                    : 1.0,
-                                child: Chip(
-                                  label: Text(
-                                    displayName,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: isAutoSelected
-                                          ? theme.colorScheme.onPrimaryContainer
-                                          : null,
-                                    ),
-                                  ),
-                                  deleteIcon: Icon(
-                                    Icons.close,
-                                    size: 16,
-                                    color: isAutoSelected
-                                        ? theme.colorScheme.onPrimaryContainer
-                                        : null,
-                                  ),
-                                  backgroundColor: isAutoSelected
-                                      ? theme.colorScheme.primaryContainer
-                                      : null,
-                                  side: isAutoSelected
-                                      ? BorderSide(
-                                          color: theme.colorScheme.primary
-                                              .withValues(alpha: 0.5),
-                                          width: 1.5,
-                                        )
-                                      : null,
-                                  avatar: isAutoSelected
-                                      ? Icon(
-                                          Icons.auto_awesome,
-                                          size: 12,
-                                          color: theme
-                                              .colorScheme
-                                              .onPrimaryContainer,
-                                        )
-                                      : null,
-                                  onDeleted: () {
-                                    final updated = List<String>.from(
-                                      widget.selectedConditions,
-                                    )..remove(conditionName);
-                                    widget.onConditionsChanged(updated);
-                                  },
-                                ),
-                              );
-                            },
-                          );
-                        }).toList(),
-                ),
+                value: widget.isTimeSensitive,
+                onChanged: widget.onTimeSensitiveChanged,
               ),
-            ),
+            ],
+
+            // Bottom padding for scroll
+            const SizedBox(height: 48),
           ],
         ),
       ),
-    );
-  }
-
-  void _showConditionSelector(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => _ConditionSelectorDialog(
-        conditions: widget.conditions,
-        selectedConditions: widget.selectedConditions,
-        onConditionsChanged: widget.onConditionsChanged,
-      ),
-    );
-  }
-}
-
-class _ConditionSelectorDialog extends StatefulWidget {
-  final List<Disease> conditions;
-  final List<String> selectedConditions;
-  final ValueChanged<List<String>> onConditionsChanged;
-
-  const _ConditionSelectorDialog({
-    required this.conditions,
-    required this.selectedConditions,
-    required this.onConditionsChanged,
-  });
-
-  @override
-  State<_ConditionSelectorDialog> createState() =>
-      _ConditionSelectorDialogState();
-}
-
-class _ConditionSelectorDialogState extends State<_ConditionSelectorDialog> {
-  late List<String> _tempSelected;
-
-  @override
-  void initState() {
-    super.initState();
-    _tempSelected = List<String>.from(widget.selectedConditions);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Select Conditions'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: widget.conditions.isEmpty
-            ? const Text('No conditions available. Add conditions first.')
-            : ListView.builder(
-                shrinkWrap: true,
-                itemCount: widget.conditions.length,
-                itemBuilder: (context, index) {
-                  final condition = widget.conditions[index];
-                  final displayName = condition.commonName.isNotEmpty
-                      ? condition.commonName
-                      : condition.name;
-                  final isSelected = _tempSelected.contains(condition.name);
-
-                  return CheckboxListTile(
-                    title: Text(displayName),
-                    subtitle: Text(
-                      '${condition.code} • ${condition.category}',
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    value: isSelected,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        if (value == true) {
-                          _tempSelected.add(condition.name);
-                        } else {
-                          _tempSelected.remove(condition.name);
-                        }
-                      });
-                    },
-                  );
-                },
-              ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            widget.onConditionsChanged(_tempSelected);
-            Navigator.pop(context);
-          },
-          child: const Text('Done'),
-        ),
-      ],
     );
   }
 }

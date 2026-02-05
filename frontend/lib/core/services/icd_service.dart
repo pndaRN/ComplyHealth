@@ -16,8 +16,7 @@ class ICDService {
         .where(
           (d) =>
               d.name.toLowerCase().contains(lower) ||
-              d.commonName.toLowerCase().contains(lower) ||
-              d.code.toLowerCase().contains(lower),
+              d.commonName.toLowerCase().contains(lower),
         )
         .toList();
   }

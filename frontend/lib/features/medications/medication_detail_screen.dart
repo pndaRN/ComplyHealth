@@ -68,7 +68,7 @@ class _MedicationDetailScreenState
     );
 
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: Text(currentMed.name),
@@ -111,7 +111,6 @@ class _MedicationDetailScreenState
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Overview'),
-              Tab(text: 'Schedule'),
               Tab(text: 'Notes'),
             ],
           ),
@@ -119,7 +118,6 @@ class _MedicationDetailScreenState
         body: TabBarView(
           children: [
             _buildOverviewTab(currentMed, conditionDisplayNames),
-            _buildScheduleTab(currentMed),
             Scaffold(
               body: _buildNotesTab(currentMed, notebookAsync),
               floatingActionButton: ValueListenableBuilder<bool>(
@@ -146,6 +144,7 @@ class _MedicationDetailScreenState
     List<String> conditionDisplayNames,
   ) {
     final theme = Theme.of(context);
+    final notifier = ref.read(medicationProvider.notifier);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -258,92 +257,7 @@ class _MedicationDetailScreenState
           ),
           const SizedBox(height: 16),
 
-          // Summary card
-          Text(
-            'Summary',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  _buildSummaryRow(
-                    context,
-                    icon: Icons.category,
-                    label: 'Type',
-                    value: medication.isPRN ? 'As needed (PRN)' : 'Scheduled',
-                  ),
-                  const Divider(height: 24),
-                  _buildSummaryRow(
-                    context,
-                    icon: Icons.schedule,
-                    label: medication.isPRN
-                        ? 'Max daily doses'
-                        : 'Times per day',
-                    value: medication.isPRN
-                        ? '${medication.maxDailyDoses ?? "Not set"}'
-                        : '${medication.scheduledTimes.length}',
-                  ),
-                  if (medication.isPRN) ...[
-                    const Divider(height: 24),
-                    _buildSummaryRow(
-                      context,
-                      icon: Icons.today,
-                      label: 'Doses taken today',
-                      value: '${medication.currentDoseCount}',
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryRow(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-        Text(
-          value,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildScheduleTab(Medication medication) {
-    final theme = Theme.of(context);
-    final notifier = ref.read(medicationProvider.notifier);
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+          // Schedule section (formerly Summary + Schedule)
           if (medication.isPRN) ...[
             // PRN dose tracking
             Card(
@@ -542,9 +456,11 @@ class _MedicationDetailScreenState
   }
 
   void _showEditDialog(Medication medication) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => MedicationEditDialog(medication: medication),
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (context) => MedicationEditSheet(medication: medication),
     );
   }
 

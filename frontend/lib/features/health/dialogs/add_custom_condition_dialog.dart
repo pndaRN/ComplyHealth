@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/models/disease.dart';
 
-/// Dialog for adding a custom condition not in the ICD-10 database
+/// Dialog for adding a custom condition not in the database
 class AddCustomConditionDialog extends StatefulWidget {
   const AddCustomConditionDialog({super.key});
 
   @override
-  State<AddCustomConditionDialog> createState() => _AddCustomConditionDialogState();
+  State<AddCustomConditionDialog> createState() =>
+      _AddCustomConditionDialogState();
 }
 
 class _AddCustomConditionDialogState extends State<AddCustomConditionDialog> {
@@ -37,7 +38,8 @@ class _AddCustomConditionDialogState extends State<AddCustomConditionDialog> {
     if (_formKey.currentState?.validate() ?? false) {
       // Generate unique code for custom condition
       const uuid = Uuid();
-      final customCode = 'CUSTOM_${uuid.v4().substring(0, _customCodeLength).toUpperCase()}';
+      final customCode =
+          'CUSTOM_${uuid.v4().substring(0, _customCodeLength).toUpperCase()}';
 
       // Create Disease object with custom fields
       final customCondition = Disease(
@@ -47,7 +49,9 @@ class _AddCustomConditionDialogState extends State<AddCustomConditionDialog> {
         commonName: nameCtrl.text.trim(),
         description: 'Custom condition added by user',
         isCustom: true,
-        personalNotes: notesCtrl.text.trim().isNotEmpty ? notesCtrl.text.trim() : null,
+        personalNotes: notesCtrl.text.trim().isNotEmpty
+            ? notesCtrl.text.trim()
+            : null,
         createdAt: DateTime.now(),
       );
 
@@ -113,10 +117,7 @@ class _AddCustomConditionDialogState extends State<AddCustomConditionDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
-        FilledButton(
-          onPressed: _save,
-          child: const Text('Save'),
-        ),
+        FilledButton(onPressed: _save, child: const Text('Save')),
       ],
     );
   }

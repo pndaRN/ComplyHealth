@@ -17,7 +17,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # To run the Flutter app with the pre-update script, use:
 # ./run_with_update.sh
 
-version: 1.5.0+11
+version: 1.6.0+12
 
 environment:
   sdk: ^3.9.2
@@ -47,6 +47,7 @@ dependencies:
   timezone: ^0.10.1
   flutter_timezone: ^4.1.1
   url_launcher: ^6.3.1
+  flutter_svg: ^2.0.10+1
   firebase_core: ^4.3.0
   firebase_crashlytics: ^5.0.6
   cloud_firestore: ^6.1.1
@@ -67,7 +68,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
 
 flutter_launcher_icons:
-  android: "launcher_icon"
+  android: true
   ios: true
   image_path: "assets/icon_launcher.png"
   min_sdk_android: 21
@@ -76,6 +77,8 @@ flutter:
   assets:
     - assets/icd10_chronic.json
     - assets/education_content.json
+    - assets/Asset 2- SVG transparent.svg
+    - assets/Asset 3- SVG transparent.svg
 
   uses-material-design: true
 

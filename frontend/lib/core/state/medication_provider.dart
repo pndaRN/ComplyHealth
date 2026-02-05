@@ -56,9 +56,14 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
     // Only schedule notifications on the first build to prevent duplicates
     // Individual add/update operations will handle their own scheduling
     if (!_hasScheduledInitialNotifications && meds.isNotEmpty) {
-      await NotificationService().cancelAllNotifications();
-      await NotificationService().scheduleAllMedications(meds);
-      _hasScheduledInitialNotifications = true;
+      try {
+        await NotificationService().cancelAllNotifications();
+        await NotificationService().scheduleAllMedications(meds);
+        _hasScheduledInitialNotifications = true;
+      } catch (e) {
+        // Log error but don't fail the build
+        print('Failed to schedule initial notifications: $e');
+      }
     }
 
     return _applySorting(meds);
@@ -88,7 +93,14 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
     state = await AsyncValue.guard(() async {
       final box = await _getBox();
       await box.put(med.id, med);
-      await NotificationService().scheduleMedicationNotifications(med);
+      // Reschedule all notifications to account for the new medication
+      try {
+        await NotificationService().rescheduleAllNotifications(
+          box.values.toList(),
+        );
+      } catch (e) {
+        print('Failed to reschedule notifications (add): $e');
+      }
       return _applySorting(box.values.toList());
     });
   }
@@ -97,7 +109,14 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
     state = await AsyncValue.guard(() async {
       final box = await _getBox();
       await box.delete(med.id);
-      await NotificationService().cancelMedicationNotifications(med.id);
+      // Reschedule all notifications to remove the deleted medication from groups
+      try {
+        await NotificationService().rescheduleAllNotifications(
+          box.values.toList(),
+        );
+      } catch (e) {
+        print('Failed to reschedule notifications (delete): $e');
+      }
       return _applySorting(box.values.toList());
     });
   }
@@ -106,7 +125,14 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
     state = await AsyncValue.guard(() async {
       final box = await _getBox();
       await box.put(med.id, med);
-      await NotificationService().scheduleMedicationNotifications(med);
+      // Reschedule all notifications to account for schedule changes
+      try {
+        await NotificationService().rescheduleAllNotifications(
+          box.values.toList(),
+        );
+      } catch (e) {
+        print('Failed to reschedule notifications (update): $e');
+      }
       return _applySorting(box.values.toList());
     });
   }

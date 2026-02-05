@@ -205,8 +205,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
     return conditions.where((condition) {
       final searchLower = _searchQuery.toLowerCase();
       return condition.name.toLowerCase().contains(searchLower) ||
-          condition.commonName.toLowerCase().contains(searchLower) ||
-          condition.code.toLowerCase().contains(searchLower);
+          condition.commonName.toLowerCase().contains(searchLower);
     }).toList();
   }
 

@@ -8,6 +8,9 @@ import '../../core/state/medication_provider.dart';
 import '../../core/utils/condition_helper.dart';
 import '../medications/dialogs/medication_add_dialog.dart';
 import 'widgets/onboarding_page.dart';
+import 'widgets/profile_setup_form.dart';
+import 'widgets/default_times_form.dart';
+import 'widgets/app_preferences_form.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   final VoidCallback onComplete;
@@ -21,6 +24,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  static const int _totalPages = 7;
 
   @override
   void dispose() {
@@ -29,7 +33,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _nextPage() {
-    if (_currentPage < 3) {
+    if (_currentPage < _totalPages - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -47,7 +51,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isLastPage = _currentPage == 3;
+    final isLastPage = _currentPage == _totalPages - 1;
     final conditionsAsync = ref.watch(conditionsProvider);
     final medicationsAsync = ref.watch(medicationProvider);
 
@@ -85,11 +89,35 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     description:
                         'Your personal health companion for tracking chronic conditions and medications.',
                   ),
-                  // Page 2: Conditions
+                  // Page 2: Profile Setup
+                  OnboardingPage(
+                    icon: Icons.person_add_outlined,
+                    title: 'Your Profile',
+                    description:
+                        'Tell us a bit about yourself to personalize your experience.',
+                    action: const ProfileSetupForm(),
+                  ),
+                  // Page 3: Default Times
+                  OnboardingPage(
+                    icon: Icons.access_time_filled,
+                    title: 'Default Dose Times',
+                    description:
+                        'When do you usually take your morning or evening meds? You can customize these defaults.',
+                    action: const DefaultTimesForm(),
+                  ),
+                  // Page 4: Conditions
                   _buildConditionsPage(conditions),
-                  // Page 3: Medications
+                  // Page 5: Medications
                   _buildMedicationsPage(conditions, medications),
-                  // Page 4: Get Started
+                  // Page 6: Preferences
+                  OnboardingPage(
+                    icon: Icons.tune,
+                    title: 'Personalize App',
+                    description:
+                        'Choose your preferred theme and notification settings.',
+                    action: const AppPreferencesForm(),
+                  ),
+                  // Page 7: Get Started
                   OnboardingPage(
                     icon: Icons.insights,
                     title: 'You\'re All Set!',
@@ -107,7 +135,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
-                  4,
+                  _totalPages,
                   (index) => AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -331,9 +359,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _showAddMedicationDialog() {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => const MedicationAddDialog(),
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (context) => const MedicationAddSheet(),
     );
   }
 
