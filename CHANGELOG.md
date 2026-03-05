@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
--
+### Changed
+- Redesigned Health Overview widget: removed outer container box and made each condition independently collapsible to show/hide related medications
 
 ## [1.6.0] - 2026-02-05
 

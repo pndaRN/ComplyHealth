@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/models/disease.dart';
 import '../../../core/models/medication.dart';
 
-class AtAGlanceWidget extends StatelessWidget {
+class AtAGlanceWidget extends StatefulWidget {
   final List<Disease> conditions;
   final List<Medication> medications;
 
@@ -13,94 +13,94 @@ class AtAGlanceWidget extends StatelessWidget {
   });
 
   @override
+  State<AtAGlanceWidget> createState() => _AtAGlanceWidgetState();
+}
+
+class _AtAGlanceWidgetState extends State<AtAGlanceWidget> {
+  final Map<String, bool> _expandedStates = {};
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
-      margin: const EdgeInsets.all(16),
+    if (widget.conditions.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          'No conditions tracked yet.\nAdd a condition to get started!',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: Colors.grey[600],
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+        children: widget.conditions.map((condition) {
+          final related = widget.medications
+              .where(
+                (medication) =>
+                    medication.conditionNames.contains(condition.name),
+              )
+              .toList();
+
+          final isExpanded = _expandedStates[condition.code] ?? false;
+
+          return Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: ExpansionTile(
+              key: PageStorageKey(condition.code),
+              leading: Icon(
+                Icons.healing,
+                color: theme.colorScheme.primary,
+              ),
+              title: Text(
+                condition.commonName,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(
+                '${related.length} medication${related.length == 1 ? '' : 's'}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              initiallyExpanded: isExpanded,
+              onExpansionChanged: (expanded) {
+                setState(() {
+                  _expandedStates[condition.code] = expanded;
+                });
+              },
               children: [
-                Expanded(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
+                if (related.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(16),
                     child: Text(
-                      'Health Overview',
-                      maxLines: 1,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                      'No medications yet',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
                       ),
+                    ),
+                  )
+                else
+                  ...related.map(
+                    (medication) => ListTile(
+                      dense: true,
+                      leading: Icon(
+                        Icons.medication,
+                        size: 20,
+                        color: theme.colorScheme.secondary,
+                      ),
+                      title: Text(medication.name),
+                      subtitle: Text(medication.dosage),
                     ),
                   ),
-                ),
               ],
             ),
-          ),
-          const Divider(height: 1),
-          if (conditions.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                'No conditions tracked yet.\nAdd a condition to get started!',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
-                ),
-              ),
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: conditions.map((condition) {
-                  final related = medications
-                      .where(
-                        (medication) =>
-                            medication.conditionNames.contains(condition.name),
-                      )
-                      .toList();
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest
-                          .withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: theme.colorScheme.outlineVariant.withValues(
-                          alpha: 0.5,
-                        ),
-                      ),
-                    ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.healing,
-                        color: theme.colorScheme.primary,
-                      ),
-                      title: Text(
-                        condition.commonName,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: related.isEmpty
-                          ? const Text('No medications yet')
-                          : Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                related
-                                    .map((m) => '▸ ${m.name} - ${m.dosage}')
-                                    .join('\n'),
-                              ),
-                            ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-        ],
+          );
+        }).toList(),
       ),
     );
   }
