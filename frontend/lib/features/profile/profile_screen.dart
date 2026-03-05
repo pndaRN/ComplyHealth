@@ -3,10 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/profile.dart';
 import '../../core/state/profile_provider.dart';
 import '../../core/widgets/app_bar_widgets.dart';
-import '../dashboard/widgets/adherence_metrics_widget.dart';
+import '../settings/about_screen.dart';
 import '../settings/settings_screen.dart';
-import 'dialogs/feedback_dialog.dart';
-import 'widgets/notebook_widget.dart';
+import 'adherence_screen.dart';
+import 'help_feedback_screen.dart';
+import 'notebook_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -169,9 +170,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _buildHeader(context, profile),
         const SizedBox(height: 24),
         _buildPersonalSection(context, profile),
-        const AdherenceMetricsWidget(),
-        const NotebookWidget(),
-        _buildSupportSection(context),
+        const SizedBox(height: 8),
+        _buildNavigationSection(context),
       ],
     );
   }
@@ -184,10 +184,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ? 'GU'
         : '${profile.firstName.isNotEmpty ? profile.firstName[0] : ''}${profile.lastName.isNotEmpty ? profile.lastName[0] : ''}'
               .toUpperCase();
-
-    // XP Logic (simplified for display)
-    final int level = (profile.xp / 100).floor() + 1;
-    final double progress = profile.levelProgress;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -210,51 +206,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.secondaryContainer,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              'Level $level',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onSecondaryContainer,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 8,
-              backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                theme.colorScheme.primary,
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'XP: ${profile.xp}',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              Text(
-                'Next Level: ${((progress) * 100).toInt()}%',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -447,56 +398,92 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildSupportSection(BuildContext context) {
+  Widget _buildNavigationSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          _buildNavigationButton(
+            context,
+            icon: Icons.book_outlined,
+            title: 'Notebook',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const NotebookScreen()),
+            ),
+          ),
+          _buildNavigationButton(
+            context,
+            icon: Icons.analytics_outlined,
+            title: 'Adherence Metrics',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AdherenceScreen()),
+            ),
+          ),
+          _buildNavigationButton(
+            context,
+            icon: Icons.help_outline,
+            title: 'Help and Feedback',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const HelpFeedbackScreen()),
+            ),
+          ),
+          _buildNavigationButton(
+            context,
+            icon: Icons.info_outline,
+            title: 'About Us',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AboutScreen()),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationButton(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
     final theme = Theme.of(context);
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
-      color: theme.colorScheme.surfaceContainerLow,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Icon(Icons.help_outline, color: theme.colorScheme.secondary),
-                const SizedBox(width: 12),
-                Text(
-                  'Support',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Need help or have feedback? We\'re always looking to improve your experience.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => const FeedbackDialog(),
-                  );
-                },
-                icon: const Icon(Icons.mail_outline),
-                label: const Text('Send Feedback'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: theme.colorScheme.secondary,
-                  foregroundColor: theme.colorScheme.onSecondary,
-                ),
-              ),
-            ),
-          ],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: theme.colorScheme.primary,
+            size: 24,
+          ),
         ),
+        title: Text(
+          title,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+        onTap: onTap,
       ),
     );
   }

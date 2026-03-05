@@ -7,8 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added Roboto and MaterialIcons font assets for consistent typography across platforms
+
 ### Changed
 - Redesigned Health Overview widget: removed outer container box and made each condition independently collapsible to show/hide related medications
+- Migrated from hive to hive_ce package for improved Hive database support
+- Simplified profile screen by replacing inline widgets with navigation buttons for Notebook, Adherence Metrics, Help and Feedback, and About Us
+- Removed XP/level system display from profile header for a cleaner interface
+- Feedback dialog now pre-selects the feedback type when opened from specific Help and Feedback options
+
+### Removed
+- Removed Firebase Testing disclaimer from About screen
 
 ## [1.6.0] - 2026-02-05
 
