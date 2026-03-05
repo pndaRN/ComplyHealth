@@ -8,7 +8,7 @@ part of 'profile.dart';
 
 class ProfileAdapter extends TypeAdapter<Profile> {
   @override
-  final int typeId = 2;
+  final typeId = 2;
 
   @override
   Profile read(BinaryReader reader) {
@@ -20,12 +20,12 @@ class ProfileAdapter extends TypeAdapter<Profile> {
       firstName: fields[0] as String,
       dob: fields[1] as String,
       allergies: fields[2] as String,
-      xp: fields[3] as int,
-      streak: fields[4] as int,
-      levelProgress: fields[5] as double,
+      xp: (fields[3] as num).toInt(),
+      streak: (fields[4] as num).toInt(),
+      levelProgress: (fields[5] as num).toDouble(),
       lastXpAwardDate: fields[6] as DateTime?,
       lastPopupShownDate: fields[7] as DateTime?,
-      lastXpGained: fields[8] as int,
+      lastXpGained: fields[8] == null ? 0 : (fields[8] as num).toInt(),
       lastName: fields[9] as String,
     );
   }

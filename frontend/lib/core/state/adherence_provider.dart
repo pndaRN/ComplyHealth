@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:complyhealth/core/models/medication.dart';
 import 'package:complyhealth/core/models/medication_log.dart';
 import 'package:complyhealth/core/state/medication_provider.dart';

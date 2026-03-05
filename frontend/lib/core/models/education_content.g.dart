@@ -8,7 +8,7 @@ part of 'education_content.dart';
 
 class EducationContentAdapter extends TypeAdapter<EducationContent> {
   @override
-  final int typeId = 6;
+  final typeId = 6;
 
   @override
   EducationContent read(BinaryReader reader) {
@@ -51,7 +51,7 @@ class EducationContentAdapter extends TypeAdapter<EducationContent> {
 
 class ArticleAdapter extends TypeAdapter<Article> {
   @override
-  final int typeId = 7;
+  final typeId = 7;
 
   @override
   Article read(BinaryReader reader) {
@@ -94,7 +94,7 @@ class ArticleAdapter extends TypeAdapter<Article> {
 
 class VideoAdapter extends TypeAdapter<Video> {
   @override
-  final int typeId = 8;
+  final typeId = 8;
 
   @override
   Video read(BinaryReader reader) {

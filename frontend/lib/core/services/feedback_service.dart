@@ -1,4 +1,4 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:complyhealth/core/models/feedback.dart' as local_feedback;
 import 'package:uuid/uuid.dart';

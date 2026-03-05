@@ -6,7 +6,7 @@ import 'about_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'dialogs/theme_picker_dialog.dart';
 import 'dart:convert';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';

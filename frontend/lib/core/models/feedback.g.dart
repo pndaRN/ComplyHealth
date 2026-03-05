@@ -8,7 +8,7 @@ part of 'feedback.dart';
 
 class FeedbackAdapter extends TypeAdapter<Feedback> {
   @override
-  final int typeId = 5;
+  final typeId = 5;
 
   @override
   Feedback read(BinaryReader reader) {

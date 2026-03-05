@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import '../models/medication.dart';
 import '../services/notification_service.dart';
 import '../services/encryption_migration_service.dart';

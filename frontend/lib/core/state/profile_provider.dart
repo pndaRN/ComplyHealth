@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import '../models/profile.dart';
 import 'adherence_provider.dart';
 import '../../core/services/encryption_migration_service.dart';
