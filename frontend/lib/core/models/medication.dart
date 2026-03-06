@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 part 'medication.g.dart';
 
@@ -24,6 +24,8 @@ class Medication {
   final DateTime? lastDoseCountReset; // When counter was last reset
   @HiveField(10)
   final String? personalNotes;
+  @HiveField(11, defaultValue: true)
+  final bool isTimeSensitive;
 
   Medication({
     required this.id,
@@ -36,6 +38,7 @@ class Medication {
     this.currentDoseCount = 0,
     this.lastDoseCountReset,
     this.personalNotes,
+    this.isTimeSensitive = true,
   });
 
   Medication copyWith({
@@ -49,6 +52,7 @@ class Medication {
     int? currentDoseCount,
     DateTime? lastDoseCountReset,
     String? personalNotes,
+    bool? isTimeSensitive,
   }) {
     return Medication(
       id: id ?? this.id,
@@ -61,6 +65,7 @@ class Medication {
       currentDoseCount: currentDoseCount ?? this.currentDoseCount,
       lastDoseCountReset: lastDoseCountReset ?? this.lastDoseCountReset,
       personalNotes: personalNotes ?? this.personalNotes,
+      isTimeSensitive: isTimeSensitive ?? this.isTimeSensitive,
     );
   }
 
@@ -81,6 +86,7 @@ class Medication {
         ? DateTime.tryParse(json['lastDoseCountReset'])
         : null,
     personalNotes: json['personalNotes'],
+    isTimeSensitive: json['isTimeSensitive'] ?? true,
   );
 
   Map<String, dynamic> toJson() => {
@@ -94,6 +100,7 @@ class Medication {
     'currentDoseCount': currentDoseCount,
     'lastDoseCountReset': lastDoseCountReset?.toIso8601String(),
     'personalNotes': personalNotes,
+    'isTimeSensitive': isTimeSensitive,
   };
 }
 
@@ -139,6 +146,7 @@ class MedicationAdapterCustom extends TypeAdapter<Medication> {
     final currentDoseCount = fields[8] as int? ?? 0;
     final lastDoseCountReset = fields[9] as DateTime?;
     final personalNotes = fields[10] as String?;
+    final isTimeSensitive = fields[11] as bool? ?? true;
 
     return Medication(
       id: fields[0] as String,
@@ -151,13 +159,14 @@ class MedicationAdapterCustom extends TypeAdapter<Medication> {
       currentDoseCount: currentDoseCount,
       lastDoseCountReset: lastDoseCountReset,
       personalNotes: personalNotes,
+      isTimeSensitive: isTimeSensitive,
     );
   }
 
   @override
   void write(BinaryWriter writer, Medication obj) {
     writer
-      ..writeByte(10) // Number of fields
+      ..writeByte(11) // Number of fields
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -177,7 +186,9 @@ class MedicationAdapterCustom extends TypeAdapter<Medication> {
       ..writeByte(9)
       ..write(obj.lastDoseCountReset)
       ..writeByte(10)
-      ..write(obj.personalNotes);
+      ..write(obj.personalNotes)
+      ..writeByte(11)
+      ..write(obj.isTimeSensitive);
   }
 
   @override

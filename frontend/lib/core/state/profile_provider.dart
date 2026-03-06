@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import '../models/profile.dart';
 import 'adherence_provider.dart';
 import '../../core/services/encryption_migration_service.dart';
@@ -120,19 +120,24 @@ class ProfileNotifier extends AsyncNotifier<Profile> {
 
     if (logs.isEmpty) return;
 
-    final baseXp = ((dailyAdherence / 100) * baseXpPerDay).round();
+    int bonusXp = 0;
     final adherenceStreak = await adherenceNotifier.getCurrentStreak();
-    final streakMultiplier = 1.0 + (0.01 * adherenceStreak);
-    final finalXp = (baseXp * streakMultiplier).round();
 
-    await addXP(finalXp, newStreak: adherenceStreak);
+    // Award "Perfect Day" bonus only if 100% adherence was achieved
+    if (dailyAdherence >= 100.0) {
+      // Base bonus is 50 XP, plus 2 XP for every day of the current streak
+      bonusXp = 50 + (adherenceStreak * 2);
+      await addXP(bonusXp, newStreak: adherenceStreak);
+    }
 
     final currentProfile = state.value;
     if (currentProfile == null) return;
 
+    // Always update last award date and streak to prevent re-processing
     final updated = currentProfile.copyWith(
       lastXpAwardDate: date,
-      lastXpGained: finalXp,
+      lastXpGained: bonusXp,
+      streak: adherenceStreak,
     );
     await save(updated);
   }

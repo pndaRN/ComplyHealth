@@ -212,9 +212,11 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen>
       return;
     }
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => const MedicationAddDialog(),
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (context) => const MedicationAddSheet(),
     );
   }
 }

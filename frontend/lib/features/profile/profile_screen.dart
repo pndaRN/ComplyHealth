@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/profile.dart';
 import '../../core/state/profile_provider.dart';
-import '../../core/theme/theme_provider.dart';
 import '../../core/widgets/app_bar_widgets.dart';
-import '../dashboard/widgets/adherence_metrics_widget.dart';
+import '../settings/about_screen.dart';
 import '../settings/settings_screen.dart';
-import 'dialogs/feedback_dialog.dart';
-import 'widgets/notebook_widget.dart';
+import 'adherence_screen.dart';
+import 'help_feedback_screen.dart';
+import 'notebook_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -164,254 +164,327 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildProfileView(BuildContext context, Profile profile) {
-    final theme = Theme.of(context);
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       children: [
-        Card(
-          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.person,
-                      size: 24,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Personal Information',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                if (_isEditing) ...[
-                  TextField(
-                    controller: _firstNameCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'First Name',
-                      prefixIcon: const Icon(Icons.badge),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _lastNameCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Last Name',
-                      prefixIcon: const Icon(Icons.badge),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () => _selectDate(context),
-                    child: AbsorbPointer(
-                      child: TextField(
-                        controller: _dobCtrl,
-                        decoration: InputDecoration(
-                          labelText: 'Date of Birth',
-                          hintText: 'Tap to select date',
-                          prefixIcon: const Icon(Icons.cake),
-                          suffixIcon: const Icon(Icons.calendar_today),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _allergyCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Allergies',
-                      prefixIcon: const Icon(Icons.warning_amber),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _cancelEdit(profile),
-                          icon: const Icon(Icons.close),
-                          label: const Text('Cancel'),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: () => _saveProfile(profile),
-                          icon: const Icon(Icons.save),
-                          label: const Text('Save'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ] else ...[
-                  _buildInfoRow(
-                    context,
-                    icon: Icons.badge,
-                    label: 'Full Name',
-                    value:
-                        (profile.firstName.isEmpty && profile.lastName.isEmpty)
-                        ? 'Tap Edit to add your name'
-                        : '${profile.firstName} ${profile.lastName}'.trim(),
-                    isEmpty:
-                        profile.firstName.isEmpty && profile.lastName.isEmpty,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInfoRow(
-                    context,
-                    icon: Icons.cake,
-                    label: 'Date of Birth',
-                    value: profile.dob.isEmpty
-                        ? 'Tap Edit to add your birthday'
-                        : profile.dob,
-                    isEmpty: profile.dob.isEmpty,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInfoRow(
-                    context,
-                    icon: Icons.warning_amber,
-                    label: 'Allergies',
-                    value: profile.allergies.isEmpty
-                        ? 'None listed'
-                        : profile.allergies,
-                    isEmpty: profile.allergies.isEmpty,
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-        const AdherenceMetricsWidget(),
-        const NotebookWidget(),
-        Card(
-          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.feedback,
-                      size: 24,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Feedback & Support',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'We value your feedback! Help us improve ComplyHealth by sharing your thoughts, reporting bugs, or requesting new features.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Center(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => const FeedbackDialog(),
-                      );
-                    },
-                    icon: const Icon(Icons.rate_review),
-                    label: const Text('Submit Feedback'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        _buildHeader(context, profile),
+        const SizedBox(height: 24),
+        _buildPersonalSection(context, profile),
+        const SizedBox(height: 8),
+        _buildNavigationSection(context),
       ],
     );
   }
 
-  Widget _buildInfoRow(
+  Widget _buildHeader(BuildContext context, Profile profile) {
+    final theme = Theme.of(context);
+    final String fullName = '${profile.firstName} ${profile.lastName}'.trim();
+    final String displayName = fullName.isEmpty ? 'Guest User' : fullName;
+    final String initials = fullName.isEmpty
+        ? 'GU'
+        : '${profile.firstName.isNotEmpty ? profile.firstName[0] : ''}${profile.lastName.isNotEmpty ? profile.lastName[0] : ''}'
+              .toUpperCase();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 45,
+            backgroundColor: theme.colorScheme.primaryContainer,
+            child: Text(
+              initials,
+              style: theme.textTheme.headlineMedium?.copyWith(
+                color: theme.colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            displayName,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPersonalSection(BuildContext context, Profile profile) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Personal Details',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (!_isEditing)
+                  TextButton.icon(
+                    onPressed: () => _enterEditMode(profile),
+                    icon: const Icon(Icons.edit, size: 16),
+                    label: const Text('Edit'),
+                    style: TextButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (_isEditing) ...[
+              _buildEditField(
+                controller: _firstNameCtrl,
+                label: 'First Name',
+                icon: Icons.person_outline,
+              ),
+              const SizedBox(height: 16),
+              _buildEditField(
+                controller: _lastNameCtrl,
+                label: 'Last Name',
+                icon: Icons.person_outline,
+              ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: () => _selectDate(context),
+                child: AbsorbPointer(
+                  child: _buildEditField(
+                    controller: _dobCtrl,
+                    label: 'Date of Birth',
+                    icon: Icons.cake_outlined,
+                    suffixIcon: Icons.calendar_today,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildEditField(
+                controller: _allergyCtrl,
+                label: 'Allergies',
+                icon: Icons.warning_amber_rounded,
+                maxLines: 2,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => _cancelEdit(profile),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () => _saveProfile(profile),
+                      child: const Text('Save Changes'),
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              _buildProfileTile(
+                context,
+                icon: Icons.badge_outlined,
+                label: 'Full Name',
+                value: (profile.firstName.isEmpty && profile.lastName.isEmpty)
+                    ? 'Not set'
+                    : '${profile.firstName} ${profile.lastName}'.trim(),
+              ),
+              const Divider(height: 32),
+              _buildProfileTile(
+                context,
+                icon: Icons.cake_outlined,
+                label: 'Date of Birth',
+                value: profile.dob.isEmpty ? 'Not set' : profile.dob,
+              ),
+              const Divider(height: 32),
+              _buildProfileTile(
+                context,
+                icon: Icons.warning_amber_rounded,
+                label: 'Allergies',
+                value: profile.allergies.isEmpty ? 'None' : profile.allergies,
+                isCritical: profile.allergies.isNotEmpty,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEditField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    IconData? suffixIcon,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        suffixIcon: suffixIcon != null ? Icon(suffixIcon) : null,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        filled: true,
+        fillColor: Theme.of(context).colorScheme.surface,
+      ),
+    );
+  }
+
+  Widget _buildProfileTile(
     BuildContext context, {
     required IconData icon,
     required String label,
     required String value,
-    bool isEmpty = false,
+    bool isCritical = false,
   }) {
     final theme = Theme.of(context);
+    final color = isCritical
+        ? theme.colorScheme.error
+        : theme.colorScheme.primary;
+
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
-        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: color, size: 22),
+        ),
+        const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: theme.textTheme.labelSmall),
-              const SizedBox(height: 4),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
+              Text(
+                label,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
-                decoration: BoxDecoration(
-                  color: isEmpty
-                      ? theme.colorScheme.surfaceContainerHighest.withValues(
-                          alpha: 0.5,
-                        )
-                      : theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
-                  ),
-                ),
-                child: Text(
-                  value,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: isEmpty
-                        ? theme.colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.6,
-                          )
-                        : theme.colorScheme.onSurface,
-                    fontStyle: isEmpty ? FontStyle.italic : null,
-                  ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isCritical
+                      ? theme.colorScheme.error
+                      : theme.colorScheme.onSurface,
                 ),
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildNavigationSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          _buildNavigationButton(
+            context,
+            icon: Icons.book_outlined,
+            title: 'Notebook',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const NotebookScreen()),
+            ),
+          ),
+          _buildNavigationButton(
+            context,
+            icon: Icons.analytics_outlined,
+            title: 'Adherence Metrics',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AdherenceScreen()),
+            ),
+          ),
+          _buildNavigationButton(
+            context,
+            icon: Icons.help_outline,
+            title: 'Help and Feedback',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const HelpFeedbackScreen()),
+            ),
+          ),
+          _buildNavigationButton(
+            context,
+            icon: Icons.info_outline,
+            title: 'About Us',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AboutScreen()),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationButton(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: theme.colorScheme.primary,
+            size: 24,
+          ),
+        ),
+        title: Text(
+          title,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+        onTap: onTap,
+      ),
     );
   }
 }

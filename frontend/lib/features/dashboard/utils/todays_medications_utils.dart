@@ -61,11 +61,14 @@ BorderSide getUrgencyBorder(MedicationInstance instance, ThemeData theme) {
   final scheduledTime = instance.scheduledTime;
 
   // Overdue (past grace period)
-  if (now.isAfter(
-    scheduledTime.add(
-      const Duration(minutes: TodaysMedicationsConstants.graceWindowMinutes),
-    ),
-  )) {
+  if (instance.medication.isTimeSensitive &&
+      now.isAfter(
+        scheduledTime.add(
+          const Duration(
+            minutes: TodaysMedicationsConstants.graceWindowMinutes,
+          ),
+        ),
+      )) {
     return BorderSide(color: theme.statusColors.error, width: 6);
   }
 
@@ -81,6 +84,9 @@ BorderSide getUrgencyBorder(MedicationInstance instance, ThemeData theme) {
 
 /// Checks if a medication instance is overdue (past grace period)
 bool isInstanceOverdue(MedicationInstance instance) {
+  // If not time sensitive, it's never considered overdue for the purpose of the "late" popup
+  if (!instance.medication.isTimeSensitive) return false;
+
   final now = DateTime.now();
   return now.isAfter(
     instance.scheduledTime.add(

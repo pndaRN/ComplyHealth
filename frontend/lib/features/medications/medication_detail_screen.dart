@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/models/medication.dart';
 import '../../core/models/notebook_entry.dart';
@@ -26,6 +27,7 @@ class MedicationDetailScreen extends ConsumerStatefulWidget {
 class _MedicationDetailScreenState
     extends ConsumerState<MedicationDetailScreen> {
   late TextEditingController _notesController;
+  String? _lastSavedContent;
   Timer? _debounceTimer;
   final ValueNotifier<bool> _hasNotesText = ValueNotifier(false);
 
@@ -50,6 +52,7 @@ class _MedicationDetailScreenState
   Widget build(BuildContext context) {
     final medicationsAsync = ref.watch(medicationProvider);
     final conditionsAsync = ref.watch(conditionsProvider);
+    final notebookAsync = ref.watch(notebookProvider);
 
     final medications = medicationsAsync.value ?? [];
     final conditions = conditionsAsync.value ?? [];
@@ -66,7 +69,7 @@ class _MedicationDetailScreenState
     );
 
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: Text(currentMed.name),
@@ -109,7 +112,6 @@ class _MedicationDetailScreenState
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Overview'),
-              Tab(text: 'Schedule'),
               Tab(text: 'Notes'),
             ],
           ),
@@ -117,9 +119,8 @@ class _MedicationDetailScreenState
         body: TabBarView(
           children: [
             _buildOverviewTab(currentMed, conditionDisplayNames),
-            _buildScheduleTab(currentMed),
             Scaffold(
-              body: _buildNotesTab(currentMed),
+              body: _buildNotesTab(currentMed, notebookAsync),
               floatingActionButton: ValueListenableBuilder<bool>(
                 valueListenable: _hasNotesText,
                 builder: (context, hasText, child) {
@@ -144,6 +145,7 @@ class _MedicationDetailScreenState
     List<String> conditionDisplayNames,
   ) {
     final theme = Theme.of(context);
+    final notifier = ref.read(medicationProvider.notifier);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -256,92 +258,7 @@ class _MedicationDetailScreenState
           ),
           const SizedBox(height: 16),
 
-          // Summary card
-          Text(
-            'Summary',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  _buildSummaryRow(
-                    context,
-                    icon: Icons.category,
-                    label: 'Type',
-                    value: medication.isPRN ? 'As needed (PRN)' : 'Scheduled',
-                  ),
-                  const Divider(height: 24),
-                  _buildSummaryRow(
-                    context,
-                    icon: Icons.schedule,
-                    label: medication.isPRN
-                        ? 'Max daily doses'
-                        : 'Times per day',
-                    value: medication.isPRN
-                        ? '${medication.maxDailyDoses ?? "Not set"}'
-                        : '${medication.scheduledTimes.length}',
-                  ),
-                  if (medication.isPRN) ...[
-                    const Divider(height: 24),
-                    _buildSummaryRow(
-                      context,
-                      icon: Icons.today,
-                      label: 'Doses taken today',
-                      value: '${medication.currentDoseCount}',
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryRow(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-        Text(
-          value,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildScheduleTab(Medication medication) {
-    final theme = Theme.of(context);
-    final notifier = ref.read(medicationProvider.notifier);
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+          // Schedule section (formerly Summary + Schedule)
           if (medication.isPRN) ...[
             // PRN dose tracking
             Card(
@@ -540,9 +457,11 @@ class _MedicationDetailScreenState
   }
 
   void _showEditDialog(Medication medication) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => MedicationEditDialog(medication: medication),
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (context) => MedicationEditSheet(medication: medication),
     );
   }
 
@@ -578,51 +497,136 @@ class _MedicationDetailScreenState
     );
   }
 
-  Widget _buildNotesTab(Medication medication) {
+  Widget _buildNotesTab(
+    Medication medication,
+    AsyncValue<List<NotebookEntry>> notebookAsync,
+  ) {
     final theme = Theme.of(context);
 
-    return Padding(
+    final entries =
+        notebookAsync.value
+            ?.where((e) => e.sourceCode == medication.id && e.sourceType == 1)
+            .toList() ??
+        [];
+    entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    return ListView(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      children: [
+        Text(
+          'Quick Notes',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Scratchpad for temporary thoughts',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _notesController,
+          maxLines: 5,
+          decoration: InputDecoration(
+            hintText: 'Write your notes here...',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            filled: true,
+            fillColor: theme.colorScheme.surfaceContainerLowest,
+          ),
+          onChanged: (value) {
+            _debounceTimer?.cancel();
+            _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+              ref
+                  .read(medicationProvider.notifier)
+                  .updateMedicationNotes(medication.id, value);
+            });
+            _hasNotesText.value =
+                value.isNotEmpty && value != _lastSavedContent;
+          },
+        ),
+        if (entries.isNotEmpty) ...[
+          const SizedBox(height: 32),
           Text(
-            'Personal Notes',
+            'Note History',
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Add your own notes about this medication',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
           const SizedBox(height: 16),
-          Expanded(
-            child: TextField(
-              controller: _notesController,
-              maxLines: null,
-              expands: true,
-              textAlignVertical: TextAlignVertical.top,
-              decoration: InputDecoration(
-                hintText: 'Write your notes here...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+          ...entries.map((entry) => _buildHistoryNoteCard(entry)),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildHistoryNoteCard(NotebookEntry entry) {
+    final theme = Theme.of(context);
+    final dateStr = DateFormat('MMM d, yyyy - HH:mm').format(entry.timestamp);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  dateStr,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                filled: true,
-                fillColor: theme.colorScheme.surfaceContainerLowest,
-              ),
-              onChanged: (value) {
-                _debounceTimer?.cancel();
-                _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-                  ref
-                      .read(medicationProvider.notifier)
-                      .updateMedicationNotes(medication.id, value);
-                });
-                _hasNotesText.value = value.isNotEmpty;
-              },
+                IconButton(
+                  icon: Icon(
+                    Icons.delete_outline,
+                    size: 18,
+                    color: theme.colorScheme.error,
+                  ),
+                  onPressed: () => _confirmDeleteNote(entry),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(entry.content, style: theme.textTheme.bodyMedium),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmDeleteNote(NotebookEntry entry) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Note'),
+        content: const Text('Are you sure you want to delete this note?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(notebookProvider.notifier).deleteEntry(entry.id);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Note deleted')));
+            },
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
         ],
@@ -645,17 +649,13 @@ class _MedicationDetailScreenState
 
     await ref.read(notebookProvider.notifier).addEntry(entry);
 
-    // Clear the notes field
-    _notesController.clear();
-    await ref
-        .read(medicationProvider.notifier)
-        .updateMedicationNotes(medication.id, '');
+    _lastSavedContent = content;
+    _hasNotesText.value = false; // Disable FAB since text matches last save
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Note saved in notebook in profile')),
       );
-      _hasNotesText.value = false;
     }
   }
 }

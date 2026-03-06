@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/state/settings_provider.dart';
 
-class TimingPresetButtons extends StatefulWidget {
+class TimingPresetButtons extends ConsumerStatefulWidget {
   final List<TimeOfDay> scheduledTimes;
   final bool isPRN;
   final ValueChanged<TimeOfDay> onTimeAdded;
@@ -17,24 +19,15 @@ class TimingPresetButtons extends StatefulWidget {
   });
 
   @override
-  State<TimingPresetButtons> createState() => _TimingPresetButtonsState();
+  ConsumerState<TimingPresetButtons> createState() =>
+      _TimingPresetButtonsState();
 }
 
-class _TimingPresetButtonsState extends State<TimingPresetButtons> {
-  /// Standard medication timing presets based on medical best practices:
-  /// - Morning (7 AM): Typical wake time for most patients
-  /// - Noon (12 PM): Mid-day, often taken with lunch
-  /// - Evening (5 PM): Before dinner, end of work day
-  /// - Night (9 PM): Before bedtime, allows 1-2 hours before sleep
-  static const TimeOfDay morningTime = TimeOfDay(hour: 7, minute: 0);
-  static const TimeOfDay noonTime = TimeOfDay(hour: 12, minute: 0);
-  static const TimeOfDay eveningTime = TimeOfDay(hour: 17, minute: 0);
-  static const TimeOfDay nightTime = TimeOfDay(hour: 21, minute: 0);
-
-  bool get _isMorningSelected => _isTimeSelected(morningTime);
-  bool get _isNoonSelected => _isTimeSelected(noonTime);
-  bool get _isEveningSelected => _isTimeSelected(eveningTime);
-  bool get _isNightSelected => _isTimeSelected(nightTime);
+class _TimingPresetButtonsState extends ConsumerState<TimingPresetButtons> {
+  TimeOfDay _parseTime(String timeStr) {
+    final parts = timeStr.split(':');
+    return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+  }
 
   bool _isTimeSelected(TimeOfDay time) {
     return widget.scheduledTimes.any(
@@ -54,12 +47,14 @@ class _TimingPresetButtonsState extends State<TimingPresetButtons> {
     }
   }
 
-  void _togglePRN() {
-    widget.onPRNChanged(!widget.isPRN);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final settings = ref.watch(settingsProvider);
+    final morningTime = _parseTime(settings.morningTime);
+    final noonTime = _parseTime(settings.noonTime);
+    final eveningTime = _parseTime(settings.eveningTime);
+    final nightTime = _parseTime(settings.nightTime);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -71,28 +66,23 @@ class _TimingPresetButtonsState extends State<TimingPresetButtons> {
           children: [
             FilterChip(
               label: const Text('Morning'),
-              selected: _isMorningSelected && !widget.isPRN,
+              selected: _isTimeSelected(morningTime) && !widget.isPRN,
               onSelected: (_) => _toggleTime(morningTime),
             ),
             FilterChip(
               label: const Text('Noon'),
-              selected: _isNoonSelected && !widget.isPRN,
+              selected: _isTimeSelected(noonTime) && !widget.isPRN,
               onSelected: (_) => _toggleTime(noonTime),
             ),
             FilterChip(
               label: const Text('Evening'),
-              selected: _isEveningSelected && !widget.isPRN,
+              selected: _isTimeSelected(eveningTime) && !widget.isPRN,
               onSelected: (_) => _toggleTime(eveningTime),
             ),
             FilterChip(
               label: const Text('Night'),
-              selected: _isNightSelected && !widget.isPRN,
+              selected: _isTimeSelected(nightTime) && !widget.isPRN,
               onSelected: (_) => _toggleTime(nightTime),
-            ),
-            FilterChip(
-              label: const Text('PRN'),
-              selected: widget.isPRN,
-              onSelected: (_) => _togglePRN(),
             ),
           ],
         ),

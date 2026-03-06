@@ -8,7 +8,7 @@ part of 'medication_log.dart';
 
 class MedicationLogAdapter extends TypeAdapter<MedicationLog> {
   @override
-  final int typeId = 4;
+  final typeId = 4;
 
   @override
   MedicationLog read(BinaryReader reader) {
@@ -69,7 +69,7 @@ class MedicationLogAdapter extends TypeAdapter<MedicationLog> {
 
 class DoseStatusAdapter extends TypeAdapter<DoseStatus> {
   @override
-  final int typeId = 3;
+  final typeId = 3;
 
   @override
   DoseStatus read(BinaryReader reader) {
@@ -90,13 +90,10 @@ class DoseStatusAdapter extends TypeAdapter<DoseStatus> {
     switch (obj) {
       case DoseStatus.taken:
         writer.writeByte(0);
-        break;
       case DoseStatus.skipped:
         writer.writeByte(1);
-        break;
       case DoseStatus.missed:
         writer.writeByte(2);
-        break;
     }
   }
 

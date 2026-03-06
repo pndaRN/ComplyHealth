@@ -4,7 +4,9 @@ import '../utils/feedback_validator.dart';
 
 /// Dialog for submitting user feedback
 class FeedbackDialog extends StatefulWidget {
-  const FeedbackDialog({super.key});
+  final String? initialType;
+
+  const FeedbackDialog({super.key, this.initialType});
 
   @override
   State<FeedbackDialog> createState() => _FeedbackDialogState();
@@ -28,6 +30,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
     super.initState();
     _subjectController = TextEditingController();
     _messageController = TextEditingController();
+    _selectedType = widget.initialType;
   }
 
   @override

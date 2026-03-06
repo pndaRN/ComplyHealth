@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:complyhealth/core/models/profile.dart';
 import 'core/models/disease.dart';
@@ -23,6 +23,7 @@ import 'features/medications/medications_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/profile/xp_gain_popup.dart';
+import 'features/splash/splash_screen.dart';
 import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -77,6 +78,7 @@ class ComplyHealthApp extends ConsumerStatefulWidget {
 class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
   int _index = 0;
   bool _showOnboarding = true;
+  bool _isLoading = true;
 
   StreamSubscription<String>? _notificationSubscription;
   int _dashboardRefreshKey = 0;
@@ -108,14 +110,25 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
   void initState() {
     super.initState();
 
+    // Start loading delay
+    _initApp();
+
     // Listen for notification taps to navigate to dashboard
     _notificationSubscription = NotificationService.onNotificationTap.listen((
       payload,
     ) {
-      setState(() {
-        _index = 0; // Navigate to dashboard
-        _dashboardRefreshKey++; // Force dashboard to rebuild and refresh
-      });
+      if (payload.startsWith('MEDICATIONS_TAB')) {
+        setState(() {
+          _index = 2; // Navigate to Medications screen
+          // We might want to pass the time to the medications screen to highlight/scroll,
+          // but for now, just opening the tab is sufficient as per requirements.
+        });
+      } else {
+        setState(() {
+          _index = 0; // Navigate to dashboard (legacy/default)
+          _dashboardRefreshKey++; // Force dashboard to rebuild and refresh
+        });
+      }
     });
 
     // Clear incorrectly auto-marked missed logs and check for actual missed doses
@@ -129,6 +142,16 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
   void dispose() {
     _notificationSubscription?.cancel();
     super.dispose();
+  }
+
+  Future<void> _initApp() async {
+    // Artificial delay to show splash screen
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _checkAndShowXpPopup(Profile profile) async {
@@ -195,7 +218,9 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
       theme: getTheme(),
       darkTheme: getTheme(),
       themeMode: themeState.themeMode,
-      home: showOnboarding
+      home: _isLoading
+          ? const SplashScreen()
+          : showOnboarding
           ? OnboardingScreen(
               onComplete: () {
                 setState(() => _showOnboarding = false);
@@ -203,7 +228,6 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
             )
           : Scaffold(
               body: IndexedStack(index: _index, children: _screens),
-
               bottomNavigationBar: BottomNavigationBar(
                 currentIndex: _index,
                 onTap: (i) => setState(() => _index = i),

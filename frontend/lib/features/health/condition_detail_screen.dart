@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/models/disease.dart';
 import '../../core/models/notebook_entry.dart';
@@ -22,6 +23,7 @@ class ConditionDetailScreen extends ConsumerStatefulWidget {
 
 class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
   late TextEditingController _notesController;
+  String? _lastSavedContent;
   Timer? _debounceTimer;
 
   @override
@@ -47,7 +49,7 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
         : widget.condition.name;
 
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: Text(displayName),
@@ -55,7 +57,6 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Overview'),
-              Tab(text: 'Medications'),
               Tab(text: 'Notes'),
             ],
           ),
@@ -81,10 +82,11 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
           body: _buildOverviewTab(),
           floatingActionButton: _buildFloatingActionButton(isAdded),
         ),
-        Scaffold(body: _buildMedicationsTab()),
         Scaffold(
           body: _buildNotesTab(isAdded),
-          floatingActionButton: isAdded && _notesController.text.isNotEmpty
+          floatingActionButton: isAdded &&
+                  _notesController.text.isNotEmpty &&
+                  _notesController.text != _lastSavedContent
               ? FloatingActionButton.extended(
                   onPressed: () => _saveToNotebook(),
                   icon: const Icon(Icons.save),
@@ -98,6 +100,9 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
 
   Widget _buildOverviewTab() {
     final theme = Theme.of(context);
+    final displayName = widget.condition.commonName.isNotEmpty
+        ? widget.condition.commonName
+        : widget.condition.name;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -112,57 +117,28 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Medical Name',
-                    style: theme.textTheme.labelLarge?.copyWith(
+                    displayName,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.condition.name,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  if (widget.condition.commonName.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      'Common Name',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: theme.colorScheme.primary,
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      widget.condition.category,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.condition.commonName,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          widget.condition.category,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'ICD-10: ${widget.condition.code}',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -171,7 +147,7 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
           const SizedBox(height: 16),
           // Description
           Text(
-            'Description',
+            'About this condition',
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -188,12 +164,22 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 24),
+          // Medications section
+          Text(
+            'Current Medications',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildMedicationsSection(),
         ],
       ),
     );
   }
 
-  Widget _buildMedicationsTab() {
+  Widget _buildMedicationsSection() {
     final theme = Theme.of(context);
     final medicationsAsync = ref.watch(medicationProvider);
 
@@ -204,39 +190,32 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
             .toList();
 
         if (linkedMedications.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.medication_outlined,
-                  size: 64,
-                  color: theme.colorScheme.outline,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'No medications for this condition',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.medication_outlined,
+                    color: theme.colorScheme.outline,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Add medications from the Medications tab',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'No medications linked to this condition.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         }
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: linkedMedications.length,
-          itemBuilder: (context, index) {
-            final med = linkedMedications[index];
+        return Column(
+          children: linkedMedications.map((med) {
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
               child: Padding(
@@ -305,16 +284,17 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
                 ),
               ),
             );
-          },
+          }).toList(),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => Center(child: Text('Error: $err')),
+      error: (err, stack) => Text('Error loading medications: $err'),
     );
   }
 
   Widget _buildNotesTab(bool isAdded) {
     final theme = Theme.of(context);
+    final notebookAsync = ref.watch(notebookProvider);
 
     if (!isAdded) {
       return Center(
@@ -345,47 +325,131 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
       );
     }
 
-    return Padding(
+    final entries =
+        notebookAsync.value
+            ?.where(
+              (e) => e.sourceCode == widget.condition.code && e.sourceType == 0,
+            )
+            .toList() ??
+        [];
+    entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    return ListView(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      children: [
+        Text(
+          'Quick Notes',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Scratchpad for temporary thoughts',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _notesController,
+          maxLines: 5,
+          decoration: InputDecoration(
+            hintText: 'Write your notes here...',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            filled: true,
+            fillColor: theme.colorScheme.surfaceContainerLowest,
+          ),
+          onChanged: (value) {
+            _debounceTimer?.cancel();
+            _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+              ref
+                  .read(conditionsProvider.notifier)
+                  .updateConditionNotes(widget.condition.code, value);
+              setState(() {}); // Refresh to show/hide FAB
+            });
+          },
+        ),
+        if (entries.isNotEmpty) ...[
+          const SizedBox(height: 32),
           Text(
-            'Personal Notes',
+            'Note History',
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Add your own notes about this condition',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
           const SizedBox(height: 16),
-          Expanded(
-            child: TextField(
-              controller: _notesController,
-              maxLines: null,
-              expands: true,
-              textAlignVertical: TextAlignVertical.top,
-              decoration: InputDecoration(
-                hintText: 'Write your notes here...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+          ...entries.map((entry) => _buildHistoryNoteCard(entry)),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildHistoryNoteCard(NotebookEntry entry) {
+    final theme = Theme.of(context);
+    final dateStr = DateFormat('MMM d, yyyy - HH:mm').format(entry.timestamp);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  dateStr,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                filled: true,
-                fillColor: theme.colorScheme.surfaceContainerLowest,
-              ),
-              onChanged: (value) {
-                _debounceTimer?.cancel();
-                _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-                  ref
-                      .read(conditionsProvider.notifier)
-                      .updateConditionNotes(widget.condition.code, value);
-                });
-              },
+                IconButton(
+                  icon: Icon(
+                    Icons.delete_outline,
+                    size: 18,
+                    color: theme.colorScheme.error,
+                  ),
+                  onPressed: () => _confirmDeleteNote(entry),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(entry.content, style: theme.textTheme.bodyMedium),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmDeleteNote(NotebookEntry entry) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Note'),
+        content: const Text('Are you sure you want to delete this note?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(notebookProvider.notifier).deleteEntry(entry.id);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Note deleted')));
+            },
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
         ],
@@ -448,17 +512,13 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
 
     await ref.read(notebookProvider.notifier).addEntry(entry);
 
-    // Clear the notes field
-    _notesController.clear();
-    await ref
-        .read(conditionsProvider.notifier)
-        .updateConditionNotes(widget.condition.code, '');
+    _lastSavedContent = content;
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Note saved in notebook in profile')),
       );
-      setState(() {}); // Refresh to hide FAB
+      setState(() {}); // Refresh to disable FAB
     }
   }
 }

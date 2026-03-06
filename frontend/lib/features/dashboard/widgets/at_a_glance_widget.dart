@@ -17,95 +17,90 @@ class AtAGlanceWidget extends StatefulWidget {
 }
 
 class _AtAGlanceWidgetState extends State<AtAGlanceWidget> {
-  bool _isExpanded = false;
+  final Map<String, bool> _expandedStates = {};
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
-      margin: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          InkWell(
-            onTap: () => setState(() => _isExpanded = !_isExpanded),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Icon(
-                    _isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: theme.textTheme.titleLarge?.color,
-                    size: 28,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'At A Glance',
-                        maxLines: 1,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    if (widget.conditions.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          'No conditions tracked yet.\nAdd a condition to get started!',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: Colors.grey[600],
           ),
-          AnimatedCrossFade(
-            duration: const Duration(milliseconds: 200),
-            crossFadeState: _isExpanded
-                ? CrossFadeState.showFirst
-                : CrossFadeState.showSecond,
-            firstChild: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: widget.conditions.map((condition) {
+          final related = widget.medications
+              .where(
+                (medication) =>
+                    medication.conditionNames.contains(condition.name),
+              )
+              .toList();
+
+          final isExpanded = _expandedStates[condition.code] ?? false;
+
+          return Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: ExpansionTile(
+              key: PageStorageKey(condition.code),
+              leading: Icon(
+                Icons.healing,
+                color: theme.colorScheme.primary,
+              ),
+              title: Text(
+                condition.commonName,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(
+                '${related.length} medication${related.length == 1 ? '' : 's'}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              initiallyExpanded: isExpanded,
+              onExpansionChanged: (expanded) {
+                setState(() {
+                  _expandedStates[condition.code] = expanded;
+                });
+              },
               children: [
-                const Divider(height: 1),
-                if (widget.conditions.isEmpty)
+                if (related.isEmpty)
                   Padding(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(16),
                     child: Text(
-                      'No conditions tracked yet.\nAdd a condition to get started!',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyLarge?.copyWith(
+                      'No medications yet',
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.grey[600],
                       ),
                     ),
                   )
                 else
-                  ...widget.conditions.map((condition) {
-                    final related = widget.medications
-                        .where(
-                          (medication) => medication.conditionNames.contains(
-                            condition.name,
-                          ),
-                        )
-                        .toList();
-                    return ListTile(
+                  ...related.map(
+                    (medication) => ListTile(
+                      dense: true,
                       leading: Icon(
-                        Icons.healing,
-                        color: theme.colorScheme.primary,
+                        Icons.medication,
+                        size: 20,
+                        color: theme.colorScheme.secondary,
                       ),
-                      title: Text(condition.commonName),
-                      subtitle: related.isEmpty
-                          ? const Text('No medications yet')
-                          : Text(
-                              related
-                                  .map((m) => '▸ ${m.name} - ${m.dosage}')
-                                  .join('\n'),
-                            ),
-                    );
-                  }),
+                      title: Text(medication.name),
+                      subtitle: Text(medication.dosage),
+                    ),
+                  ),
               ],
             ),
-            secondChild: const SizedBox.shrink(),
-          ),
-        ],
+          );
+        }).toList(),
       ),
     );
   }

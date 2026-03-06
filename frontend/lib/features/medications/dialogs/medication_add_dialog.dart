@@ -7,22 +7,22 @@ import '../../../core/state/conditions_provider.dart';
 import '../widgets/medication_form_content.dart';
 import '../utils/medication_validator.dart';
 
-/// Dialog for adding a new medication
-class MedicationAddDialog extends ConsumerStatefulWidget {
-  const MedicationAddDialog({super.key});
+/// Bottom sheet for adding a new medication
+class MedicationAddSheet extends ConsumerStatefulWidget {
+  const MedicationAddSheet({super.key});
 
   @override
-  ConsumerState<MedicationAddDialog> createState() =>
-      _MedicationAddDialogState();
+  ConsumerState<MedicationAddSheet> createState() => _MedicationAddSheetState();
 }
 
-class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
+class _MedicationAddSheetState extends ConsumerState<MedicationAddSheet> {
   late TextEditingController nameCtrl;
   late TextEditingController doseCtrl;
   late TextEditingController maxDosesCtrl;
   List<String> selectedConditions = [];
   Set<String> _autoSelectedConditions = {};
   bool isPRN = false;
+  bool isTimeSensitive = true;
   List<TimeOfDay> scheduledTimes = [];
   List<TimeOfDay>? _savedScheduledTimes;
 
@@ -46,10 +46,42 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
     return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
 
+  void _onSave() {
+    final notifier = ref.read(medicationProvider.notifier);
+
+    if (!MedicationValidator.validateForm(
+      context: context,
+      name: nameCtrl.text,
+      dosage: doseCtrl.text,
+      conditions: selectedConditions,
+      isPRN: isPRN,
+      scheduledTimes: scheduledTimes,
+      maxDailyDoses: maxDosesCtrl.text.isEmpty
+          ? null
+          : int.tryParse(maxDosesCtrl.text),
+    )) {
+      return;
+    }
+
+    final newMedication = Medication(
+      id: const Uuid().v4(),
+      name: nameCtrl.text.trim(),
+      dosage: doseCtrl.text.trim(),
+      conditionNames: selectedConditions,
+      isPRN: isPRN,
+      scheduledTimes: scheduledTimes.map(_timeToString).toList(),
+      maxDailyDoses: maxDosesCtrl.text.isEmpty
+          ? null
+          : int.tryParse(maxDosesCtrl.text),
+      isTimeSensitive: isTimeSensitive,
+    );
+    notifier.addMeds(newMedication);
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final conditionsAsync = ref.watch(conditionsProvider);
-    final notifier = ref.read(medicationProvider.notifier);
 
     // Auto-selection logic
     conditionsAsync.whenData((conditions) {
@@ -65,9 +97,24 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
       }
     });
 
-    return AlertDialog(
-      title: const Text('Add Medication'),
-      content: conditionsAsync.when(
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text('Add Medication'),
+        actions: [
+          TextButton(
+            onPressed: conditionsAsync.isLoading ? null : _onSave,
+            child: const Text(
+              'Save',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+      body: conditionsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) =>
             Center(child: Text('Error loading conditions: $err')),
@@ -112,48 +159,14 @@ class _MedicationAddDialogState extends ConsumerState<MedicationAddDialog> {
           },
           maxDosesController: maxDosesCtrl,
           autoSelectedConditions: _autoSelectedConditions,
+          isTimeSensitive: isTimeSensitive,
+          onTimeSensitiveChanged: (value) {
+            setState(() {
+              isTimeSensitive = value;
+            });
+          },
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: conditionsAsync.isLoading
-              ? null // Disable button while loading conditions
-              : () {
-                  if (!MedicationValidator.validateForm(
-                    context: context,
-                    name: nameCtrl.text,
-                    dosage: doseCtrl.text,
-                    conditions: selectedConditions,
-                    isPRN: isPRN,
-                    scheduledTimes: scheduledTimes,
-                    maxDailyDoses: maxDosesCtrl.text.isEmpty
-                        ? null
-                        : int.tryParse(maxDosesCtrl.text),
-                  )) {
-                    return;
-                  }
-
-                  final newMedication = Medication(
-                    id: const Uuid().v4(),
-                    name: nameCtrl.text.trim(),
-                    dosage: doseCtrl.text.trim(),
-                    conditionNames: selectedConditions,
-                    isPRN: isPRN,
-                    scheduledTimes: scheduledTimes.map(_timeToString).toList(),
-                    maxDailyDoses: maxDosesCtrl.text.isEmpty
-                        ? null
-                        : int.tryParse(maxDosesCtrl.text),
-                  );
-                  notifier.addMeds(newMedication);
-                  Navigator.pop(context);
-                },
-          child: const Text('Add Medication'),
-        ),
-      ],
     );
   }
 }

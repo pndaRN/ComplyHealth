@@ -8,8 +8,20 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:complyhealth/core/models/medication.dart';
 
 class NotificationService {
-  static final NotificationService _instance = NotificationService._internal();
-  factory NotificationService() => _instance;
+  static NotificationService? _singleton;
+
+  factory NotificationService() {
+    if (_singleton == null) {
+      try {
+        _singleton = NotificationService._internal();
+      } catch (e) {
+        debugPrint('Failed to initialize NotificationService: $e');
+        rethrow;
+      }
+    }
+    return _singleton!;
+  }
+
   NotificationService._internal()
     : _notifications = FlutterLocalNotificationsPlugin();
 
@@ -118,68 +130,98 @@ class NotificationService {
     _notificationTapController.add(response.payload ?? '');
   }
 
-  /// Schedule notifications for a medication
-  Future<void> scheduleMedicationNotifications(Medication medication) async {
+  /// Schedule notifications for all medications (grouped by time)
+  Future<void> scheduleAllMedications(List<Medication> medications) async {
+    await rescheduleAllNotifications(medications);
+  }
+
+  /// Reschedule all notifications, grouping medications by time
+  Future<void> rescheduleAllNotifications(List<Medication> medications) async {
     if (!_initialized) await initialize();
 
-    // Cancel existing notifications for this medication first
-    await cancelMedicationNotifications(medication.id);
+    // Cancel all existing notifications
+    await cancelAllNotifications();
 
-    if (medication.isPRN) {
-      // Don't schedule notifications for PRN medications
-      return;
+    // Group medications by time
+    final Map<String, List<Medication>> scheduledGroups = {};
+    for (final med in medications) {
+      if (med.isPRN) continue;
+
+      for (final timeStr in med.scheduledTimes) {
+        if (!scheduledGroups.containsKey(timeStr)) {
+          scheduledGroups[timeStr] = [];
+        }
+        scheduledGroups[timeStr]!.add(med);
+      }
     }
 
-    // Schedule notification for each scheduled time
-    for (int i = 0; i < medication.scheduledTimes.length; i++) {
-      final timeStr = medication.scheduledTimes[i];
+    // Schedule notification for each time group
+    for (final entry in scheduledGroups.entries) {
+      final timeStr = entry.key;
+      final meds = entry.value;
       final parts = timeStr.split(':');
-      if (parts.length < 2) continue; // Skip invalid time format
+      if (parts.length < 2) continue;
 
       final hour = int.tryParse(parts[0]);
       final minute = int.tryParse(parts[1]);
-      if (hour == null || minute == null) continue; // Skip invalid time values
+      if (hour == null || minute == null) continue;
 
-      // Create a unique notification ID for each medication time
-      final notificationId = _generateNotificationId(medication.id, i);
+      // Schedule for each day of the week to allow cycling messages
+      for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
+        final now = tz.TZDateTime.now(tz.local);
+        var scheduledDate = tz.TZDateTime(
+          tz.local,
+          now.year,
+          now.month,
+          now.day,
+          hour,
+          minute,
+        );
 
-      // Schedule daily notification at this time
-      await _scheduleDailyNotification(
-        id: notificationId,
-        title: 'Time to take ${medication.name}',
-        body:
-            '${medication.dosage} - Scheduled for ${_formatTime(hour, minute)}',
-        hour: hour,
-        minute: minute,
-        payload: '${medication.id}|$timeStr',
-      );
+        // Adjust to the correct day
+        scheduledDate = scheduledDate.add(Duration(days: dayOffset));
+
+        // If the calculated date is in the past (even with dayOffset), move it forward by weeks until it's future
+        // Actually, since we loop 0..6 from *today*, only today's time might be past.
+        if (scheduledDate.isBefore(now)) {
+          // If it's today and past, this specific instance is for next week.
+          // However, local_notifications matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime
+          // means it triggers every week at this time on this weekday.
+          // We just need to give it a valid date.
+          // If we give it a past date, it might fire immediately or schedule for next week depending on implementation.
+          // Safer to ensure it's in the future.
+          scheduledDate = scheduledDate.add(const Duration(days: 7));
+        }
+
+        final weekday = scheduledDate.weekday; // 1 (Mon) to 7 (Sun)
+        final message = _getMessageForTime(hour, dayOffset);
+        final medNames = meds.map((m) => m.name).join(', ');
+
+        // Generate a unique ID for this time AND day
+        final notificationId = _generateNotificationIdForTimeAndDay(
+          hour,
+          minute,
+          weekday,
+        );
+
+        await _scheduleWeeklyNotification(
+          id: notificationId,
+          title: message,
+          body: 'Time to take: $medNames',
+          scheduledDate: scheduledDate,
+          payload: 'MEDICATIONS_TAB|$timeStr',
+        );
+      }
     }
   }
 
-  /// Schedule a daily notification at a specific time
-  Future<void> _scheduleDailyNotification({
+  Future<void> _scheduleWeeklyNotification({
     required int id,
     required String title,
     required String body,
-    required int hour,
-    required int minute,
+    required tz.TZDateTime scheduledDate,
     String? payload,
   }) async {
-    final now = tz.TZDateTime.now(tz.local);
-    var scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      hour,
-      minute,
-    );
-
-    // If the scheduled time has already passed today, schedule for tomorrow
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
-
     const androidDetails = AndroidNotificationDetails(
       'medication_reminders',
       'Medication Reminders',
@@ -212,34 +254,100 @@ class NotificationService {
       scheduledDate,
       details,
       androidScheduleMode: scheduleMode,
-      matchDateTimeComponents: DateTimeComponents.time,
+      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
       payload: payload,
     );
   }
 
-  /// Cancel all notifications for a medication
-  Future<void> cancelMedicationNotifications(String medicationId) async {
-    if (!_initialized) await initialize();
+  String _getMessageForTime(int hour, int randomSeed) {
+    // Pools of messages
+    const morning = [
+      'Before coffee gets cold ☕',
+      'Good morning! Time for meds ☀️',
+      'Start the day right 💊',
+      'Morning check-in! 🌅',
+    ];
 
-    // Cancel all possible notification IDs for this medication
-    // We'll cancel up to 10 possible times (should be more than enough)
-    for (int i = 0; i < 10; i++) {
-      final notificationId = _generateNotificationId(medicationId, i);
-      await _notifications.cancel(notificationId);
+    const midday = [
+      'Time for your midday meds ☀️',
+      'Lunchtime check-in 🥪',
+      'Keep it up! Midday meds 💊',
+    ];
+
+    const afternoon = [
+      'Afternoon check-in 🌿',
+      'Time for afternoon meds 🌤️',
+      'Don\'t forget your meds! 🍵',
+    ];
+
+    const evening = [
+      'Evening medications 🌙',
+      'Time to wind down 🌆',
+      'Evening check-in ✨',
+    ];
+
+    const night = [
+      'Sleep well! Night meds 😴',
+      'Sweet dreams! 💤',
+      'Nighttime routine 🌙',
+    ];
+
+    List<String> pool;
+    if (hour >= 5 && hour < 11) {
+      pool = morning;
+    } else if (hour >= 11 && hour < 14) {
+      pool = midday;
+    } else if (hour >= 14 && hour < 18) {
+      pool = afternoon;
+    } else if (hour >= 18 && hour < 22) {
+      pool = evening;
+    } else {
+      pool = night;
     }
+
+    // Pick a message based on the seed (day offset) to cycle through them
+    return pool[randomSeed % pool.length];
+  }
+
+  int _generateNotificationIdForTimeAndDay(int hour, int minute, int weekday) {
+    // Format: DHHmm (D=1-7, HH=00-23, mm=00-59)
+    // Example: Sunday 23:59 -> 72359
+    // Max value: 72359, well within int range
+    return (weekday * 10000) + (hour * 100) + minute;
+  }
+
+  /// Schedule notifications for a medication
+  // Deprecated: Use rescheduleAllNotifications instead
+  Future<void> scheduleMedicationNotifications(Medication medication) async {
+    debugPrint(
+      'WARNING: scheduleMedicationNotifications called directly. Use rescheduleAllNotifications instead.',
+    );
+  }
+
+  /// Schedule a daily notification at a specific time
+  Future<void> _scheduleDailyNotification({
+    required int id,
+    required String title,
+    required String body,
+    required int hour,
+    required int minute,
+    String? payload,
+  }) async {
+    // Deprecated
+  }
+
+  /// Cancel all notifications for a medication
+  // Deprecated: Use rescheduleAllNotifications instead
+  Future<void> cancelMedicationNotifications(String medicationId) async {
+    debugPrint(
+      'WARNING: cancelMedicationNotifications called directly. Use rescheduleAllNotifications instead.',
+    );
   }
 
   /// Cancel all notifications
   Future<void> cancelAllNotifications() async {
     if (!_initialized) await initialize();
     await _notifications.cancelAll();
-  }
-
-  /// Schedule notifications for all medications
-  Future<void> scheduleAllMedications(List<Medication> medications) async {
-    for (final medication in medications) {
-      await scheduleMedicationNotifications(medication);
-    }
   }
 
   /// Generate a unique notification ID from medication ID and time index

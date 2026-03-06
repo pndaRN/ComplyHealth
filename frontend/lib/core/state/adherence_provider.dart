@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:complyhealth/core/models/medication.dart';
 import 'package:complyhealth/core/models/medication_log.dart';
 import 'package:complyhealth/core/state/medication_provider.dart';
+import 'package:complyhealth/core/state/profile_provider.dart';
 import '../../core/services/encryption_migration_service.dart';
 
 /// Provider for medication adherence tracking
@@ -246,6 +247,9 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
 
     for (final instance in instances) {
       if (instance.log == null && !instance.isPRN) {
+        // Skip if medication is not time sensitive
+        if (!instance.medication.isTimeSensitive) continue;
+
         final deadline = instance.scheduledTime.add(
           Duration(minutes: graceMinutes),
         );
@@ -305,6 +309,8 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       for (final med in medications) {
         // Skip PRN medications - they don't have mandatory schedules
         if (med.isPRN) continue;
+        // Skip non-time-sensitive medications
+        if (!med.isTimeSensitive) continue;
 
         for (final timeStr in med.scheduledTimes) {
           final parts = timeStr.split(':');
@@ -422,7 +428,12 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       return box.values.toList();
     });
 
-    // Rethrow error if update failed so caller can handle it
+    // Award immediate XP for taking a dose
+    if (!state.hasError) {
+      await ref.read(profileProvider.notifier).addXP(20);
+    }
+
+    // Rethrow error if save failed so caller can handle it
     if (state.hasError) {
       throw state.error!;
     }
@@ -506,7 +517,12 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       return box.values.toList();
     });
 
-    // Rethrow error if dismiss failed so caller can handle it
+    // Award immediate XP for recovering a missed dose
+    if (!state.hasError) {
+      await ref.read(profileProvider.notifier).addXP(20);
+    }
+
+    // Rethrow error if recovery failed so caller can handle it
     if (state.hasError) {
       throw state.error!;
     }
@@ -668,6 +684,7 @@ class MedicationInstance {
   /// Uses 60-minute clinical standard window
   bool get isOverdue {
     if (isPending && !isPRN) {
+      if (!medication.isTimeSensitive) return false;
       final now = DateTime.now();
       const gracePeriod = Duration(minutes: 60);
       final deadline = scheduledTime.add(gracePeriod);

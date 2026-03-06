@@ -321,7 +321,10 @@ class _NoteCreationDialogState extends ConsumerState<NoteCreationDialog> {
       await ref.read(notebookProvider.notifier).addEntry(entry);
 
       if (mounted) {
-        Navigator.of(context).pop();
+        setState(() {
+          _contentController.clear();
+          _selectedSourceId = null;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Note created successfully')),
         );

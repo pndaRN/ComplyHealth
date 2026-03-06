@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-03-06
+
+### Added
+- Added Roboto and MaterialIcons font assets for consistent typography across platforms
+
+### Changed
+- Notes fields on condition detail, medication detail, and profile note creation now remain visible after saving — the save button disables until new text is entered, letting users continue adding notes without losing context
+- Redesigned Health Overview widget: removed outer container box and made each condition independently collapsible to show/hide related medications
+- Migrated from hive to hive_ce package for improved Hive database support
+- Simplified profile screen by replacing inline widgets with navigation buttons for Notebook, Adherence Metrics, Help and Feedback, and About Us
+- Removed XP/level system display from profile header for a cleaner interface
+- Feedback dialog now pre-selects the feedback type when opened from specific Help and Feedback options
+
+### Removed
+- Removed Firebase Testing disclaimer from About screen
+
+## [1.6.0] - 2026-02-05
+
+### Added
+- Added custom application icons for Android and iOS using the branded ComplyHealth logo.
+- Implemented a 1-second splash screen with dynamic theme support (white logo for light mode, blue logo for dark mode).
+- Integrated notebook history into the "Notes" tab of the Condition Detail screen, allowing users to view and manage past notes alongside their scratchpad.
+- Added note count indicators to condition cards in the Health tab, providing a quick summary of recorded notes for each condition.
+- Integrated notebook history into the "Notes" tab of the Medication Detail screen, enabling consistent note management across health conditions and medications.
+- Added note count indicators to medication cards in the Medications tab, showing the volume of recorded notes at a glance.
+- Added "Time Sensitive" toggle to medications, allowing users to mark meds that shouldn't trigger "Late" alerts if missed.
+- Added friendly, cycling notification messages based on time of day (e.g., "Before coffee gets cold ☕").
+
+### Changed
+- Reorganized Medication Detail screen to consolidate "Overview" and "Schedule" tabs into a simplified two-tab interface (Overview and Notes).
+- Merged medication summary and interactive scheduling/PRN tracking into the unified "Overview" tab for better information density.
+- Redesigned the Dose Logging Dialog to be cleaner and friendlier, with a simplified main view for taking doses and a separate, streamlined view for skipping.
+- Moved the medication status icon ("checkmark") to the right side of tiles in the MAR tab for better visual flow.
+- Added a "More Options" menu button to each medication tile in the MAR tab, providing access to skip reasons and time editing.
+- Added a high-quality 800ms "hold-to-take" animation with color inversion and progress tracking to all medication items in the MAR tab.
+- Refactored the MAR tab to use a grouped timeline with auto-expanding dropdowns for each medication timing.
+- Dropdowns now automatically expand if a medication is due within one hour or is late/unlogged.
+- Added a subtle red tint to late time slots in the MAR tab to highlight actions needed.
+- Improved the smoothness and visual feedback of the "Next Due" card completion animation (note: Next Due card moved to dropdown structure).
+- Defaulted "actually taken" time to the current time in the late dose logging dialog for a more intuitive user experience.
+- Replaced collapsible category tiles in the Health screen's "Browse All" view with a direct list of conditions and static category headers for better immediate visibility.
+- Improved search results in the Health screen by displaying a flat list of matching conditions directly.
+- Renamed "At A Glance" dashboard widget to "Health Overview".
+- Updated "Health Overview" widget to be permanently open, removing the expandable/collapsible functionality for better immediate visibility.
+- Enclosed each condition within its own styled box inside the "Health Overview" widget to improve visual separation.
+- Cleaned up unused imports across `health_screen.dart`, `dashboard_screen.dart`, and `profile_screen.dart`.
+- Updated notifications to group multiple medications scheduled for the same time into a single alert.
+- Redesigned "Add Medication" and "Edit Medication" flows to use full-screen bottom sheets instead of dialogs for better usability.
+- Improved medication form with inline condition selection chips and a clear "Scheduled" vs "As Needed" toggle.
+- Updated notification tap behavior to navigate directly to the Medications screen for immediate action.
+- Deprecated legacy notification scheduling methods in favor of a new grouped scheduling system.
+
 ## [1.5.0] - 2026-02-03
 
 ### Changed
@@ -15,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored Dashboard header to use a standard Material 3 AppBar with optimized font sizes.
 
 ### Fixed
+- Fixed an issue where cancelling the "Mark as Taken (Late)" dialog would leave the medication card in a non-interactive state.
 - Resolved "ScrollController has no ScrollPosition attached" exception in medication add/edit forms.
 - Fixed visibility issues in late-dose logging and medication detail dialogs for dark mode users.
 - Improved auto-selected condition visibility by using theme-aware primary colors.
@@ -46,9 +99,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.0] - 2026-01-27
 
 ### Added
-
 - Added progress bar to dashboard to help medication tracking
 - Create button on notebook on profile
+
 
 ### Fixed
 

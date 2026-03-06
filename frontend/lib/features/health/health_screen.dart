@@ -4,7 +4,7 @@ import '../../core/models/disease.dart';
 import '../../core/services/icd_service.dart';
 import '../../core/state/conditions_provider.dart';
 import '../../core/state/medication_provider.dart';
-import '../../core/theme/theme_provider.dart';
+import '../../core/state/notebook_provider.dart';
 import '../../core/utils/condition_helper.dart';
 import '../../core/widgets/app_bar_widgets.dart';
 import '../../core/widgets/empty_state_widget.dart';
@@ -74,6 +74,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
     // Note: medicationProvider will also be converted to Async,
     // but we handle it here to prepare for the change.
     final medications = ref.watch(medicationProvider);
+    final notebookAsync = ref.watch(notebookProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -114,28 +115,40 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
         ),
       ),
       body: userConditionsAsync.when(
-        data: (userConditions) =>
-            _buildBody(userConditions, medications.asData?.value ?? []),
+        data: (userConditions) => _buildBody(
+          userConditions,
+          medications.asData?.value ?? [],
+          notebookAsync.asData?.value ?? [],
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('Error: $error')),
       ),
     );
   }
 
-  Widget _buildBody(List<Disease> userConditions, List medications) {
+  Widget _buildBody(
+    List<Disease> userConditions,
+    List medications,
+    List notebookEntries,
+  ) {
     if (_viewMode == HealthViewMode.myConditions) {
-      return _buildMyConditionsView(userConditions, medications);
+      return _buildMyConditionsView(
+        userConditions,
+        medications,
+        notebookEntries,
+      );
     } else {
       if (_isLoadingAll) {
         return const Center(child: CircularProgressIndicator());
       }
-      return _buildBrowseAllView(userConditions, medications);
+      return _buildBrowseAllView(userConditions, medications, notebookEntries);
     }
   }
 
   Widget _buildMyConditionsView(
     List<Disease> userConditions,
     List medications,
+    List notebookEntries,
   ) {
     // Filter by search query
     final filteredConditions = _filterConditionsBySearch(userConditions);
@@ -164,10 +177,19 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
             .where((m) => m.conditionNames.contains(condition.name))
             .length;
 
+        final noteCount =
+            notebookEntries
+                .where(
+                  (e) => e.sourceCode == condition.code && e.sourceType == 0,
+                )
+                .length +
+            (condition.personalNotes?.isNotEmpty == true ? 1 : 0);
+
         return ConditionCard(
           condition: condition,
           isAdded: true,
           medicationCount: medCount,
+          noteCount: noteCount,
           onTap: () => _navigateToDetail(condition),
           onToggle: () => _removeCondition(condition),
           showToggle: false,
@@ -183,8 +205,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
     return conditions.where((condition) {
       final searchLower = _searchQuery.toLowerCase();
       return condition.name.toLowerCase().contains(searchLower) ||
-          condition.commonName.toLowerCase().contains(searchLower) ||
-          condition.code.toLowerCase().contains(searchLower);
+          condition.commonName.toLowerCase().contains(searchLower);
     }).toList();
   }
 
@@ -201,7 +222,11 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
     return groupedConditions;
   }
 
-  Widget _buildBrowseAllView(List<Disease> userConditions, List medications) {
+  Widget _buildBrowseAllView(
+    List<Disease> userConditions,
+    List medications,
+    List notebookEntries,
+  ) {
     final theme = Theme.of(context);
 
     // Filter by search query
@@ -249,47 +274,73 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
       );
     }
 
-    // Group by category and sort
-    final groupedConditions = _groupConditionsByCategory(filteredConditions);
-    final sortedCategories = groupedConditions.keys.toList()..sort();
+    // Flatten data for the list
+    final List<dynamic> listItems = [];
+    if (_searchQuery.isNotEmpty) {
+      listItems.addAll(filteredConditions);
+    } else {
+      // Group by category and sort
+      final groupedConditions = _groupConditionsByCategory(filteredConditions);
+      final sortedCategories = groupedConditions.keys.toList()..sort();
+
+      for (final category in sortedCategories) {
+        listItems.add(category); // String as header
+        listItems.addAll(groupedConditions[category]!); // Diseases as cards
+      }
+    }
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: sortedCategories.length,
-      itemBuilder: (context, categoryIndex) {
-        final category = sortedCategories[categoryIndex];
-        final conditions = groupedConditions[category]!;
+      itemCount: listItems.length,
+      itemBuilder: (context, index) {
+        final item = listItems[index];
 
-        return ExpansionTile(
-          title: Text(
-            category,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+        if (item is String) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+            child: Text(
+              item.toUpperCase(),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
             ),
-          ),
-          subtitle: Text(
-            '${conditions.length} condition${conditions.length != 1 ? 's' : ''}',
-          ),
-          initiallyExpanded:
-              _searchQuery.isNotEmpty || sortedCategories.length == 1,
-          children: conditions.map((condition) {
-            final isAdded = userConditions.any((c) => c.code == condition.code);
-            final medCount = isAdded
-                ? medications
-                      .where((m) => m.conditionNames.contains(condition.name))
-                      .length
-                : 0;
+          );
+        }
 
-            return ConditionCard(
-              condition: condition,
-              isAdded: isAdded,
-              medicationCount: medCount,
-              onTap: () => _navigateToDetail(condition),
-              onToggle: () => isAdded
-                  ? _removeCondition(condition)
-                  : _addCondition(condition),
-            );
-          }).toList(),
+        final condition = item as Disease;
+        final matchingUserCondition =
+            userConditions.any((c) => c.code == condition.code)
+            ? userConditions.firstWhere((c) => c.code == condition.code)
+            : null;
+        final isAdded = matchingUserCondition != null;
+        final medCount = isAdded
+            ? medications
+                  .where((m) => m.conditionNames.contains(condition.name))
+                  .length
+            : 0;
+
+        final noteCount = isAdded
+            ? notebookEntries
+                      .where(
+                        (e) =>
+                            e.sourceCode == condition.code && e.sourceType == 0,
+                      )
+                      .length +
+                  (matchingUserCondition.personalNotes?.isNotEmpty == true
+                      ? 1
+                      : 0)
+            : 0;
+
+        return ConditionCard(
+          condition: condition,
+          isAdded: isAdded,
+          medicationCount: medCount,
+          noteCount: noteCount,
+          onTap: () => _navigateToDetail(condition),
+          onToggle: () =>
+              isAdded ? _removeCondition(condition) : _addCondition(condition),
         );
       },
     );

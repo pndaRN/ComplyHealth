@@ -19,7 +19,7 @@ class _BackdateDoseDialogState extends State<BackdateDoseDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedTime = widget.instance.scheduledTime;
+    _selectedTime = DateTime.now();
   }
 
   Future<void> _selectTime() async {

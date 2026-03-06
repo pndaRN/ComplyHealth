@@ -8,7 +8,7 @@ part of 'medication.dart';
 
 class MedicationAdapterGenerated extends TypeAdapter<Medication> {
   @override
-  final int typeId = 1;
+  final typeId = 1;
 
   @override
   Medication read(BinaryReader reader) {
@@ -20,22 +20,25 @@ class MedicationAdapterGenerated extends TypeAdapter<Medication> {
       id: fields[0] as String,
       name: fields[1] as String,
       dosage: fields[2] as String,
-      conditionNames:
-          fields[4] == null ? [] : (fields[4] as List).cast<String>(),
+      conditionNames: fields[4] == null
+          ? []
+          : (fields[4] as List).cast<String>(),
       isPRN: fields[5] == null ? false : fields[5] as bool,
-      scheduledTimes:
-          fields[6] == null ? [] : (fields[6] as List).cast<String>(),
-      maxDailyDoses: fields[7] as int?,
-      currentDoseCount: fields[8] == null ? 0 : fields[8] as int,
+      scheduledTimes: fields[6] == null
+          ? []
+          : (fields[6] as List).cast<String>(),
+      maxDailyDoses: (fields[7] as num?)?.toInt(),
+      currentDoseCount: fields[8] == null ? 0 : (fields[8] as num).toInt(),
       lastDoseCountReset: fields[9] as DateTime?,
       personalNotes: fields[10] as String?,
+      isTimeSensitive: fields[11] == null ? true : fields[11] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, Medication obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -55,7 +58,9 @@ class MedicationAdapterGenerated extends TypeAdapter<Medication> {
       ..writeByte(9)
       ..write(obj.lastDoseCountReset)
       ..writeByte(10)
-      ..write(obj.personalNotes);
+      ..write(obj.personalNotes)
+      ..writeByte(11)
+      ..write(obj.isTimeSensitive);
   }
 
   @override

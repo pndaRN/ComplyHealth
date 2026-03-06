@@ -18,6 +18,8 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
   final _notesController = TextEditingController();
   String? _selectedSkipReason;
   DateTime? _customTime;
+  bool _isSkipping = false;
+  bool _isAddingNote = false;
 
   final List<String> _skipReasons = [
     'Forgot',
@@ -371,87 +373,137 @@ class _DoseLoggingDialogState extends ConsumerState<DoseLoggingDialog> {
 
               // Logging form (if no log exists)
               if (log == null) ...[
-                // Notes field
-                TextField(
-                  controller: _notesController,
-                  decoration: const InputDecoration(
-                    labelText: 'Notes (optional)',
-                    hintText: 'Add any notes about this dose',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 16),
-
-                // Custom time picker
-                OutlinedButton.icon(
-                  onPressed: _selectCustomTime,
-                  icon: const Icon(Icons.access_time),
-                  label: Text(
-                    _customTime != null
-                        ? 'Time: ${_formatTime(_customTime!)}'
-                        : 'Set Custom Time (optional)',
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Mark as Taken button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _markAsTaken,
-                    icon: const Icon(Icons.check),
-                    label: const Text('Mark as Taken'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: theme.colorScheme.onPrimary,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                if (_isSkipping) ...[
+                  Text(
+                    'Reason for skipping',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
-
-                // Skip reason dropdown
-                DropdownButtonFormField<String>(
-                  value: _selectedSkipReason,
-                  decoration: const InputDecoration(
-                    labelText: 'Skip Reason',
-                    border: OutlineInputBorder(),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _skipReasons.map((reason) {
+                      final isSelected = _selectedSkipReason == reason;
+                      return ChoiceChip(
+                        label: Text(reason),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedSkipReason = selected ? reason : null;
+                          });
+                        },
+                      );
+                    }).toList(),
                   ),
-                  items: _skipReasons.map((reason) {
-                    return DropdownMenuItem(value: reason, child: Text(reason));
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() => _selectedSkipReason = value);
-                  },
-                ),
-                const SizedBox(height: 12),
-
-                // Mark as Skipped button
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: _selectedSkipReason != null
-                        ? _markAsSkipped
-                        : null,
-                    icon: const Icon(Icons.cancel),
-                    label: const Text('Mark as Skipped'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: theme.colorScheme.secondary,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _isSkipping = false;
+                            _selectedSkipReason = null;
+                          });
+                        },
+                        child: const Text('Back'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton(
+                        onPressed: _selectedSkipReason != null
+                            ? _markAsSkipped
+                            : null,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: theme.colorScheme.error,
+                          foregroundColor: theme.colorScheme.onError,
+                        ),
+                        child: const Text('Confirm Skip'),
+                      ),
+                    ],
+                  ),
+                ] else ...[
+                  // Main View
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: _markAsTaken,
+                      icon: const Icon(Icons.check),
+                      label: const Text('Mark as Taken'),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-                // Cancel button
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
+                  // Secondary Options Row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _selectCustomTime,
+                          child: Text(
+                            _customTime != null
+                                ? _formatTime(_customTime!)
+                                : 'Change Time',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setState(() => _isAddingNote = !_isAddingNote);
+                          },
+                          child: Text(
+                            _isAddingNote || _notesController.text.isNotEmpty
+                                ? 'Hide Note'
+                                : 'Add Note',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+
+                  if (_isAddingNote || _notesController.text.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _notesController,
+                      decoration: const InputDecoration(
+                        labelText: 'Notes',
+                        hintText: 'Add any notes...',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                      ),
+                      maxLines: 2,
+                    ),
+                  ],
+
+                  const SizedBox(height: 24),
+
+                  // Skip Action
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton.icon(
+                      onPressed: () => setState(() => _isSkipping = true),
+                      icon: Icon(
+                        Icons.block,
+                        size: 18,
+                        color: theme.colorScheme.error,
+                      ),
+                      label: Text(
+                        'Skip this Dose',
+                        style: TextStyle(color: theme.colorScheme.error),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ],
           ),

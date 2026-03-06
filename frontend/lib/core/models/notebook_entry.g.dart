@@ -8,7 +8,7 @@ part of 'notebook_entry.dart';
 
 class NotebookEntryAdapter extends TypeAdapter<NotebookEntry> {
   @override
-  final int typeId = 9;
+  final typeId = 9;
 
   @override
   NotebookEntry read(BinaryReader reader) {
@@ -18,7 +18,7 @@ class NotebookEntryAdapter extends TypeAdapter<NotebookEntry> {
     };
     return NotebookEntry(
       id: fields[0] as String,
-      sourceType: fields[1] as int,
+      sourceType: (fields[1] as num).toInt(),
       sourceName: fields[2] as String,
       sourceCode: fields[3] as String,
       content: fields[4] as String,

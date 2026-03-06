@@ -5,6 +5,7 @@ class ConditionCard extends StatelessWidget {
   final Disease condition;
   final bool isAdded;
   final int medicationCount;
+  final int noteCount;
   final VoidCallback onTap;
   final VoidCallback onToggle;
   final bool showToggle;
@@ -14,6 +15,7 @@ class ConditionCard extends StatelessWidget {
     required this.condition,
     required this.isAdded,
     required this.medicationCount,
+    this.noteCount = 0,
     required this.onTap,
     required this.onToggle,
     this.showToggle = true,
@@ -48,23 +50,41 @@ class ConditionCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    // Show medication count if added
-                    if (isAdded && medicationCount > 0) ...[
+                    // Show medication count and note count if added
+                    if (isAdded && (medicationCount > 0 || noteCount > 0)) ...[
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Icon(
-                            Icons.medication,
-                            size: 16,
-                            color: theme.colorScheme.secondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$medicationCount medication${medicationCount != 1 ? 's' : ''}',
-                            style: theme.textTheme.bodySmall?.copyWith(
+                          if (medicationCount > 0) ...[
+                            Icon(
+                              Icons.medication,
+                              size: 16,
                               color: theme.colorScheme.secondary,
                             ),
-                          ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$medicationCount medication${medicationCount != 1 ? 's' : ''}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.secondary,
+                              ),
+                            ),
+                          ],
+                          if (medicationCount > 0 && noteCount > 0)
+                            const SizedBox(width: 12),
+                          if (noteCount > 0) ...[
+                            Icon(
+                              Icons.note_alt_outlined,
+                              size: 16,
+                              color: theme.colorScheme.secondary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$noteCount note${noteCount != 1 ? 's' : ''}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.secondary,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ],
