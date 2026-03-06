@@ -27,6 +27,7 @@ class MedicationDetailScreen extends ConsumerStatefulWidget {
 class _MedicationDetailScreenState
     extends ConsumerState<MedicationDetailScreen> {
   late TextEditingController _notesController;
+  String? _lastSavedContent;
   Timer? _debounceTimer;
   final ValueNotifier<bool> _hasNotesText = ValueNotifier(false);
 
@@ -542,7 +543,8 @@ class _MedicationDetailScreenState
                   .read(medicationProvider.notifier)
                   .updateMedicationNotes(medication.id, value);
             });
-            _hasNotesText.value = value.isNotEmpty;
+            _hasNotesText.value =
+                value.isNotEmpty && value != _lastSavedContent;
           },
         ),
         if (entries.isNotEmpty) ...[
@@ -647,17 +649,13 @@ class _MedicationDetailScreenState
 
     await ref.read(notebookProvider.notifier).addEntry(entry);
 
-    // Clear the notes field
-    _notesController.clear();
-    await ref
-        .read(medicationProvider.notifier)
-        .updateMedicationNotes(medication.id, '');
+    _lastSavedContent = content;
+    _hasNotesText.value = false; // Disable FAB since text matches last save
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Note saved in notebook in profile')),
       );
-      _hasNotesText.value = false;
     }
   }
 }

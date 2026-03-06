@@ -23,6 +23,7 @@ class ConditionDetailScreen extends ConsumerStatefulWidget {
 
 class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
   late TextEditingController _notesController;
+  String? _lastSavedContent;
   Timer? _debounceTimer;
 
   @override
@@ -83,7 +84,9 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
         ),
         Scaffold(
           body: _buildNotesTab(isAdded),
-          floatingActionButton: isAdded && _notesController.text.isNotEmpty
+          floatingActionButton: isAdded &&
+                  _notesController.text.isNotEmpty &&
+                  _notesController.text != _lastSavedContent
               ? FloatingActionButton.extended(
                   onPressed: () => _saveToNotebook(),
                   icon: const Icon(Icons.save),
@@ -509,17 +512,13 @@ class _ConditionDetailScreenState extends ConsumerState<ConditionDetailScreen> {
 
     await ref.read(notebookProvider.notifier).addEntry(entry);
 
-    // Clear the notes field
-    _notesController.clear();
-    await ref
-        .read(conditionsProvider.notifier)
-        .updateConditionNotes(widget.condition.code, '');
+    _lastSavedContent = content;
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Note saved in notebook in profile')),
       );
-      setState(() {}); // Refresh to hide FAB
+      setState(() {}); // Refresh to disable FAB
     }
   }
 }

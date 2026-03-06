@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Roboto and MaterialIcons font assets for consistent typography across platforms
 
 ### Changed
+- Notes fields on condition detail, medication detail, and profile note creation now remain visible after saving — the save button disables until new text is entered, letting users continue adding notes without losing context
 - Redesigned Health Overview widget: removed outer container box and made each condition independently collapsible to show/hide related medications
 - Migrated from hive to hive_ce package for improved Hive database support
 - Simplified profile screen by replacing inline widgets with navigation buttons for Notebook, Adherence Metrics, Help and Feedback, and About Us
