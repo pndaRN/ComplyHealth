@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-03-06
+
 ### Added
 - Added Roboto and MaterialIcons font assets for consistent typography across platforms
 
