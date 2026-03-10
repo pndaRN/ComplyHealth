@@ -14,11 +14,11 @@ workflows:
       flutter: stable
       xcode: latest
       cocoapods: default
-      groups:
-        - appstore_credentials 
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
+        # Replace with your actual bundle ID
+        BUNDLE_ID: "com.complyhealth.app"
 
     triggering:
       events:
@@ -29,25 +29,16 @@ workflows:
           source: true
 
     scripts:
-      - name: Initialize Keychain
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+
+      - name: Set up keychain
         script: |
           keychain initialize
-
-      - name: Decode and Set up Code Signing
-        script: |
-          # 1. Prepare Provisioning Profile directory
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          
-          # 2. Decode files. We use 'tr -d' to strip any accidental null bytes
-          echo "$CM_CERTIFICATE" | tr -d '\0' | base64 --decode > /tmp/certificate.p12
-          echo "$CM_PROVISIONING_PROFILE" | tr -d '\0' | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/dist.mobileprovision
-          
-          # 3. Add certificate to keychain
-          # We wrap the password in quotes and use 'tr' to ensure it is clean
-          CLEAN_PASS=$(echo "$CM_CERTIFICATE_PASSWORD" | tr -d '\0')
-          keychain add-certificates \
-            --certificate /tmp/certificate.p12 \
-            --certificate-password "$CLEAN_PASS"
+          keychain add-certificates
 
       - name: Set up code signing settings on Xcode project
         script: |
