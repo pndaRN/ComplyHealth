@@ -36,9 +36,12 @@ workflows:
 
       - name: Fetch or Create signing files
         script: |
+          app-store-connect certificateslist 
+
           app-store-connect fetch-signing-files com.complyhealth.app \
             --type IOS_APP_STORE \
-            --create 
+            --create \
+            --verbose
 
       - name: Set up code signing settings on Xcode project
         script: |
