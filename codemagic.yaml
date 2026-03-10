@@ -48,6 +48,13 @@ workflows:
           cd frontend/ios
           pod install
 
+      - name: Extract release notes from CHANGELOG
+        script: |
+          # Extract the latest version section (between first two ## headers)
+          awk '/^## \[.*\] -/{if(found) exit; found=1} found' CHANGELOG.md > release_notes.txt
+          echo "Release notes extracted:"
+          cat release_notes.txt
+
       - name: Flutter build ipa
         script: |
           cd frontend
