@@ -19,6 +19,8 @@ workflows:
         XCODE_SCHEME: "Runner"
         # Replace with your actual bundle ID
         BUNDLE_ID: "com.complyhealth.app"
+      groups:
+        - appstore_credentials
 
     triggering:
       events:
