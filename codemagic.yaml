@@ -16,11 +16,6 @@ workflows:
       cocoapods: default
       groups:
         - appstore_credentials
-      ios_signing:
-        provisioning_profiles:
-          - APP_STORE_PROFILE
-        certificates:
-          - DISTRIBUTION_APP_STORE
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
@@ -36,7 +31,7 @@ workflows:
     scripts:
       - name: Set up code signing settings on Xcode project
         script: |
-          xcode-project use-profiles
+          xcode-project use-profiles --warn-only
 
       - name: Get Flutter packages
         script: |
