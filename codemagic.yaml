@@ -29,44 +29,31 @@ workflows:
           source: true
 
     
-    scripts:
-      - name: Initialize Keychain
-        script: |
-          keychain initialize
+  scripts:
+    - name: Set up code signing settings on Xcode project
+      script: |
+        # Initializes keychain and adds the manual certificate/profile
+        keychain initialize
+        # Codemagic automatically looks for CM_CERTIFICATE and CM_PROVISIONING_PROFILE
+        keychain add-certificates --certificate "$CM_CERTIFICATE" --certificate-password "$CM_CERTIFICATE_PASSWORD"
+        xcode-project use-profiles --warn-only
 
-      - name: Fetch or Create signing files
-        script: |
-          app-store-connect fetch-signing-files com.complyhealth.app \
-            --type IOS_APP_STORE \
-            --create \
-            --verbose
+    - name: Get Flutter packages
+      script: |
+        cd frontend
+        flutter pub get
 
-      - name: Set up code signing settings on Xcode project
-        script: |
-          keychain add-certificates
-          xcode-project use-profiles --warn-only
+    - name: Install CocoaPods dependencies
+      script: |
+        cd frontend/ios
+        pod install
 
-      - name: Get Flutter packages
-        script: |
-          cd frontend
-          flutter pub get
-
-      - name: Install CocoaPods dependencies
-        script: |
-          cd frontend/ios
-          pod install
-
-      - name: Extract release notes from CHANGELOG
-        script: |
-          # Extract the latest version section (between first two ## headers)
-          awk '/^## \[.*\] -/{if(found) exit; found=1} found' CHANGELOG.md > release_notes.txt
-          echo "Release notes extracted:"
-          cat release_notes.txt
-
-      - name: Flutter build ipa
-        script: |
-          cd frontend
-          flutter build ipa --release --build-number=$BUILD_NUMBER --export-options-plist=/Users/builder/export_options.plist
+    - name: Flutter build ipa
+      script: |
+        cd frontend
+        flutter build ipa --release \
+          --build-number=$BUILD_NUMBER \
+          --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
       - frontend/build/ios/ipa/*.ipa
