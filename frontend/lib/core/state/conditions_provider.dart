@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive_ce.dart';
 import '../models/disease.dart';
@@ -9,25 +10,27 @@ final conditionsProvider =
     );
 
 class ConditionsNotifier extends AsyncNotifier<List<Disease>> {
+  static const String _boxName = 'conditions';
+
   Future<Box<Disease>> _getBox() async {
     final key = await EncryptionMigrationService.getEncryptionKey();
 
-    if (Hive.isBoxOpen('conditions')) {
+    if (Hive.isBoxOpen(_boxName)) {
       try {
         // Try to get the box with the expected type first
         try {
-          final box = Hive.box<Disease>('conditions');
+          final box = Hive.box<Disease>(_boxName);
           return box;
         } catch (_) {
           // Type mismatch or other error, try to get as dynamic to close it
-          final box = Hive.box('conditions');
+          final box = Hive.box(_boxName);
           await box.close();
         }
       } catch (_) {
         // If even getting as dynamic failed, try opening as dynamic to get handle and close
         try {
           // This handles the "already open" case by getting the existing instance
-          final box = await Hive.openBox('conditions');
+          final box = await Hive.openBox(_boxName);
           await box.close();
         } catch (_) {
           // If all else fails, ignore and try to open fresh below
@@ -35,10 +38,23 @@ class ConditionsNotifier extends AsyncNotifier<List<Disease>> {
       }
     }
 
-    return await Hive.openBox<Disease>(
-      'conditions',
-      encryptionCipher: HiveAesCipher(key),
-    );
+    try {
+      return await Hive.openBox<Disease>(
+        _boxName,
+        encryptionCipher: HiveAesCipher(key),
+      );
+    } catch (e) {
+      debugPrint('Failed to open $_boxName: $e - clearing and retrying');
+      // Clear corrupted box
+      try {
+        await Hive.deleteBoxFromDisk(_boxName);
+      } catch (_) {}
+      // Open fresh empty box
+      return await Hive.openBox<Disease>(
+        _boxName,
+        encryptionCipher: HiveAesCipher(key),
+      );
+    }
   }
 
   @override

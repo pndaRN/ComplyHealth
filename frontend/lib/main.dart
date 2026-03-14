@@ -43,17 +43,31 @@ void main() async {
   Hive.registerAdapter(VideoAdapter());
   Hive.registerAdapter(NotebookEntryAdapter());
 
-  // Initialize notification service
-  await NotificationService().initialize();
+  // Initialize notification service (non-critical for app launch)
+  try {
+    await NotificationService().initialize();
+  } catch (e) {
+    debugPrint('NotificationService init failed: $e');
+  }
 
-  // Init Firebase
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Init Firebase (non-critical for app launch)
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  } catch (e) {
+    debugPrint('Firebase init failed: $e');
+  }
 
   // Perform data encryption migration before app starts
   try {
     await EncryptionMigrationService.migrateAllBoxes();
   } catch (e) {
     debugPrint('Startup migration error: $e');
+    // If migration fails completely, clear all boxes to allow fresh start
+    try {
+      await EncryptionMigrationService.clearAllBoxes();
+    } catch (clearError) {
+      debugPrint('Failed to clear boxes: $clearError');
+    }
   }
 
   // Set up Crashlytics error handlers (not supported on web)

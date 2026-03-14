@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive_ce.dart';
 import '../models/profile.dart';
@@ -10,31 +11,45 @@ final profileProvider = AsyncNotifierProvider<ProfileNotifier, Profile>(
 );
 
 class ProfileNotifier extends AsyncNotifier<Profile> {
+  static const String _boxName = 'profile';
   static const int maxLevel = 100;
   static const int baseXpPerDay = 100;
 
   Future<Box<Profile>> _getBox() async {
-    if (Hive.isBoxOpen('profile')) {
+    if (Hive.isBoxOpen(_boxName)) {
       try {
         try {
-          final box = Hive.box<Profile>('profile');
+          final box = Hive.box<Profile>(_boxName);
           return box;
         } catch (_) {
-          final box = Hive.box('profile');
+          final box = Hive.box(_boxName);
           await box.close();
         }
       } catch (_) {
         try {
-          final box = await Hive.openBox('profile');
+          final box = await Hive.openBox(_boxName);
           await box.close();
         } catch (_) {}
       }
     }
     final key = await EncryptionMigrationService.getEncryptionKey();
-    return await Hive.openBox<Profile>(
-      'profile',
-      encryptionCipher: HiveAesCipher(key),
-    );
+    try {
+      return await Hive.openBox<Profile>(
+        _boxName,
+        encryptionCipher: HiveAesCipher(key),
+      );
+    } catch (e) {
+      debugPrint('Failed to open $_boxName: $e - clearing and retrying');
+      // Clear corrupted box
+      try {
+        await Hive.deleteBoxFromDisk(_boxName);
+      } catch (_) {}
+      // Open fresh empty box
+      return await Hive.openBox<Profile>(
+        _boxName,
+        encryptionCipher: HiveAesCipher(key),
+      );
+    }
   }
 
   @override

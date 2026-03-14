@@ -77,23 +77,24 @@ class EncryptionMigrationService {
     }
   }
 
+  static const List<String> _allBoxNames = [
+    'conditions',
+    'medications',
+    'profile',
+    'medication_logs',
+    'feedback',
+    'settings',
+    'medication_settings',
+    'theme',
+    'notebook',
+  ];
+
   static Future<void> migrateAllBoxes() async {
     if (await isMigrationCompleted()) {
       return;
     }
-    final boxesToMigrate = [
-      'conditions',
-      'medications',
-      'profile',
-      'medication_logs',
-      'feedback',
-      'settings',
-      'medication_settings',
-      'theme',
-      'notebook',
-    ];
 
-    for (final boxName in boxesToMigrate) {
+    for (final boxName in _allBoxNames) {
       try {
         await migrateBox(boxName);
       } catch (e) {
@@ -103,5 +104,27 @@ class EncryptionMigrationService {
 
     await markMigrationCompleted();
     debugPrint('Migration completed successfully');
+  }
+
+  /// Clears all Hive boxes when data is unrecoverable.
+  /// This allows the app to start fresh after corruption.
+  static Future<void> clearAllBoxes() async {
+    for (final name in _allBoxNames) {
+      try {
+        if (Hive.isBoxOpen(name)) {
+          await Hive.box(name).close();
+        }
+        await Hive.deleteBoxFromDisk(name);
+      } catch (e) {
+        debugPrint('Error clearing box $name: $e');
+      }
+    }
+    // Reset migration flag so it runs fresh next time
+    try {
+      await _secureStorage.delete(key: _migrationFlagKey);
+    } catch (e) {
+      debugPrint('Error resetting migration flag: $e');
+    }
+    debugPrint('All boxes cleared for fresh start');
   }
 }

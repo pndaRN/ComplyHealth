@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:complyhealth/core/models/medication.dart';
@@ -40,11 +41,25 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     }
 
     final key = await EncryptionMigrationService.getEncryptionKey();
-    _box = await Hive.openBox<MedicationLog>(
-      boxName,
-      encryptionCipher: HiveAesCipher(key),
-    );
-    return _box!;
+    try {
+      _box = await Hive.openBox<MedicationLog>(
+        boxName,
+        encryptionCipher: HiveAesCipher(key),
+      );
+      return _box!;
+    } catch (e) {
+      debugPrint('Failed to open $boxName: $e - clearing and retrying');
+      // Clear corrupted box
+      try {
+        await Hive.deleteBoxFromDisk(boxName);
+      } catch (_) {}
+      // Open fresh empty box
+      _box = await Hive.openBox<MedicationLog>(
+        boxName,
+        encryptionCipher: HiveAesCipher(key),
+      );
+      return _box!;
+    }
   }
 
   @override
