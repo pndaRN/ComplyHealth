@@ -1,5 +1,5 @@
 workflows:
-# ========================================
+  # ========================================
   # iOS TestFlight Workflow (main branch)
   # ========================================
   ios-testflight-workflow:
@@ -8,19 +8,22 @@ workflows:
     instance_type: mac_mini_m2
 
     integrations:
-      app_store_connect: Codemagic Admin
+      app_store_connect: App Store Connect
 
     environment:
       flutter: stable
       xcode: latest
       cocoapods: default
+      groups:
+        - appstore_credentials
+      ios_signing:
+        provisioning_profiles:
+          - APP_STORE_PROFILE
+        certificates:
+          - DISTRIBUTION_APP_STORE
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
-        # Replace with your actual bundle ID
-        BUNDLE_ID: "com.complyhealth.app"
-      groups:
-        - appstore_credentials
 
     triggering:
       events:
@@ -31,20 +34,9 @@ workflows:
           source: true
 
     scripts:
-      - name: Fetch signing files
-        script: |
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create
-
-      - name: Set up keychain
-        script: |
-          keychain initialize
-          keychain add-certificates
-
       - name: Set up code signing settings on Xcode project
         script: |
-          xcode-project use-profiles --warn-only
+          xcode-project use-profiles
 
       - name: Get Flutter packages
         script: |
@@ -56,16 +48,22 @@ workflows:
           cd frontend/ios
           pod install
 
+      - name: Extract release notes from CHANGELOG
+        script: |
+          # Extract the latest version section (between first two ## headers)
+          awk '/^## \[.*\] -/{if(found) exit; found=1} found' CHANGELOG.md > release_notes.txt
+          echo "Release notes extracted:"
+          cat release_notes.txt
+
       - name: Flutter build ipa
         script: |
           cd frontend
-          flutter build ipa --release \
-            --build-number=$BUILD_NUMBER \
-            --export-options-plist=/Users/builder/export_options.plist
+          flutter build ipa --release --build-number=$BUILD_NUMBER --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
       - frontend/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
+      - frontend/flutter_drive.log
 
     publishing:
       email:
@@ -78,3 +76,83 @@ workflows:
         auth: integration
         submit_to_testflight: true
         submit_to_app_store: false
+
+  # ========================================
+  # iOS Firebase Workflow (develop branch)
+  # ========================================
+  ios-firebase-workflow:
+    name: iOS Firebase Workflow
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+
+    integrations:
+      app_store_connect: App Store Connect
+
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      groups:
+        - firebase_credentials
+      ios_signing:
+        provisioning_profiles:
+          - AD_HOC
+        certificates:
+          - DISTRIBUTION_FIREBASE
+      vars:
+        XCODE_WORKSPACE: "Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: develop
+          include: true
+          source: true
+
+    scripts:
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+
+      - name: Get Flutter packages
+        script: |
+          cd frontend
+          flutter pub get
+
+      - name: Install CocoaPods dependencies
+        script: |
+          cd frontend/ios
+          pod install
+
+      - name: Extract release notes from CHANGELOG
+        script: |
+          # Extract the latest version section (between first two ## headers)
+          awk '/^## \[.*\] -/{if(found) exit; found=1} found' CHANGELOG.md > release_notes.txt
+          echo "Release notes extracted:"
+          cat release_notes.txt
+      - name: Flutter build ipa
+        script: |
+          cd frontend
+          flutter build ipa --release --build-number=$BUILD_NUMBER --export-options-plist=/Users/builder/export_options.plist
+
+    artifacts:
+      - frontend/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - frontend/flutter_drive.log
+      - release_notes.txt
+
+    publishing:
+      email:
+        recipients:
+          - pndaRN.dev@proton.me
+        notify:
+          success: true
+          failure: true
+      firebase:
+        firebase_service_account: $FIREBASE_SERVICE_ACCOUNT
+        ios:
+          app_id: $FIREBASE_IOS_APP_ID
+          groups:
+            - ios-testers
