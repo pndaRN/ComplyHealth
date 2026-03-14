@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Fixed iOS crash on launch after upgrading from previous version due to hive_ce migration data corruption
+- Added robust error handling to app initialization (Firebase, NotificationService) to prevent startup crashes
+- Added data recovery mechanism that clears corrupted Hive boxes and allows app to start fresh when data is unrecoverable
+
 ## [1.7.0] - 2026-03-06
 
 ### Added

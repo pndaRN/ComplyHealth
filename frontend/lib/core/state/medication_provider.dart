@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive_ce.dart';
 import '../models/medication.dart';
@@ -11,31 +12,45 @@ final medicationProvider =
     );
 
 class MedicationNotifier extends AsyncNotifier<List<Medication>> {
+  static const String _boxName = 'medications';
   MedicationSortOption _sortOption = MedicationSortOption.alphabetical;
   static bool _hasScheduledInitialNotifications = false;
 
   Future<Box<Medication>> _getBox() async {
-    if (Hive.isBoxOpen('medications')) {
+    if (Hive.isBoxOpen(_boxName)) {
       try {
         try {
-          final box = Hive.box<Medication>('medications');
+          final box = Hive.box<Medication>(_boxName);
           return box;
         } catch (_) {
-          final box = Hive.box('medications');
+          final box = Hive.box(_boxName);
           await box.close();
         }
       } catch (_) {
         try {
-          final box = await Hive.openBox('medications');
+          final box = await Hive.openBox(_boxName);
           await box.close();
         } catch (_) {}
       }
     }
     final key = await EncryptionMigrationService.getEncryptionKey();
-    return await Hive.openBox<Medication>(
-      'medications',
-      encryptionCipher: HiveAesCipher(key),
-    );
+    try {
+      return await Hive.openBox<Medication>(
+        _boxName,
+        encryptionCipher: HiveAesCipher(key),
+      );
+    } catch (e) {
+      debugPrint('Failed to open $_boxName: $e - clearing and retrying');
+      // Clear corrupted box
+      try {
+        await Hive.deleteBoxFromDisk(_boxName);
+      } catch (_) {}
+      // Open fresh empty box
+      return await Hive.openBox<Medication>(
+        _boxName,
+        encryptionCipher: HiveAesCipher(key),
+      );
+    }
   }
 
   Future<Box> _getSettingsBox() async {
