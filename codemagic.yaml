@@ -20,7 +20,7 @@ workflows:
         provisioning_profiles:
           - APP_STORE_PROFILE
         certificates:
-          - DISTRIBUTION_APP_STORE
+          - DISTRIBUTION
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
@@ -98,7 +98,7 @@ workflows:
         provisioning_profiles:
           - AD_HOC
         certificates:
-          - DISTRIBUTION_FIREBASE
+          - DISTRIBUTION
       vars:
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
