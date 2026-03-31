@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/profile.dart';
 import '../../core/state/profile_provider.dart';
+import '../../core/state/auth_provider.dart';
 import '../../core/widgets/app_bar_widgets.dart';
 import '../settings/about_screen.dart';
 import '../settings/settings_screen.dart';
@@ -185,6 +186,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         : '${profile.firstName.isNotEmpty ? profile.firstName[0] : ''}${profile.lastName.isNotEmpty ? profile.lastName[0] : ''}'
               .toUpperCase();
 
+    final authState = ref.watch(authStateProvider);
+    final userEmail = authState.whenOrNull(data: (user) => user?.email);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -207,6 +211,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
+          if (userEmail != null && userEmail.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              userEmail,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ],
       ),
     );

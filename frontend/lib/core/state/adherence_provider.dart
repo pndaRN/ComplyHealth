@@ -5,7 +5,9 @@ import 'package:complyhealth/core/models/medication.dart';
 import 'package:complyhealth/core/models/medication_log.dart';
 import 'package:complyhealth/core/state/medication_provider.dart';
 import 'package:complyhealth/core/state/profile_provider.dart';
+import 'package:complyhealth/core/state/conditions_provider.dart';
 import '../../core/services/encryption_migration_service.dart';
+import '../../core/state/auth_provider.dart';
 
 /// Provider for medication adherence tracking
 final adherenceProvider =
@@ -182,6 +184,7 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     String? notes,
     bool isPRN = false,
   }) async {
+    MedicationLog? savedLog;
     state = await AsyncValue.guard(() async {
       final box = await _getBox();
       final logs = box.values.toList();
@@ -204,6 +207,7 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       );
 
       await box.put(log.id, log);
+      savedLog = log;
       return box.values.toList();
     });
 
@@ -211,6 +215,7 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     if (state.hasError) {
       throw state.error!;
     }
+    if (savedLog != null) _syncLog(savedLog!);
   }
 
   /// Log a dose as skipped
@@ -223,6 +228,7 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     String? notes,
     bool isPRN = false,
   }) async {
+    MedicationLog? savedLog;
     state = await AsyncValue.guard(() async {
       final box = await _getBox();
       final logs = box.values.toList();
@@ -245,6 +251,7 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       );
 
       await box.put(log.id, log);
+      savedLog = log;
       return box.values.toList();
     });
 
@@ -252,6 +259,7 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     if (state.hasError) {
       throw state.error!;
     }
+    if (savedLog != null) _syncLog(savedLog!);
   }
 
   /// Auto-mark doses as missed if past grace period (today only)
@@ -374,6 +382,7 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     required String dosage,
     required DateTime scheduledTime,
   }) async {
+    MedicationLog? savedLog;
     state = await AsyncValue.guard(() async {
       final box = await _getBox();
       final logs = box.values.toList();
@@ -391,6 +400,7 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
       );
 
       await box.put(log.id, log);
+      savedLog = log;
       return box.values.toList();
     });
 
@@ -398,6 +408,7 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
     if (state.hasError) {
       throw state.error!;
     }
+    if (savedLog != null) _syncLog(savedLog!);
   }
 
   /// Delete a log entry
@@ -642,6 +653,57 @@ class AdherenceNotifier extends AsyncNotifier<List<MedicationLog>> {
         .where((log) => log.status == DoseStatus.taken)
         .length;
     return (takenCount / logs.length) * 100;
+  }
+
+  void _syncLog(MedicationLog log) {
+    final uid = ref.read(userIdProvider);
+    if (uid == null) return;
+    ref.read(syncServiceProvider).syncMedicationLog(uid, log);
+    _updateCompliance(uid);
+  }
+
+  Future<void> _updateCompliance(String uid) async {
+    try {
+      final metrics = await getMetrics();
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final todayLogs = await getLogsForDate(today);
+
+      final takenToday = todayLogs.where((l) => l.status == DoseStatus.taken).length;
+      final missedToday = todayLogs.where((l) => l.status == DoseStatus.missed).length;
+      final skippedToday = todayLogs.where((l) => l.status == DoseStatus.skipped).length;
+
+      final complianceService = ref.read(complianceServiceProvider);
+      await complianceService.updateDailyMetrics(
+        uid: uid,
+        date: today,
+        scheduledCount: todayLogs.length,
+        takenCount: takenToday,
+        missedCount: missedToday,
+        skippedCount: skippedToday,
+      );
+
+      final profile = ref.read(profileProvider).value;
+      final profileNotifier = ref.read(profileProvider.notifier);
+      final medications = ref.read(medicationProvider).value ?? [];
+      final conditions = ref.read(conditionsProvider).value ?? [];
+
+      await complianceService.updateSummary(
+        uid: uid,
+        overallAdherencePercent: metrics.overallAdherence,
+        currentStreak: metrics.currentStreak,
+        totalDosesTaken: metrics.totalDosesTaken,
+        totalDosesMissed: metrics.totalDosesMissed,
+        totalDosesSkipped: metrics.totalDosesSkipped,
+        totalDosesScheduled: metrics.totalDosesScheduled,
+        xp: profile?.xp ?? 0,
+        level: profileNotifier.getCurrentLevel(profile?.xp ?? 0),
+        medicationCount: medications.length,
+        conditionCount: conditions.length,
+      );
+    } catch (e) {
+      debugPrint('Compliance update failed: $e');
+    }
   }
 
   /// Get adherence metrics summary

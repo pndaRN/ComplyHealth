@@ -24,6 +24,8 @@ import 'features/dashboard/dashboard_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/profile/xp_gain_popup.dart';
 import 'features/splash/splash_screen.dart';
+import 'features/auth/welcome_screen.dart';
+import 'core/state/auth_provider.dart';
 import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -218,6 +220,11 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
     // Determine if we should show onboarding
     final showOnboarding = _showOnboarding && !settings.hasCompletedOnboarding;
 
+    // Watch auth state
+    final authState = ref.watch(authStateProvider);
+    final bool isAuthenticated =
+        authState.whenOrNull(data: (user) => user != null) ?? false;
+
     // Determine theme based on selected theme type
     ThemeData getTheme() {
       final platformBrightness = MediaQuery.of(context).platformBrightness;
@@ -227,27 +234,34 @@ class _ComplyHealthAppState extends ConsumerState<ComplyHealthApp> {
       );
     }
 
+    Widget home;
+    if (_isLoading) {
+      home = const SplashScreen();
+    } else if (!isAuthenticated) {
+      home = const WelcomeScreen();
+    } else if (showOnboarding) {
+      home = OnboardingScreen(
+        onComplete: () {
+          setState(() => _showOnboarding = false);
+        },
+      );
+    } else {
+      home = Scaffold(
+        body: IndexedStack(index: _index, children: _screens),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _index,
+          onTap: (i) => setState(() => _index = i),
+          items: _bottomNavigationBarItems,
+        ),
+      );
+    }
+
     return MaterialApp(
       title: 'ComplyHealth',
       theme: getTheme(),
       darkTheme: getTheme(),
       themeMode: themeState.themeMode,
-      home: _isLoading
-          ? const SplashScreen()
-          : showOnboarding
-          ? OnboardingScreen(
-              onComplete: () {
-                setState(() => _showOnboarding = false);
-              },
-            )
-          : Scaffold(
-              body: IndexedStack(index: _index, children: _screens),
-              bottomNavigationBar: BottomNavigationBar(
-                currentIndex: _index,
-                onTap: (i) => setState(() => _index = i),
-                items: _bottomNavigationBarItems,
-              ),
-            ),
+      home: home,
     );
   }
 }

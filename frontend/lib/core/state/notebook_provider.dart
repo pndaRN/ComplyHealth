@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive_ce.dart';
 import '../models/notebook_entry.dart';
 import '../services/encryption_migration_service.dart';
+import '../../core/state/auth_provider.dart';
 
 enum NotebookSortOption { chronological, bySource }
 
@@ -67,6 +68,7 @@ class NotebookNotifier extends AsyncNotifier<List<NotebookEntry>> {
       final box = await _getBox();
       await box.put(entry.id, entry);
       state = AsyncValue.data(_applySorting(box.values.toList()));
+      _syncEntry(entry);
     } catch (e, s) {
       state = AsyncValue.error(e, s);
     }
@@ -78,9 +80,22 @@ class NotebookNotifier extends AsyncNotifier<List<NotebookEntry>> {
       final box = await _getBox();
       await box.delete(id);
       state = AsyncValue.data(_applySorting(box.values.toList()));
+      _syncDeleteEntry(id);
     } catch (e, s) {
       state = AsyncValue.error(e, s);
     }
+  }
+
+  void _syncEntry(NotebookEntry entry) {
+    final uid = ref.read(userIdProvider);
+    if (uid == null) return;
+    ref.read(syncServiceProvider).syncNotebookEntry(uid, entry);
+  }
+
+  void _syncDeleteEntry(String id) {
+    final uid = ref.read(userIdProvider);
+    if (uid == null) return;
+    ref.read(syncServiceProvider).deleteNotebookEntryRemote(uid, id);
   }
 
   Future<void> setSortOption(NotebookSortOption option) async {

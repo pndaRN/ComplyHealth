@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive_ce.dart';
 import '../models/disease.dart';
 import '../../core/services/encryption_migration_service.dart';
+import '../../core/state/auth_provider.dart';
 
 final conditionsProvider =
     AsyncNotifierProvider<ConditionsNotifier, List<Disease>>(
@@ -71,6 +72,7 @@ class ConditionsNotifier extends AsyncNotifier<List<Disease>> {
       await box.put(disease.code, disease);
       // After successfully adding, update the state with the new list.
       state = AsyncValue.data(box.values.toList());
+      _syncCondition(disease);
     } catch (e, s) {
       // If an error occurs, update the state to reflect the error.
       state = AsyncValue.error(e, s);
@@ -83,6 +85,7 @@ class ConditionsNotifier extends AsyncNotifier<List<Disease>> {
       final box = await _getBox();
       await box.delete(disease.code);
       state = AsyncValue.data(box.values.toList());
+      _syncDeleteCondition(disease.code);
     } catch (e, s) {
       state = AsyncValue.error(e, s);
     }
@@ -95,6 +98,19 @@ class ConditionsNotifier extends AsyncNotifier<List<Disease>> {
       final updated = existing.copyWith(personalNotes: notes);
       await box.put(code, updated);
       state = AsyncValue.data(box.values.toList());
+      _syncCondition(updated);
     }
+  }
+
+  void _syncCondition(Disease disease) {
+    final uid = ref.read(userIdProvider);
+    if (uid == null) return;
+    ref.read(syncServiceProvider).syncCondition(uid, disease);
+  }
+
+  void _syncDeleteCondition(String code) {
+    final uid = ref.read(userIdProvider);
+    if (uid == null) return;
+    ref.read(syncServiceProvider).deleteConditionRemote(uid, code);
   }
 }

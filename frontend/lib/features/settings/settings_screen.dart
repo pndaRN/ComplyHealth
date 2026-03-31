@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/state/settings_provider.dart';
+import '../../core/state/auth_provider.dart';
 import '../../core/theme/theme_provider.dart';
 import 'about_screen.dart';
 import 'privacy_policy_screen.dart';
@@ -71,6 +72,11 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const Divider(),
 
+          // Account section
+          _buildSectionHeader(context, 'Account'),
+          _buildAccountSection(context, ref),
+          const Divider(),
+
           // About section
           _buildSectionHeader(context, 'About'),
           ListTile(
@@ -94,6 +100,121 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               );
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccountSection(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final authState = ref.watch(authStateProvider);
+    final userEmail = authState.whenOrNull(data: (user) => user?.email);
+
+    return Column(
+      children: [
+        if (userEmail != null)
+          ListTile(
+            leading: const Icon(Icons.email_outlined),
+            title: const Text('Email'),
+            subtitle: Text(userEmail),
+          ),
+        ListTile(
+          leading: const Icon(Icons.logout),
+          title: const Text('Sign Out'),
+          onTap: () => _showSignOutDialog(context, ref),
+        ),
+        ListTile(
+          leading: Icon(Icons.delete_forever, color: theme.colorScheme.error),
+          title: Text(
+            'Delete Account',
+            style: TextStyle(color: theme.colorScheme.error),
+          ),
+          subtitle: const Text('Permanently delete your account and all data'),
+          onTap: () => _showDeleteAccountDialog(context, ref),
+        ),
+      ],
+    );
+  }
+
+  void _showSignOutDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out?'),
+        content: const Text(
+          'Your data will remain on this device. You can sign back in anytime.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final authService = ref.read(authServiceProvider);
+              final syncService = ref.read(syncServiceProvider);
+              syncService.stopRealtimeSync();
+              await authService.signOut();
+              if (context.mounted) {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              }
+            },
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account?'),
+        content: const Text(
+          'This will permanently delete your account, all synced data, and local data. This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () async {
+              try {
+                final uid = ref.read(userIdProvider);
+                final authService = ref.read(authServiceProvider);
+                final syncService = ref.read(syncServiceProvider);
+
+                // Delete remote data
+                if (uid != null) {
+                  syncService.stopRealtimeSync();
+                  await syncService.deleteAllRemoteData(uid);
+                }
+
+                // Clear local data
+                await ref.read(settingsProvider.notifier).clearAllData();
+
+                // Delete Firebase Auth account
+                await authService.deleteAccount();
+
+                if (context.mounted) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to delete account: $e')),
+                  );
+                }
+              }
+            },
+            child: const Text('Delete Account'),
           ),
         ],
       ),

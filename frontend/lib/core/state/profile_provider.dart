@@ -5,6 +5,7 @@ import 'package:hive_ce/hive_ce.dart';
 import '../models/profile.dart';
 import 'adherence_provider.dart';
 import '../../core/services/encryption_migration_service.dart';
+import '../../core/state/auth_provider.dart';
 
 final profileProvider = AsyncNotifierProvider<ProfileNotifier, Profile>(
   ProfileNotifier.new,
@@ -84,6 +85,13 @@ class ProfileNotifier extends AsyncNotifier<Profile> {
       await box.put('user', p);
       return p;
     });
+    _syncProfile(p);
+  }
+
+  void _syncProfile(Profile profile) {
+    final uid = ref.read(userIdProvider);
+    if (uid == null) return;
+    ref.read(syncServiceProvider).syncProfile(uid, profile);
   }
 
   int getCurrentLevel(int xp) {

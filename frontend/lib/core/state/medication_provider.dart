@@ -5,6 +5,7 @@ import '../models/medication.dart';
 import '../services/notification_service.dart';
 import '../services/encryption_migration_service.dart';
 import '../../features/medications/utils/medication_sorter.dart';
+import '../../core/state/auth_provider.dart';
 
 final medicationProvider =
     AsyncNotifierProvider<MedicationNotifier, List<Medication>>(
@@ -118,6 +119,7 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
       }
       return _applySorting(box.values.toList());
     });
+    _syncMedication(med);
   }
 
   Future<void> deleteMeds(Medication med) async {
@@ -134,6 +136,7 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
       }
       return _applySorting(box.values.toList());
     });
+    _syncDeleteMedication(med.id);
   }
 
   Future<void> updateMeds(Medication med) async {
@@ -150,6 +153,7 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
       }
       return _applySorting(box.values.toList());
     });
+    _syncMedication(med);
   }
 
   Future<void> updateMedicationNotes(String id, String notes) async {
@@ -159,7 +163,20 @@ class MedicationNotifier extends AsyncNotifier<List<Medication>> {
       final updated = existing.copyWith(personalNotes: notes);
       await box.put(id, updated);
       state = AsyncValue.data(_applySorting(box.values.toList()));
+      _syncMedication(updated);
     }
+  }
+
+  void _syncMedication(Medication med) {
+    final uid = ref.read(userIdProvider);
+    if (uid == null) return;
+    ref.read(syncServiceProvider).syncMedication(uid, med);
+  }
+
+  void _syncDeleteMedication(String id) {
+    final uid = ref.read(userIdProvider);
+    if (uid == null) return;
+    ref.read(syncServiceProvider).deleteMedicationRemote(uid, id);
   }
 
   Future<void> setSortOption(MedicationSortOption option) async {
