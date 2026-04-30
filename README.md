@@ -1,4 +1,4 @@
-# ComplyHealth
+# ![ComplyHealth](https://github.com/pndaRN/ComplyHealth/blob/main/frontend/assets/complyhealth-logo.svg)
 
 ComplyHealth is an easy-to-use chronic health management app built with Flutter. This project was developed as a startup venture with a co-worker. The current state of the repo reflects the handoff point when I transitioned off the project.
 
