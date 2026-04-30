@@ -41,6 +41,6 @@ flutter pub get
 flutter run
 ```
 
-## Useage
+## Usage
 
 ## Contributing
