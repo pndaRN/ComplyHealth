@@ -12,3 +12,33 @@ Development of ComplyHealth was driven by the desire to provide those living wit
  - **Privacy**: Most health applications sell your data to make an income. ComplyHealth doesn't do that.
 
 ## Demo
+
+## Quick Start
+
+### Prerequisites
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) installed
+- A connected device or emulator
+
+### Run these 4 steps
+``` bash
+# 1. Clone the repo
+git clone https://github.com/pndaRN/ComplyHealth && cd ComplyHealth
+```
+``` bash
+# 2. Switch to working branch
+git switch develop # Latest App Release
+
+# or 
+
+git switch localtest # Latest Testing Release
+```
+``` bash
+# 3. Install dependencies
+flutter pub get
+```
+``` bash
+# 4. Run the app
+flutter run
+```
+
+## Useage
